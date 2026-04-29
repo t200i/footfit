@@ -11,7 +11,7 @@
 ### 2. 下載模型：
 
   ```
-  uv run huggingface-cli download amd/Gemma-3-4b-it-mm-onnx-ryzenai-npu --local-dir ./gemma3_4b_npu
+  uv run huggingface-cli download amd/Gemma-3-4b-it-mm-onnx-ryzenai-npu --local-dir ./amd_Gemma-3-4b-it-mm-onnx-ryzenai-npu
   ```
 
 ### 在程式裡呼叫：
@@ -19,10 +19,13 @@
 ```python
 import onnxruntime_genai as og
 
-# 同時提供 Windows 與 Linux 的 provider
-providers = ["DmlExecutionProvider", "ROCMExecutionProvider"]
+# 指向你下載的目錄
+model_dir = "./amd_Gemma-3-4b-it-mm-onnx-ryzenai-npu"
 
-session = og.InferenceSession("./gemma3_4b_npu", providers=providers)
+# 同時提供 Windows 與 Linux 的 provider
+providers = ["DmlExecutionProvider", "ROCMExecutionProvider", "CPUExecutionProvider"]
+
+session = og.InferenceSession(model_dir, providers=providers)
 generator = og.Generator(session)
 
 prompt = "Explain ESOP RAG benchmarks."
