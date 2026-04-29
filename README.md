@@ -11,7 +11,9 @@
 ### 2. 下載模型：
 
   ```
-  uv run hf download amd/Gemma-3-4b-it-mm-onnx-ryzenai-npu --local-dir ./amd_Gemma-3-4b-it-mm-onnx-ryzenai-npu --include "*"
+  uv run hf download amd/Gemma-3-4b-it-mm-onnx-ryzenai-npu \
+  --local-dir ./amd_Gemma-3-4b-it-mm-onnx-ryzenai-npu \
+  --include "*" --revision main --repo-type model
   ```
 
 ### 在程式裡呼叫：
