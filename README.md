@@ -3,14 +3,15 @@
 ### 安裝 Python 套件：
 
   ```
-  pip install git+https://github.com/AMDResearch/Ryzers.git
-  pip install onnxruntime-genai huggingface_hub
+  uv init -p 3.12
+  uv add git+https://github.com/AMDResearch/Ryzers.git
+  uv add onnxruntime-genai huggingface_hub
   ```
 
 ### 2. 下載模型：
 
   ```
-  huggingface-cli download amd/Gemma-3-4b-it-mm-onnx-ryzenai-npu --local-dir ./gemma3_4b_npu
+  uv run huggingface-cli download amd/Gemma-3-4b-it-mm-onnx-ryzenai-npu --local-dir ./gemma3_4b_npu
   ```
 
 ### 在程式裡呼叫：
