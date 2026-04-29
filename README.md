@@ -40,10 +40,10 @@ output_text = tokenizer.decode(generator.get_output())
 print(output_text)
 ```
 ```
-PS C:\Users\ITRI-EOSL\Documents\GitHub\FY115-BCI-Agent> uv run .\test.py   
+PS C:\Users\ITRI-EOSL\Documents\GitHub\FY115-BCI-Agent> uv run .\test.py
 Traceback (most recent call last):
-  File "C:\Users\ITRI-EOSL\Documents\GitHub\FY115-BCI-Agent\test.py", line 9, in <module>
-    session = og.InferenceSession(model_dir, providers=providers)
-              ^^^^^^^^^^^^^^^^^^^
-AttributeError: module 'onnxruntime_genai' has no attribute 'InferenceSession'
+  File "C:\Users\ITRI-EOSL\Documents\GitHub\FY115-BCI-Agent\test.py", line 4, in <module>
+    model = og.Model("./amd_Gemma-3-4b-it-mm-onnx-ryzenai-npu")
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: Error opening ./amd_Gemma-3-4b-it-mm-onnx-ryzenai-npu\genai_config.json
 ```
