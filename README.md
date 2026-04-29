@@ -11,7 +11,7 @@
 ### 2. 下載模型：
 
   ```
-  uv run huggingface-cli download amd/Gemma-3-4b-it-mm-onnx-ryzenai-npu --local-dir ./amd_Gemma-3-4b-it-mm-onnx-ryzenai-npu
+  uv run hf download amd/Gemma-3-4b-it-mm-onnx-ryzenai-npu --local-dir ./amd_Gemma-3-4b-it-mm-onnx-ryzenai-npu --include "*"
   ```
 
 ### 在程式裡呼叫：
@@ -19,23 +19,28 @@
 ```python
 import onnxruntime_genai as og
 
+model_dir = "./amd_Gemma-3-4b-it-mm-onnx-ryzenai-npu"
+
 # 載入模型
-model = og.Model("./amd_Gemma-3-4b-it-mm-onnx-ryzenai-npu")
+model = og.Model(model_dir)
+
+# 建立 tokenizer
+tokenizer = og.Tokenizer(model)
 
 # 建立生成器
 generator = og.Generator(model)
 
-# 建立輸入序列
-tokenizer = og.Tokenizer(model)
+# 編碼輸入
 input_ids = tokenizer.encode("Explain ESOP RAG benchmarks.")
 
-# 執行推論
+# 設定生成參數
 params = og.GeneratorParams(model)
 params.set_search_options(max_length=200)
 
+# 執行生成
 generator.generate(input_ids, params)
 
-# 取出結果
+# 解碼輸出
 output_text = tokenizer.decode(generator.get_output())
 print(output_text)
 ```
