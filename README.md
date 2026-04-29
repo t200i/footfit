@@ -4,20 +4,26 @@
 
 拉取 AMD 提供的 Ryzen AI Docker Image
   ```
-  docker pull amd/ryzenai:latest
+  git clone https://github.com/amd/Ryzers.git
+  cd Ryzers/docker
+  docker build -t ryzenai .
   ```
 
 啟動容器並掛載本地目錄
   ```
   # 這個容器已經包含 ROCm 與 ONNX Runtime GenAI，確保能直接使用 NPU。
-  docker run -it --rm \
-    --device=/dev/kfd \
-    --device=/dev/dri \
-    --group-add video \
-    -v $PWD:/workspace \
-    amd/ryzenai:latest /bin/bash
+  docker run -it \
+  --device=/dev/kfd \
+  --device=/dev/dri \
+  --group-add video \
+  -v $PWD:/workspace \
+  --name ryzenai-test \
+  ryzenai-dev /bin/bash
   ```
-
+下次可以用啟動服務
+  ```
+  docker start -ai ryzenai-test
+  ```
 
 ### 2. 下載 Hugging Face 模型 (Gemma‑3 4B NPU 版本)
 
