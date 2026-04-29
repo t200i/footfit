@@ -32,3 +32,11 @@ prompt = "Explain ESOP RAG benchmarks."
 output = generator.generate(prompt, max_tokens=200)
 print(output)
 ```
+```
+PS C:\Users\ITRI-EOSL\Documents\GitHub\FY115-BCI-Agent> uv run .\test.py   
+Traceback (most recent call last):
+  File "C:\Users\ITRI-EOSL\Documents\GitHub\FY115-BCI-Agent\test.py", line 9, in <module>
+    session = og.InferenceSession(model_dir, providers=providers)
+              ^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'onnxruntime_genai' has no attribute 'InferenceSession'
+```
