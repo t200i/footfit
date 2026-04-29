@@ -19,18 +19,25 @@
 ```python
 import onnxruntime_genai as og
 
-# 指向你下載的目錄
-model_dir = "./amd_Gemma-3-4b-it-mm-onnx-ryzenai-npu"
+# 載入模型
+model = og.Model("./amd_Gemma-3-4b-it-mm-onnx-ryzenai-npu")
 
-# 同時提供 Windows 與 Linux 的 provider
-providers = ["DmlExecutionProvider", "ROCMExecutionProvider", "CPUExecutionProvider"]
+# 建立生成器
+generator = og.Generator(model)
 
-session = og.InferenceSession(model_dir, providers=providers)
-generator = og.Generator(session)
+# 建立輸入序列
+tokenizer = og.Tokenizer(model)
+input_ids = tokenizer.encode("Explain ESOP RAG benchmarks.")
 
-prompt = "Explain ESOP RAG benchmarks."
-output = generator.generate(prompt, max_tokens=200)
-print(output)
+# 執行推論
+params = og.GeneratorParams(model)
+params.set_search_options(max_length=200)
+
+generator.generate(input_ids, params)
+
+# 取出結果
+output_text = tokenizer.decode(generator.get_output())
+print(output_text)
 ```
 ```
 PS C:\Users\ITRI-EOSL\Documents\GitHub\FY115-BCI-Agent> uv run .\test.py   
