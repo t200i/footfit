@@ -19,11 +19,10 @@
 ```python
 import onnxruntime_genai as og
 
-# 在 Windows 上用 DirectML provider
-session = og.InferenceSession(
-    "./gemma3_4b_npu",
-    providers=["DmlExecutionProvider"]
-)
+# 同時提供 Windows 與 Linux 的 provider
+providers = ["DmlExecutionProvider", "ROCMExecutionProvider"]
+
+session = og.InferenceSession("./gemma3_4b_npu", providers=providers)
 generator = og.Generator(session)
 
 prompt = "Explain ESOP RAG benchmarks."
