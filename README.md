@@ -1,5 +1,6 @@
 # FY115-BCI-Agent
 
+https://repo.anaconda.com/archive/Anaconda3-2025.12-2-Windows-x86_64.exe
 ### 安裝 Python 套件：
 
   ```
