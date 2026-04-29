@@ -45,15 +45,15 @@ output_text = tokenizer.decode(generator.get_output())
 print(output_text)
 ```
 ```
-PS C:\Users\ITRI-EOSL\Documents\GitHub\FY115-BCI-Agent> uv run hf download amd/Gemma-3-4b-it-mm-onnx-ryzenai-npu --local-dir ./amd_Gemma-3-4b-it-mm-onnx-ryzenai-npu --include "*"
+PS C:\Users\ITRI-EOSL\Documents\GitHub\FY115-BCI-Agent> uv run hf download amd/Gemma-3-4b-it-mm-onnx-ryzenai-npu --local-dir ./amd_Gemma-3-4b-it-mm-onnx-ryzenai-npu --include "*" --revision main --repo-type model
 C:\Users\ITRI-EOSL\Documents\GitHub\FY115-BCI-Agent\.venv\Lib\site-packages\huggingface_hub\cli\download.py:147: UserWarning: Ignoring `--include` since filenames have being explicitly set.
   warnings.warn("Ignoring `--include` since filenames have being explicitly set.")
-Fetching 1 files: 100%|███████████████████████████████████████████████████████████████████████████| 1/1 [00:00<00:00,  1.36it/s]
-Download complete: 100%|███████████████████████████████████████████████████████████████████████| 890/890 [00:00<00:00, 1.21kB/s]✓ Downloaded
+Fetching 1 files: 100%|█████████████████████████████████████████████████████████████████████████| 1/1 [00:00<00:00, 1000.07it/s]
+Download complete: : 0.00B [00:00, ?B/s]              ✓ Downloaded                                        | 0/1 [00:00<?, ?it/s]
   path: C:\Users\ITRI-EOSL\Documents\GitHub\FY115-BCI-Agent\amd_Gemma-3-4b-it-mm-onnx-ryzenai-npu
-Download complete: 100%|███████████████████████████████████████████████████████████████████████| 890/890 [00:00<00:00, 1.18kB/s]
+Download complete: : 0.00B [00:00, ?B/s]
 PS C:\Users\ITRI-EOSL\Documents\GitHub\FY115-BCI-Agent> uv run .\test.py                                                         
-Traceback (most recent call last):               
+Traceback (most recent call last):                                                 
   File "C:\Users\ITRI-EOSL\Documents\GitHub\FY115-BCI-Agent\test.py", line 6, in <module>
     model = og.Model(model_dir)
             ^^^^^^^^^^^^^^^^^^^
