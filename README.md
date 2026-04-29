@@ -1,6 +1,7 @@
 # FY115-BCI-Agent
 
-https://repo.anaconda.com/archive/Anaconda3-2025.12-2-Windows-x86_64.exe
+https://www.amd.com/en/developer/resources/technical-articles/introducing-amd-support-for-new-gemma-3-models-from-google.html?utm_source=copilot.com
+
 ### 安裝 Python 套件：
 
   ```
