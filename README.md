@@ -3,7 +3,7 @@
 ### 安裝 Python 套件：
 
   ```
-  pip install Ryzers
+  pip install git+https://github.com/AMDResearch/Ryzers.git
   pip install onnxruntime-genai huggingface_hub
   ```
 
