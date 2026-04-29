@@ -24,3 +24,21 @@ generator = og.Generator(session)
 
 print(generator.generate("Explain ESOP RAG benchmarks.", max_tokens=200))
 ```
+
+```
+PS C:\Users\ITRI-EOSL\Documents\GitHub\FY115-BCI-Agent> uv init -p 3.12
+Initialized project `fy115-bci-agent`
+PS C:\Users\ITRI-EOSL\Documents\GitHub\FY115-BCI-Agent> uv add Ryzers
+Using CPython 3.12.13
+Creating virtual environment at: .venv
+  × No solution found when resolving dependencies:
+  ╰─▶ Because ryzers was not found in the package registry and your project depends on ryzers, we can conclude that your
+      project's requirements are unsatisfiable.
+  help: If you want to add the package regardless of the failed resolution, provide the `--frozen` flag to skip locking and
+        syncing.
+PS C:\Users\ITRI-EOSL\Documents\GitHub\FY115-BCI-Agent> uv add ryzers
+  × No solution found when resolving dependencies:
+  ╰─▶ Because ryzers was not found in the package registry and your project depends on ryzers, we can conclude that your
+      project's requirements are unsatisfiable.
+  help: If you want 
+```
