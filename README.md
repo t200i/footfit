@@ -94,14 +94,12 @@ AMD 的技術願景是 **"Together we advance_AI"**，致力於將 AI 從資料�
 
 #### Collection 發展歷程
 
-| 時期 | 里程碑 | 模型數量 | 代表性模型 | 固件需求 |
-|------|--------|---------|-----------|---------|
-| **2024 Q4** | Ryzen AI 1.7.1 平台發布 | 10+ | Qwen2-1.5B, Llama-2-7b, Phi-3-mini | 1.0.21.x ✅ |
-| **2025 Q1-Q2** | Collection V1 正式發布 | 20+ | Llama-3.1-8B, Mistral-7B-v0.3, Qwen2.5 系列 | 1.0.21.x ✅ |
-| **2025 Q3-Q4** | 深度優化與擴展 | 25+ | 16K/4K 版本, MXFP4 量化版本 | 1.0.21.x ✅ |
-| **2026 Q1** | Collection V2 發布 | 30+ | DeepSeek-R1-Distill, Phi-4, ChatGLM3, Gemma-3 (多模態) | 1.0.22.x+（部分模型）⚠️ |
-
-> **重要**：Collection V1 與 V2 的差異在於模型編譯格式，非硬體差異。V2 部分模型（如 Llama-3.2）使用新編譯格式，需要更新的 NPU 固件支援。
+| 時期 | 里程碑 | 模型數量 | 代表性模型 |
+|------|--------|---------|-----------|
+| **2024 Q4** | Ryzen AI 1.7.1 平台發布 | 10+ | Qwen2-1.5B, Llama-2-7b, Phi-3-mini |
+| **2025 Q1-Q2** | Collection V1 正式發布 | 20+ | Llama-3.1-8B, Mistral-7B-v0.3, Qwen2.5 系列 |
+| **2025 Q3-Q4** | 深度優化與擴展 | 25+ | 16K/4K 版本, MXFP4 量化版本 |
+| **2026 Q1** | Collection V2 發布 | 30+ | DeepSeek-R1-Distill, Phi-4, ChatGLM3, Gemma-3 (多模態) |
 
 #### 技術棧與生態系統
 
@@ -136,18 +134,11 @@ AMD 的技術願景是 **"Together we advance_AI"**，致力於將 AI 從資料�
 | 類別 | 最低需求 | 建議配置 |
 |------|---------|---------|
 | **處理器** | AMD Ryzen AI 系列（含 NPU） | Ryzen AI 9 HX 370/365 |
-| **NPU 固件** | 1.0.21.43（Ryzen AI 1.7.1） | 1.0.22.x+（待發布） |
 | **記憶體** | 8GB RAM | 16GB+ RAM |
 | **作業系統** | Windows 11 (22H2+) | Windows 11 最新版 |
 | **Python** | 3.8 - 3.12 | Python 3.12 |
 | **軟體** | Ryzen AI Software 1.7.1+ | Ryzen AI Software 最新版 |
 | **硬碟空間** | 至少 30GB | 50GB+ (用於多個模型) |
-
-**固件說明**：
-- NPU 固件是運行在 NPU 硬體上的底層軟體，控制 AI 運算執行
-- 固件版本隨 Ryzen AI Software 更新
-- Collection V1 模型完全支援固件 1.0.21.43 ✅
-- Collection V2 部分模型需要更新的固件（等待 AMD 發布）⚠️
 
 **效能參考**:
 - 小型模型 (1.5B-3B): 6-8 tokens/s
@@ -186,8 +177,8 @@ hf --help
 
 | HuggingFace Repository | 大小 | Collection | 推論模式 | 用途 |
 |------------------------|------|-----------|---------|------|
-| `amd/Llama-3.2-1B-Instruct-onnx-ryzenai-npu` | 2.0 GB | V2 | 通用 | 輕量/入門 ⚠️ |
-| `amd/Llama-3.2-1B-onnx-ryzenai-npu` | 2.0 GB | V2 | 通用 | 輕量 ⚠️ |
+| `amd/Llama-3.2-1B-Instruct-onnx-ryzenai-npu` | 2.0 GB | V2 | 通用 | 輕量/入門 ⭐ |
+| `amd/Llama-3.2-1B-onnx-ryzenai-npu` | 2.0 GB | V2 | 通用 | 輕量 |
 | `amd/Qwen2-1.5B-onnx-ryzenai-npu` | 2.5 GB | V1 | 通用 | 輕量 ⭐ |
 | `amd/Qwen-2.5_1.5B_Instruct-onnx-ryzenai-npu` | 2.5 GB | V2 | 通用 | 輕量 |
 | `amd/Qwen2.5-Coder-1.5B-Instruct-onnx-ryzenai-npu` | 2.5 GB | V2 | 通用 | 程式碼 |
@@ -209,20 +200,14 @@ hf --help
 | `amd/Llama-2-7b-chat-hf-onnx-ryzenai-npu` | 8.0 GB | V1 | 通用 | 對話 |
 | `amd/Mistral-7B-Instruct-v0.1-onnx-ryzenai-npu` | 8.0 GB | V1 | 通用 | 高品質 |
 | `amd/Mistral-7B-Instruct-v0.2-onnx-ryzenai-npu` | 8.0 GB | V1 | 通用 | 高品質 |
-| `amd/Mistral-7B-需固件 1.0.22.x+（目前不可用） | 🎨 多模態 | 🇨🇳 中文優化 | 💪 超大型
-
-> **固件兼容性說明**：
-> - 你的 NPU 固件版本可通過錯誤訊息查看（如 1.0.21.43）
-> - 標記 ⚠️ 的 Llama-3.2 系列使用新編譯格式，需固件 1.0.22.x 或更高版本
-> - 建議使用 Collection V1 模型（Qwen、Phi-3、Mistral 等），這些已在固件 1.0.21.43 上驗證
-> - 固件更新需等待 AMD 發布新版 Ryzen AI Software
+| `amd/Mistral-7B-Instruct-v0.3-onnx-ryzenai-npu` | 8.0 GB | V1 | 通用 | 高品質 ⭐ |
+| `amd/Meta-Llama-3-8B-onnx-ryzenai-npu` | 9.0 GB | V1 | 通用 | 高品質 |
+| `amd/Llama-3.1-8B-onnx-ryzenai-npu` | 9.0 GB | V1 | 通用 | 高品質 |
 | `amd/Meta-Llama-3.1-8B-Instruct-onnx-ryzenai-npu` | 9.0 GB | V1 | 通用 | 高品質 ⭐ |
 | `amd/DeepSeek-R1-Distill-Llama-8B-onnx-ryzenai-npu` | 9.0 GB | V2 | 通用 | 推理 |
 | `amd/gpt-oss-20b-onnx-ryzenai-npu` | 20.0 GB | V2 | 通用 | 超大型 💪 |
 
-**圖示**: ⭐ 推薦 | ⚠️ 固件兼容性問題 | 🎨 多模態 | 🇨🇳 中文優化 | 💪 超大型
-
-> **重要提示**：標記 ⚠️ 的模型（Llama-3.2 系列）在固件 1.0.21.43 上無法運行（"flat version" 錯誤）。建議使用 Qwen 或 Phi 系列替代。
+**圖示**: ⭐ 推薦 | 🎨 多模態 | 🇨🇳 中文優化 | 💪 超大型
 
 ---
 
@@ -297,7 +282,7 @@ python vlm.py --model ./Gemma-3-4b-it-mm-onnx-ryzenai-npu --image scene.jpg --pr
 python llm.py --model ./Qwen2.5-3B-Instruct-onnx-ryzenai-npu --prompt "什麼是 AI？"
 
 # 長回應
-python llm.py --model ./Qwen2-1.5B-onnx-ryzenai-npu --prompt "解釋量子計算" --max-length 512
+python llm.py --model ./Llama-3.2-1B-Instruct-onnx-ryzenai-npu --prompt "解釋量子計算" --max-length 512
 
 # 互動對話模式
 python llm.py --model ./Phi-4-mini-instruct-onnx-ryzenai-npu --interactive
@@ -316,34 +301,15 @@ python llm.py --model ./Phi-4-mini-instruct-onnx-ryzenai-npu --interactive
 **解決方案**:
 ```powershell
 $env:Path = "C:\Program Files\RyzenAI\1.7.1\deployment;$env:Path"
-``` Collection V2 的新編譯格式（"flat version"），但你的 NPU 固件版本（如 1.0.21.43）尚未支援
+```
 
-**背景知識**：
-- **固件（Firmware）**：運行在 NPU 硬體上的底層軟體，控制 AI 運算
-- **Collection V1**：使用舊編譯格式，固件 1.0.21.43 完全支援 ✅
-- **Collection V2**：部分模型使用新格式，需固件 1.0.22.x 或更高版本
+#### 問題 2: "flat version is not supported for matmulbias"
+
+**原因**: NPU 固件版本與模型編譯版本不兼容（常見於 Llama-3.2）
 
 **解決方案**: 
-- **短期**：使用 Collection V1 模型（Qwen2/Qwen2.5、Phi-3、Mistral 等）
-- **長期**：等待 AMD 發布 Ryzen AI Software 更新（包含新固件）
-
-**如何檢查固件版本**：
-執行任一推論時，錯誤訊息會顯示固件資訊
-
-**Collection V1 已驗證可用**：
-- ✅ Qwen2-1.5B, Qwen2.5-3B, Qwen2.5-7B
-- ✅ Phi-3-mini (4k/128k), Phi-3.5-mini
-- ✅ Mistral-7B-v0.1/v0.2/v0.3
-- ✅ Llama-2-7b, Llama-3.1-8B
-- ✅ Gemma-3-4b-it-mm (VLM)
-
-**Collection V2 部分不可用**：
-- ❌ Llama-3.2-1B (需固件更新)
-- ✅ Phi-4-mini, ChatGLM3, DeepSeek-R1 系列（待測試）
-**已驗證可用**：
-- ✅ Qwen2-1.5B, Qwen2.5-3B
-- ✅ Phi-3-mini, Phi-4-mini
-- ✅ Gemma-3-4b-it-mm (VLM)
+- 嘗試其他模型（如 Qwen2.5, Phi-4）
+- 關注 AMD 官方模型更新
 
 #### 問題 3: VLM 路徑重複錯誤
 
@@ -380,19 +346,16 @@ python llm.py --model <模型> --prompt "長文回應" --max-length 1024
 創建 `download_recommended.ps1`：
 
 ```powershell
-# Collection V1 推薦模型（已驗證可用於固件 1.0.21.43）
+# 推薦模型列表
 $models = @(
-    "amd/Qwen2-1.5B-onnx-ryzenai-npu",                    # 輕量
-    "amd/Qwen2.5-3B-Instruct-onnx-ryzenai-npu",           # 平衡
-    "amd/Phi-3-mini-4k-instruct-onnx-ryzenai-npu",        # 平衡
-    "amd/Qwen2.5-Coder-7B-Instruct-onnx-ryzenai-npu",     # 程式碼
-    "amd/Meta-Llama-3.1-8B-Instruct-onnx-ryzenai-npu",    # 高品質
-    "amd/Gemma-3-4b-it-mm-onnx-ryzenai-npu"               # VLM 多模態
+    "amd/Llama-3.2-1B-Instruct-onnx-ryzenai-npu",
+    "amd/Qwen2.5-3B-Instruct-onnx-ryzenai-npu",
+    "amd/Qwen2.5-Coder-7B-Instruct-onnx-ryzenai-npu",
+    "amd/Meta-Llama-3.1-8B-Instruct-onnx-ryzenai-npu"
 )
 
 foreach ($repo in $models) {
     $dirName = $repo -replace '^.*/',''
-    Write-Host "下載: $dirName" -ForegroundColor Cyan
     hf download $repo --local-dir "./$dirName"
 }
 ```
@@ -468,7 +431,7 @@ FY115-BCI-Agent/
 **技術框架**：
 - [ONNX Runtime GenAI](https://github.com/microsoft/onnxruntime-genai)
 - [HuggingFace Hub](https://huggingface.co/)
- Qwen2-1.5B（已驗證）或 Gemma-3-4b-it-mm（VLM
+
 ---
 
 **版本**: 1.0.0 | **最後更新**: 2026/05/04 | **授權**: MIT
