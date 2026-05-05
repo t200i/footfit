@@ -9,7 +9,7 @@
 ## 📰 Ryzen AI 最新發展
 
 - [AMD XDNA NPU 基本架構](https://www.amd.com/en/technologies/xdna.html) - 打造第三代 AI 引擎，提供更高效能的 NPU 設計。
-- [LLM Inference at the Edge: Mobile, NPU, and GPU Performance Efficiency Trade-offs Under Sustained Load](https://arxiv.org/html/2603.23640v1) - 比較 NPU 與 GPU 在邊緣設備上執行 LLM 推理的效能、能耗與熱管理。
+- [LLM Inference at the Edge: Mobile, NPU, and GPU Performance Efficiency Trade-offs Under Sustained Load](https://arxiv.org/html/2603.23640v1) - 比較 NPU 與 GPU 執行 LLM 推理的效能、能耗與熱管理。
 - [AMD 在 COMPUTEX 2024 推出 50 TOPS NPU，並宣布與微軟合作](https://www.amd.com/zh-tw/newsroom/press-releases/2024-6-2-amd-extends-ai-and-high-performance-leadership-in-.html) - 將 Ryzen AI NPU 作為 Copilot+ PC 的 AI 硬體
 - [AMD 發布首款能在原生 NPU 上推理 Google Gemma-3](https://www.amd.com/en/developer/resources/technical-articles/introducing-amd-support-for-new-gemma-3-models-from-google.html?utm_source=copilot.com) - 展示 NPU 不只支援文字 LLM，也能處理影像、語音等多模態 AI
 - [ONNX Runtime 1.23.3 起新增 Vitis AI Execution Provider，支援 AMD NPU 加速](https://onnxruntime.ai/docs/execution-providers/Vitis-AI-ExecutionProvider.html) - 讓 Hugging Face 與 ONNX 模型能直接在 Ryzen AI NPU 上推理
