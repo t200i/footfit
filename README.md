@@ -24,19 +24,17 @@
 
 ### 1. 安裝 AMD Ryzen AI Software
 
-在取得原裝的Ryzen AI PC後，請依照 [installation instructions](https://ryzenai.docs.amd.com/en/latest/inst.html)下載並安裝**NPU driver 32.0.203.280**+**ryzen-ai-lt 1.7.1** 或更新版本。
+依照 [installation instructions](https://ryzenai.docs.amd.com/en/latest/inst.html)下載並安裝**NPU driver 32.0.203.280**+**ryzen-ai-lt 1.7.1** 或更新版本。
 
 
 ### 2. 設定系統環境變數
 
-將 `C:\Program Files\RyzenAI\1.7.1\deployment` 加入系統 PATH 環境變數（包含 AMD 自訂的 Vitis AI Execution Provider 執行庫）。
+將 `C:\Program Files\RyzenAI\1.7.1\deployment` 加入系統 PATH 環境變數（以匯入 AMD 自訂的 Vitis AI Execution Provider 執行庫）。
 
 ### 3. 安裝 HuggingFace CLI
 
 ```bash
 conda activate ryzen-ai-1.7.1 # 該環境會由Ryzen AI Software自動安裝
-```
-```powershell
 pip install huggingface-hub[cli]
 ```
 
@@ -84,6 +82,7 @@ pip install huggingface-hub[cli]
 | HuggingFace Repository | 大小 | 支援精度 |
 |------------------------|------|---------|
 | `amd/Gemma-3-4b-it-mm-onnx-ryzenai-npu` | 6.2 GB | `UINT4`, `BFP16` |
+
 ---
 
 ### 快速開始
@@ -112,3 +111,4 @@ python llm.py --model ./<模型名稱> --prompt "解釋量子計算" --max-lengt
 # VLM 推論模式
 python vlm.py --model ./<模型名稱> --image cat.jpg --prompt "詳細描述這個場景" --max-tokens 512
 ```
+> 將原始模型的權重壓縮至 `UINT4`（4-bit unsigned integer）格式，並在推論時使用 `BFP16`（Brain Float 16）處理激活值，可支援這兩種形式
