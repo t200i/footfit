@@ -7,34 +7,22 @@
 
 ## 📋 執行摘要
 
-本專案提供**通用推論引擎**，支援 AMD Ryzen AI 1.7 NPU 上的 30+ 個官方優化模型。使用原生 HuggingFace CLI 下載模型，搭配兩種推論模式，快速部署各種 LLM（Qwen、Llama、Phi、Mistral、DeepSeek、Gemma、ChatGLM 等）。
-
-**核心功能**：
-- ✅ 支援 30+ AMD 官方優化模型（1.5B - 20B+ 參數）
-- ✅ 使用原生 HuggingFace CLI 下載
-- ✅ 兩種推論模式：VLM（多模態）與 LLM（純文本）
-- ✅ 自動處理路徑、DLL、模板等技術問題
-- ✅ 互動對話與批次推論
+本專案提供**通用推論引擎**，支援 [Ryzen AI Software](https://www.amd.com/en/developer/resources/ryzen-ai-software.html) 官方釋出的的 30+ 個模型。使用原生 HuggingFace CLI 下載模型，搭配 VLM 與 LLM 兩種推論模式，快速部署各種 LLM（Qwen、Llama、Phi、Mistral、DeepSeek、Gemma、ChatGLM 等基礎模型）。
 
 ---
 
-## 📰 最新發展與重要公告
+## 📰 Ryzen AI 最新發展
 
-### Ryzen AI 平台發布
-- [AMD Ryzen AI 1.7.1 軟體平台發布（2024 Q4）](https://www.amd.com/en/products/software/ryzen-ai.html) - 支援 NPU 加速推論
-- [Ryzen AI 開發者指南](https://ryzenai.docs.amd.com/) - 完整技術文檔與 API 參考
-- [AMD 發布 Gemma-3 模型支援（2026 Q1）](https://www.amd.com/en/developer/resources/technical-articles/introducing-amd-support-for-new-gemma-3-models-from-google.html) - 首款多模態 NPU 模型
-- [Ryzen AI Software 1.7 更新說明](https://www.amd.com/en/developer/resources/ryzen-ai-software.html) - ONNX Runtime 1.23.3 支援
+- [AMD 發布 Gemma-3 模型支援（2026 Q1）](https://www.amd.com/en/developer/resources/technical-articles/introducing-amd-support-for-new-gemma-3-models-from-google.html) - 首款能於 NPU 推論的多模態模型
+- [AMD 與 Microsoft 合作整合NPU加速Execution Provider](https://onnxruntime.ai/docs/execution-providers/Vitis-AI-ExecutionProvider.html) - ONNX Runtime 1.23.3 起，Vitis AI支援AMD NPU加速
 
 ### AMD AI 技術研究
-- [AMD ROCm 開放生態系統](https://www.amd.com/en/products/software/rocm.html) - 開源 AI 加速平台
 - [AMD XDNA NPU 架構詳解](https://www.amd.com/en/technologies/xdna.html) - 第三代 AI 引擎技術
-- [AMD Instinct MI300 與 Ryzen AI 技術共享](https://www.amd.com/en/products/accelerators/instinct/mi300.html) - 資料中心到邊緣的 AI 一致性
 - [Together We Advance_AI](https://community.amd.com/t5/ai/ct-p/ai_zone) - AMD AI 社群與開發者資源
 
 ### ONNX Runtime 更新
 - [ONNX Runtime GenAI 0.11.2 發布](https://github.com/microsoft/onnxruntime-genai/releases/tag/v0.11.2) - 支援更多模型與效能優化
-- [Microsoft 與 AMD 合作公告](https://onnxruntime.ai/docs/execution-providers/Vitis-AI-ExecutionProvider.html) - Vitis AI Execution Provider
+
 
 ### 研究論文
 - [On-Device AI: NPU vs GPU Performance Analysis](https://arxiv.org/abs/2024.xxxxx) - NPU 效能研究（參考）
