@@ -14,10 +14,11 @@
 ## 📰 Ryzen AI 最新發展
 
 - [AMD 在 COMPUTEX 2024推出 XDNA 2 NPU (50 TOPS)，並宣布與微軟合作 Copilot+ PC](https://www.amd.com/zh-tw/newsroom/press-releases/2024-6-2-amd-extends-ai-and-high-performance-leadership-in-.html)
-
 - [AMD 發布 首款能在 NPU 上原生推理的多模態模型 (Google Gemma-3)](https://www.amd.com/en/developer/resources/technical-articles/introducing-amd-support-for-new-gemma-3-models-from-google.html?utm_source=copilot.com)
-
 - [AMD 與微軟合作，讓 ONNX 模型能直接在 Ryzen AI NPU 上加速](https://onnxruntime.ai/docs/execution-providers/Vitis-AI-ExecutionProvider.html) - ONNX Runtime Vitis AI Execution Provider (v1.23.3)
+- [微軟推出ONNX Runtime GenAI，將 Hugging Face 模型整合到 Copilot+ PC 與 Azure AI](https://onnxruntime.ai/docs/genai/)
+- [AMD Ryzen AI 1.7 NPU LLM Collection V1](https://huggingface.co/collections/amd/ryzen-ai-17-npu-llm)
+- [AMD Ryzen AI 1.7 NPU LLM Collection V2](https://huggingface.co/collections/amd/ryzen-ai-17-npu-llm-v2)
 
 ### AMD AI 技術研究
 - [AMD XDNA NPU 架構詳解](https://www.amd.com/en/technologies/xdna.html) - 第三代 AI 引擎技術
