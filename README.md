@@ -42,7 +42,7 @@ pip install huggingface-hub[cli]
 
 ## 📦 AMD Ryzen AI NPU 模型列表
 
-所有模型皆採用 **AWQ 量化技術**預先編譯，權重已壓縮為 `UINT4`（4-bit unsigned integer）格式，推論時自動使用 `BFP16`（Brain Float 16）處理激活值。以下為官方釋出的HuggingFaceCollections：
+AMD 官方在 HuggingFace 上釋出多個 NPU 模型 Collections，這些模型多數採用 **AWQ 量化技術**預先編譯，權重壓縮為 `UINT4` 格式，推論時使用 `BFP16` 處理激活值。以下 Collections 提供可供測試的模型來源：
 
 * [Ryzen AI 1.7.1 — NPU LFM2 Models](https://huggingface.co/collections/amd/ryzen-ai-171-npu-lfm2-models)
 * [Ryzen AI 1.7.1 — NPU 16K](https://huggingface.co/collections/amd/ryzen-ai-171-npu-16k)
@@ -52,7 +52,7 @@ pip install huggingface-hub[cli]
 * [Ryzen AI 1.7 Whisper NPU Optimized ONNX models](https://huggingface.co/collections/amd/ryzen-ai-17-whisper-npu-optimized-onnx-models)
 * [Ryzen-AI-1.7-NPU-creativity-models](https://huggingface.co/collections/amd/ryzen-ai-17-npu-creativity-models)
 
-### Ryzen AI 350 已驗證的模型
+### Ryzen AI 350 實測通過的模型
 
 | HuggingFace Repository | Size |  |
 |------------------------|------|--------------|
@@ -68,29 +68,18 @@ conda activate ryzen-ai-1.7.1
 
 #### 步驟 2: 下載模型
 
-使用 HuggingFace CLI 下載模型列表中的模型(如：`Llama-3.2-1B-onnx-ryzenai-npu`)。
+使用 HuggingFace CLI 下載模型列表中的模型(如：`Gemma-3-4b-it-mm-onnx-ryzenai-npu`)。
 
 ```powershell
 hf download amd/<模型名稱> --local-dir ./<模型名稱>
 ```
-SmolLM-135M-Instruct_rai_1.7.1_npu_4K
-hf download amd/SmolLM-135M-Instruct_rai_1.7.1_npu_4K --local-dir ./SmolLM-135M-Instruct_rai_1.7.1_npu_4K
 
 #### 步驟 3: 執行推論
 
 ```powershell
-# LLM 推論模式
+# for Language LM 推論
 python llm.py --model ./<模型名稱> --prompt "解釋量子計算" --max-length 512
 
-# VLM 推論模式
+# for Vision LM 推論
 python vlm.py --model ./<模型名稱> --image cat.jpg --prompt "詳細描述這個場景" --max-tokens 512
 ```
-
-# 1. Mistral-7B-Instruct-v0.3 (8GB) - 通用對話模型，V1 版本
-hf download Mistral-7B-Instruct-v0.3-onnx-ryzenai-npu --local-dir ./Mistral-7B-Instruct-v0.3-onnx-ryzenai-npu
-
-# 2. Phi-3-mini-4k-instruct (4GB) - 小型高效模型，適合快速測試
-hf download Phi-3-mini-4k-instruct-onnx-ryzenai-npu --local-dir ./Phi-3-mini-4k-instruct-onnx-ryzenai-npu
-
-# 3. Qwen2-7B (8GB) - Qwen2（不是 Qwen2.5），V1 版本
-hf download Qwen2-7B-onnx-ryzenai-npu --local-dir ./Qwen2-7B-onnx-ryzenai-npu
