@@ -44,42 +44,46 @@ pip install huggingface-hub[cli]
 
 ## 📦 AMD Ryzen AI NPU 模型列表
 
-這些模型皆採用 **AWQ 量化技術**，將原始模型的權重壓縮至 `UINT4`（4-bit unsigned integer）格式，並在推論時使用 `BFP16`（Brain Float 16）處理激活值。下表列出所有可以使用的模型：
+所有模型皆採用 **AWQ 量化技術**，將原始模型的權重壓縮至 `UINT4`（4-bit unsigned integer）格式，並在推論時使用 `BFP16`（Brain Float 16）處理激活值。
 
-| HuggingFace Repository | 大小 | 支援精度 | 推論模式 |
-|------------------------|------|---------|---------|
-| `amd/Llama-3.2-1B-Instruct-onnx-ryzenai-npu` | 2.0 GB | `UINT4`, `BFP16` | LLM |
-| `amd/Llama-3.2-1B-onnx-ryzenai-npu` | 2.0 GB | `UINT4`, `BFP16` | LLM |
-| `amd/Qwen2-1.5B-onnx-ryzenai-npu` | 2.5 GB | `UINT4`, `BFP16` | LLM |
-| `amd/Qwen-2.5_1.5B_Instruct-onnx-ryzenai-npu` | 2.5 GB | `UINT4`, `BFP16` | LLM |
-| `amd/Qwen2.5-Coder-1.5B-Instruct-onnx-ryzenai-npu` | 2.5 GB | `UINT4`, `BFP16` | LLM |
-| `amd/DeepSeek-R1-Distill-Qwen-1.5B-onnx-ryzenai-npu` | 2.5 GB | `UINT4`, `BFP16` | LLM |
-| `amd/Qwen2.5-3B-Instruct-onnx-ryzenai-npu` | 4.0 GB | `UINT4`, `BFP16` | LLM |
-| `amd/Phi-3-mini-4k-instruct-onnx-ryzenai-npu` | 4.0 GB | `UINT4`, `BFP16` | LLM |
-| `amd/Phi-3-mini-128k-instruct-onnx-ryzenai-npu` | 4.0 GB | `UINT4`, `BFP16` | LLM |
-| `amd/Phi-3.5-mini-instruct-onnx-ryzenai-npu` | 4.0 GB | `UINT4`, `BFP16` | LLM |
-| `amd/Phi-4-mini-instruct-onnx-ryzenai-npu` | 4.5 GB | `UINT4`, `BFP16` | LLM |
-| `amd/Gemma-3-4b-it-mm-onnx-ryzenai-npu` | 6.2 GB | `UINT4`, `BFP16` | VLM |
-| `amd/ChatGLM3-6B-onnx-ryzenai-npu` | 7.0 GB | `UINT4`, `BFP16` | LLM |
-| `amd/Qwen2-7B-onnx-ryzenai-npu` | 8.0 GB | `UINT4`, `BFP16` | LLM |
-| `amd/Qwen2.5-7B-Instruct-onnx-ryzenai-npu` | 8.0 GB | `UINT4`, `BFP16` | LLM |
-| `amd/Qwen1.5-7B-Chat-onnx-ryzenai-npu` | 8.0 GB | `UINT4`, `BFP16` | LLM |
-| `amd/Qwen2.5-Coder-7B-Instruct-onnx-ryzenai-npu` | 8.0 GB | `UINT4`, `BFP16` | LLM |
-| `amd/CodeLlama-7b-Instruct-hf-onnx-ryzenai-npu` | 8.0 GB | `UINT4`, `BFP16` | LLM |
-| `amd/DeepSeek-R1-Distill-Qwen-7B-onnx-ryzenai-npu` | 8.0 GB | `UINT4`, `BFP16` | LLM |
-| `amd/Llama-2-7b-hf-onnx-ryzenai-npu` | 8.0 GB | `UINT4`, `BFP16` | LLM |
-| `amd/Llama-2-7b-chat-hf-onnx-ryzenai-npu` | 8.0 GB | `UINT4`, `BFP16` | LLM |
-| `amd/Mistral-7B-Instruct-v0.1-onnx-ryzenai-npu` | 8.0 GB | `UINT4`, `BFP16` | LLM |
-| `amd/Mistral-7B-Instruct-v0.2-onnx-ryzenai-npu` | 8.0 GB | `UINT4`, `BFP16` | LLM |
-| `amd/Mistral-7B-Instruct-v0.3-onnx-ryzenai-npu` | 8.0 GB | `UINT4`, `BFP16` | LLM |
-| `amd/Meta-Llama-3-8B-onnx-ryzenai-npu` | 9.0 GB | `UINT4`, `BFP16` | LLM |
-| `amd/Llama-3.1-8B-onnx-ryzenai-npu` | 9.0 GB | `UINT4`, `BFP16` | LLM |
-| `amd/Meta-Llama-3.1-8B-Instruct-onnx-ryzenai-npu` | 9.0 GB | `UINT4`, `BFP16` | LLM |
-| `amd/DeepSeek-R1-Distill-Llama-8B-onnx-ryzenai-npu` | 9.0 GB | `UINT4`, `BFP16` | LLM |
-| `amd/gpt-oss-20b-onnx-ryzenai-npu` | 20.0 GB | `UINT4`, `BFP16` | LLM |
+### LLM
 
-> `LLM` 表示該模型的輸入類型為純粹的文字。\n
-> `VLM` 表示該模型的輸入類型可同時包含圖像與文字。
+| HuggingFace Repository | 大小 | 支援精度 |
+|------------------------|------|---------|
+| `amd/Llama-3.2-1B-Instruct-onnx-ryzenai-npu` | 2.0 GB | `UINT4`, `BFP16` |
+| `amd/Llama-3.2-1B-onnx-ryzenai-npu` | 2.0 GB | `UINT4`, `BFP16` |
+| `amd/Qwen2-1.5B-onnx-ryzenai-npu` | 2.5 GB | `UINT4`, `BFP16` |
+| `amd/Qwen-2.5_1.5B_Instruct-onnx-ryzenai-npu` | 2.5 GB | `UINT4`, `BFP16` |
+| `amd/Qwen2.5-Coder-1.5B-Instruct-onnx-ryzenai-npu` | 2.5 GB | `UINT4`, `BFP16` |
+| `amd/DeepSeek-R1-Distill-Qwen-1.5B-onnx-ryzenai-npu` | 2.5 GB | `UINT4`, `BFP16` |
+| `amd/Qwen2.5-3B-Instruct-onnx-ryzenai-npu` | 4.0 GB | `UINT4`, `BFP16` |
+| `amd/Phi-3-mini-4k-instruct-onnx-ryzenai-npu` | 4.0 GB | `UINT4`, `BFP16` |
+| `amd/Phi-3-mini-128k-instruct-onnx-ryzenai-npu` | 4.0 GB | `UINT4`, `BFP16` |
+| `amd/Phi-3.5-mini-instruct-onnx-ryzenai-npu` | 4.0 GB | `UINT4`, `BFP16` |
+| `amd/Phi-4-mini-instruct-onnx-ryzenai-npu` | 4.5 GB | `UINT4`, `BFP16` |
+| `amd/ChatGLM3-6B-onnx-ryzenai-npu` | 7.0 GB | `UINT4`, `BFP16` |
+| `amd/Qwen2-7B-onnx-ryzenai-npu` | 8.0 GB | `UINT4`, `BFP16` |
+| `amd/Qwen2.5-7B-Instruct-onnx-ryzenai-npu` | 8.0 GB | `UINT4`, `BFP16` |
+| `amd/Qwen1.5-7B-Chat-onnx-ryzenai-npu` | 8.0 GB | `UINT4`, `BFP16` |
+| `amd/Qwen2.5-Coder-7B-Instruct-onnx-ryzenai-npu` | 8.0 GB | `UINT4`, `BFP16` |
+| `amd/CodeLlama-7b-Instruct-hf-onnx-ryzenai-npu` | 8.0 GB | `UINT4`, `BFP16` |
+| `amd/DeepSeek-R1-Distill-Qwen-7B-onnx-ryzenai-npu` | 8.0 GB | `UINT4`, `BFP16` |
+| `amd/Llama-2-7b-hf-onnx-ryzenai-npu` | 8.0 GB | `UINT4`, `BFP16` |
+| `amd/Llama-2-7b-chat-hf-onnx-ryzenai-npu` | 8.0 GB | `UINT4`, `BFP16` |
+| `amd/Mistral-7B-Instruct-v0.1-onnx-ryzenai-npu` | 8.0 GB | `UINT4`, `BFP16` |
+| `amd/Mistral-7B-Instruct-v0.2-onnx-ryzenai-npu` | 8.0 GB | `UINT4`, `BFP16` |
+| `amd/Mistral-7B-Instruct-v0.3-onnx-ryzenai-npu` | 8.0 GB | `UINT4`, `BFP16` |
+| `amd/Meta-Llama-3-8B-onnx-ryzenai-npu` | 9.0 GB | `UINT4`, `BFP16` |
+| `amd/Llama-3.1-8B-onnx-ryzenai-npu` | 9.0 GB | `UINT4`, `BFP16` |
+| `amd/Meta-Llama-3.1-8B-Instruct-onnx-ryzenai-npu` | 9.0 GB | `UINT4`, `BFP16` |
+| `amd/DeepSeek-R1-Distill-Llama-8B-onnx-ryzenai-npu` | 9.0 GB | `UINT4`, `BFP16` |
+| `amd/gpt-oss-20b-onnx-ryzenai-npu` | 20.0 GB | `UINT4`, `BFP16` |
+
+### VLM
+
+| HuggingFace Repository | 大小 | 支援精度 |
+|------------------------|------|---------|
+| `amd/Gemma-3-4b-it-mm-onnx-ryzenai-npu` | 6.2 GB | `UINT4`, `BFP16` |
 ---
 
 ### 快速開始
@@ -103,8 +107,8 @@ hf download amd/<模型名稱> --local-dir ./<模型名稱>
 
 ```powershell
 # LLM 推論模式
-python llm.py --model ./Llama-3.2-1B-Instruct-onnx-ryzenai-npu --prompt "解釋量子計算" --max-length 512
+python llm.py --model ./<模型名稱> --prompt "解釋量子計算" --max-length 512
 
 # VLM 推論模式
-python vlm.py --model ./Gemma-3-4b-it-mm-onnx-ryzenai-npu --image cat.jpg --prompt "詳細描述這個場景" --max-tokens 512
+python vlm.py --model ./<模型名稱> --image cat.jpg --prompt "詳細描述這個場景" --max-tokens 512
 ```
