@@ -1,8 +1,8 @@
-# AMD Ryzen AI NPU 通用模型的部署之路
+# AMD Ryzen AI 1.7.1 — NPU 模型部署之路
 
 ## 📋 執行摘要
 
-本專案專門為AMD Ryzen AI 系列處理器提供**LLM 推論引擎**，支援 [Ryzen AI Software](https://www.amd.com/en/developer/resources/ryzen-ai-software.html) 官方釋出的的 30+ 個模型。使用原生 HuggingFace CLI 下載模型，搭配 VLM 與 LLM 兩種推論模式，快速部署各種 LLM（Qwen、Llama、Phi、Mistral、DeepSeek、Gemma、ChatGLM 等基礎模型）。
+本專案專門為AMD Ryzen AI 系列處理器提供**LLM 推論引擎**，支援 [Ryzen AI Software](https://www.amd.com/en/developer/resources/ryzen-ai-software.html) 官方Collections 釋出的模型 (僅限能完整Offload NPU的模型)。
 
 ---
 
@@ -22,7 +22,7 @@
 
 ## 📥 安裝指南
 
-### 1. 安裝 AMD Ryzen AI Software
+### 1. 安裝 AMD Ryzen AI Software 1.7.1
 
 依照 [installation instructions](https://ryzenai.docs.amd.com/en/latest/inst.html)下載並安裝**NPU driver 32.0.203.280**+**ryzen-ai-lt 1.7.1** 或更新版本。
 
@@ -42,50 +42,23 @@ pip install huggingface-hub[cli]
 
 ## 📦 AMD Ryzen AI NPU 模型列表
 
-所有模型皆採用 **AWQ 量化技術**預先編譯，權重已壓縮為 `UINT4`（4-bit unsigned integer）格式，推論時自動使用 `BFP16`（Brain Float 16）處理激活值。
+所有模型皆採用 **AWQ 量化技術**預先編譯，權重已壓縮為 `UINT4`（4-bit unsigned integer）格式，推論時自動使用 `BFP16`（Brain Float 16）處理激活值。以下為官方釋出的HuggingFaceCollections：
 
-### LLM
+* [Ryzen AI 1.7.1 — NPU LFM2 Models](https://huggingface.co/collections/amd/ryzen-ai-171-npu-lfm2-models)
+* [Ryzen AI 1.7.1 — NPU 16K](https://huggingface.co/collections/amd/ryzen-ai-171-npu-16k)
+* [Ryzen AI 1.7.1 — NPU 4K](https://huggingface.co/collections/amd/ryzen-ai-171-npu-4k)
+* [Ryzen-AI-1.7-NPU-LLM_V2](https://huggingface.co/collections/amd/ryzen-ai-17-npu-llm-v2)
+* [Ryzen-AI-1.7-NPU-LLM](https://huggingface.co/collections/amd/ryzen-ai-17-npu-llm)
+* [Ryzen AI 1.7 Whisper NPU Optimized ONNX models](https://huggingface.co/collections/amd/ryzen-ai-17-whisper-npu-optimized-onnx-models)
+* [Ryzen-AI-1.7-NPU-creativity-models](https://huggingface.co/collections/amd/ryzen-ai-17-npu-creativity-models)
 
-| HuggingFace Repository | Size | Test Pass (Ryzen AI 350) |
+### Ryzen AI 350 已驗證的模型
+
+| HuggingFace Repository | Size |  |
 |------------------------|------|--------------|
-| `Llama-3.2-1B-Instruct-onnx-ryzenai-npu` | 2.0 GB | ❌ |
-| `Llama-3.2-1B-onnx-ryzenai-npu` | 2.0 GB | ❌ |
-| `Qwen2-1.5B-onnx-ryzenai-npu` | 2.5 GB | ⚠️ |
-| `Qwen-2.5_1.5B_Instruct-onnx-ryzenai-npu` | 2.5 GB | ❌ |
-| `Qwen2.5-Coder-1.5B-Instruct-onnx-ryzenai-npu` | 2.5 GB | ❌ |
-| `DeepSeek-R1-Distill-Qwen-1.5B-onnx-ryzenai-npu` | 2.5 GB | ❌ |
-| `Qwen2.5-3B-Instruct-onnx-ryzenai-npu` | 4.0 GB | ❌ |
-| `Phi-3-mini-4k-instruct-onnx-ryzenai-npu` | 4.0 GB | ⚠️ |
-| `Phi-3-mini-128k-instruct-onnx-ryzenai-npu` | 4.0 GB | ⚠️ |
-| `Phi-3.5-mini-instruct-onnx-ryzenai-npu` | 4.0 GB | ⚠️ |
-| `Phi-4-mini-instruct-onnx-ryzenai-npu` | 4.5 GB | ⚠️ |
-| `ChatGLM3-6B-onnx-ryzenai-npu` | 7.0 GB | ⚠️ |
-| `Qwen2-7B-onnx-ryzenai-npu` | 8.0 GB | ⚠️ |
-| `Qwen2.5-7B-Instruct-onnx-ryzenai-npu` | 8.0 GB | ❌ |
-| `Qwen1.5-7B-Chat-onnx-ryzenai-npu` | 8.0 GB | ⚠️ |
-| `Qwen2.5-Coder-7B-Instruct-onnx-ryzenai-npu` | 8.0 GB | ❌ |
-| `CodeLlama-7b-Instruct-hf-onnx-ryzenai-npu` | 8.0 GB | ⚠️ |
-| `DeepSeek-R1-Distill-Qwen-7B-onnx-ryzenai-npu` | 8.0 GB | ❌ |
-| `Llama-2-7b-hf-onnx-ryzenai-npu` | 8.0 GB | ⚠️ |
-| `Llama-2-7b-chat-hf-onnx-ryzenai-npu` | 8.0 GB | ⚠️ |
-| `Mistral-7B-Instruct-v0.1-onnx-ryzenai-npu` | 8.0 GB | ⚠️ |
-| `Mistral-7B-Instruct-v0.2-onnx-ryzenai-npu` | 8.0 GB | ⚠️ |
-| `Mistral-7B-Instruct-v0.3-onnx-ryzenai-npu` | 8.0 GB | ⚠️ |
-| `Meta-Llama-3-8B-onnx-ryzenai-npu` | 9.0 GB | ⚠️ |
-| `Llama-3.1-8B-onnx-ryzenai-npu` | 9.0 GB | ⚠️ |
-| `Meta-Llama-3.1-8B-Instruct-onnx-ryzenai-npu` | 9.0 GB | ⚠️ |
-| `DeepSeek-R1-Distill-Llama-8B-onnx-ryzenai-npu` | 9.0 GB | ⚠️ |
-| `gpt-oss-20b-onnx-ryzenai-npu` | 20.0 GB | ⚠️ |
-
-
-### VLM
-
-| HuggingFace Repository | Size | Test Pass (Ryzen AI 350) |
-|------------------------|------|--------------|
-| `Gemma-3-4b-it-mm-onnx-ryzenai-npu` | 6.2 GB | ✅ |
+| `Gemma-3-4b-it-mm-onnx-ryzenai-npu` | 6.2 GB | Vision LM |
 
 ### 快速開始
-
 
 #### 步驟 1: 啟動 Conda 環境**（每次使用前執行）
 
@@ -100,6 +73,8 @@ conda activate ryzen-ai-1.7.1
 ```powershell
 hf download amd/<模型名稱> --local-dir ./<模型名稱>
 ```
+SmolLM-135M-Instruct_rai_1.7.1_npu_4K
+hf download amd/SmolLM-135M-Instruct_rai_1.7.1_npu_4K --local-dir ./SmolLM-135M-Instruct_rai_1.7.1_npu_4K
 
 #### 步驟 3: 執行推論
 
