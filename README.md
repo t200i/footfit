@@ -27,15 +27,9 @@
 在取得原裝的Ryzen AI PC後，請依照 [installation instructions](https://ryzenai.docs.amd.com/en/latest/inst.html)下載並安裝**NPU driver 32.0.203.280**+**ryzen-ai-lt 1.7.1** 或更新版本。
 
 
-### 2. 啟動AMD Ryzen AI原生 Python 環境
+### 2. 設定系統環境變數
 
-NPU 推論需要特定的 DLL 文件（`onnx_custom_ops.dll`、`onnxruntime.dll` 等），將 `C:\Program Files\RyzenAI\1.7.1\deployment` 加入系統 PATH 環境變數。
-
-設定方式：
-1. 開啟「系統設定」→「進階系統設定」→「環境變數」
-2. 在「系統變數」區塊中找到 `Path`，點選「編輯」
-3. 點選「新增」，輸入 `C:\Program Files\RyzenAI\1.7.1\deployment`
-4. 點選「確定」儲存
+將 `C:\Program Files\RyzenAI\1.7.1\deployment` 加入系統 PATH 環境變數（包含 AMD 自訂的 Vitis AI Execution Provider 執行庫）。
 
 ### 3. 安裝 HuggingFace CLI
 
@@ -50,7 +44,7 @@ pip install huggingface-hub[cli]
 
 ## 📦 AMD Ryzen AI NPU 模型列表
 
-這些模型皆採用 **AWQ 量化技術**，將原始模型的權重壓縮至 `UINT4`（4-bit unsigned integer）格式，並在推論時使用 `BFP16`（Brain Float 16）處理激活值。下表列出所有可用模型的基本資訊。**推論模式**欄位標示該模型的輸入類型：`LLM` 代表純文本模型（如對話、翻譯、程式碼生成），`VLM` 則是視覺語言模型（可同時處理圖像與文本輸入，如圖片描述、視覺問答）。
+這些模型皆採用 **AWQ 量化技術**，將原始模型的權重壓縮至 `UINT4`（4-bit unsigned integer）格式，並在推論時使用 `BFP16`（Brain Float 16）處理激活值。下表列出所有可以使用的模型：
 
 | HuggingFace Repository | 大小 | 支援精度 | 推論模式 |
 |------------------------|------|---------|---------|
@@ -84,11 +78,15 @@ pip install huggingface-hub[cli]
 | `amd/DeepSeek-R1-Distill-Llama-8B-onnx-ryzenai-npu` | 9.0 GB | `UINT4`, `BFP16` | LLM |
 | `amd/gpt-oss-20b-onnx-ryzenai-npu` | 20.0 GB | `UINT4`, `BFP16` | LLM |
 
+> `LLM` 表示該模型的輸入類型為純粹的文字。
+> `VLM` 表示該模型的輸入類型可同時包含圖像與文字。
 ---
 
 ## 🎯 標準化使用流程
 
 ### 關於模型與推論模式
+
+
 
 上方模型列表中的 HuggingFace Repository 路徑（如 `amd/Gemma-3-4b-it-mm-onnx-ryzenai-npu`）是用來從 HuggingFace 下載模型到本機的識別碼。下載後的模型目錄將包含完整的 ONNX 格式模型文件、配置文件與 tokenizer。
 
