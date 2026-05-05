@@ -8,15 +8,15 @@
 
 ## 📰 Ryzen AI 最新發展
 
-- [AMD XDNA NPU 基本架構](https://www.amd.com/en/technologies/xdna.html) - 打造第三代 AI 引擎，提供更高效能的 NPU 設計。
+- [XDNA NPU 基本架構](https://www.amd.com/en/technologies/xdna.html) - 打造第三代 AI 引擎，提供更高效能的 NPU 設計。
 - [On-Device AI: NPU vs GPU Performance](https://arxiv.org/html/2603.23640v1) - 比較 NPU 與 GPU 執行 LLM 推理的效能、能耗與熱管理。
-- [AMD 在 COMPUTEX 2024 推出 50 TOPS NPU，並宣布與微軟合作](https://www.amd.com/zh-tw/newsroom/press-releases/2024-6-2-amd-extends-ai-and-high-performance-leadership-in-.html) - 將 Ryzen AI NPU 作為 Copilot+ PC 的 AI 硬體
-- [AMD 發布首款能在原生 NPU 上推理 Google Gemma-3](https://www.amd.com/en/developer/resources/technical-articles/introducing-amd-support-for-new-gemma-3-models-from-google.html?utm_source=copilot.com) - 展示 NPU 與影像、語音等模態的相容性
-- [ONNX Runtime 1.23.3 新增 Vitis AI Execution Provider，支援 AMD NPU](https://onnxruntime.ai/docs/execution-providers/Vitis-AI-ExecutionProvider.html) - 整合 Hugging Face 與 ONNX 模型
-- [微軟推出 ONNX Runtime GenAI，提供 Chat、Embedding...等 API](https://onnxruntime.ai/docs/genai/) - 整合 Hugging Face 模型到 Copilot+ PC
+- [於 COMPUTEX 2024 推出 50 TOPS NPU，並宣布與微軟合作](https://www.amd.com/zh-tw/newsroom/press-releases/2024-6-2-amd-extends-ai-and-high-performance-leadership-in-.html) - 將 Ryzen AI NPU 作為 Copilot+ PC 的 AI 硬體
+- [發布首款能在原生 NPU 上推理 Google Gemma-3](https://www.amd.com/en/developer/resources/technical-articles/introducing-amd-support-for-new-gemma-3-models-from-google.html?utm_source=copilot.com) - 展示 NPU 與影像、語音等模態的相容性
+- [ONNX Runtime 1.23.3 新增 Vitis AI Execution Provider](https://onnxruntime.ai/docs/execution-providers/Vitis-AI-ExecutionProvider.html) - Hugging Face 與 ONNX 模型的 NPU 支援
+- [微軟推出 ONNX Runtime GenAI，提供多項Chat API](https://onnxruntime.ai/docs/genai/) - 整合 Hugging Face 模型到 Copilot+ PC
 - [MXFP4 Quantization for Edge AI](https://arxiv.org/pdf/2509.23202) - 探討 MXFP4 低位元量化技術，提升邊緣 AI 推理效率
-- [2026 年 2 月，AMD 推出 Ryzen AI 1.7 NPU LLM Collection V1](https://huggingface.co/collections/amd/ryzen-ai-17-npu-llm) - 第一套讓開發者能驗證 Ryzen AI 性能的集合。
-- [2026 年 3 月，AMD 發布 Ryzen AI 1.7 NPU LLM Collection V2](https://huggingface.co/collections/amd/ryzen-ai-17-npu-llm-v2) - A涵蓋更多不同地區與語言的生成式 AI模型。
+- [2026 年 2 月，推出 Ryzen AI 1.7 NPU LLM Collection V1](https://huggingface.co/collections/amd/ryzen-ai-17-npu-llm) - 第一套讓開發者能驗證 Ryzen AI 性能的集合。
+- [2026 年 3 月，發布 Ryzen AI 1.7 NPU LLM Collection V2](https://huggingface.co/collections/amd/ryzen-ai-17-npu-llm-v2) - A涵蓋更多不同地區與語言的生成式 AI模型。
 
 ---
 
