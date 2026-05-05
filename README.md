@@ -78,226 +78,33 @@ pip install huggingface-hub[cli]
 | `amd/DeepSeek-R1-Distill-Llama-8B-onnx-ryzenai-npu` | 9.0 GB | `UINT4`, `BFP16` | LLM |
 | `amd/gpt-oss-20b-onnx-ryzenai-npu` | 20.0 GB | `UINT4`, `BFP16` | LLM |
 
-> `LLM` 表示該模型的輸入類型為純粹的文字。
+> `LLM` 表示該模型的輸入類型為純粹的文字。\n
 > `VLM` 表示該模型的輸入類型可同時包含圖像與文字。
 ---
 
-## 🎯 標準化使用流程
-
-### 關於模型與推論模式
+### 快速開始
 
 
-
-上方模型列表中的 HuggingFace Repository 路徑（如 `amd/Gemma-3-4b-it-mm-onnx-ryzenai-npu`）是用來從 HuggingFace 下載模型到本機的識別碼。下載後的模型目錄將包含完整的 ONNX 格式模型文件、配置文件與 tokenizer。
-
-本專案提供兩種推論模式：
-- **VLM 模式**（多模態）：處理圖像與文本的結合輸入，如圖像描述、視覺問答等任務
-- **LLM 模式**（純文本）：僅處理文本輸入輸出，如對話、翻譯、程式碼生成等任務
-
----
-
-### 前置準備：環境設置
-
-
-**步驟 2: 啟動 Conda 環境**（每次使用前執行）
+#### 步驟 1: 啟動 Conda 環境**（每次使用前執行）
 
 ```powershell
 conda activate ryzen-ai-1.7.1
 ```
 
----
+#### 步驟 2: 下載模型
 
-### 快速開始
-
-#### 步驟 1: 下載模型
-
-從模型列表選擇模型，使用 HuggingFace CLI 下載：
+使用 HuggingFace CLI 下載模型列表中的模型(如：`amd/Llama-3.2-1B-onnx-ryzenai-npu`)。
 
 ```powershell
 hf download amd/<模型名稱> --local-dir ./<模型名稱>
 ```
 
----
-
-#### 步驟 2: 執行推論
-
-本專案提供兩種推論模式：
-
-##### A. **VLM 推論模式** （圖像 + 文本）
-
-使用 `vlm.py` - 支援所有視覺語言模型：
+#### 步驟 3: 執行推論
 
 ```powershell
-# 基本用法
-python vlm.py --model ./Gemma-3-4b-it-mm-onnx-ryzenai-npu --image cat.jpg --prompt "這是什麼動物？"
-
-# 長回應
-python vlm.py --model ./Gemma-3-4b-it-mm-onnx-ryzenai-npu --image scene.jpg --prompt "詳細描述這個場景" --max-tokens 512
-```
-
-**技術說明**: 腳本會自動處理 VLM 的路徑重複問題（使用 `.` 作為模型路徑）。
-
-##### B. **LLM 推論模式** （僅文本）
-
-使用 `llm.py` - 支援所有文本語言模型：
-
-```powershell
-# 單次推論
-python llm.py --model ./Qwen2.5-3B-Instruct-onnx-ryzenai-npu --prompt "什麼是 AI？"
-
-# 長回應
+# LLM 推論模式
 python llm.py --model ./Llama-3.2-1B-Instruct-onnx-ryzenai-npu --prompt "解釋量子計算" --max-length 512
 
-# 互動對話模式
-python llm.py --model ./Phi-4-mini-instruct-onnx-ryzenai-npu --interactive
+# VLM 推論模式
+python vlm.py --model ./Gemma-3-4b-it-mm-onnx-ryzenai-npu --image cat.jpg --prompt "詳細描述這個場景" --max-tokens 512
 ```
-
-**注意**: 部分模型可能有固件兼容性問題（如 Llama-3.2 的 "flat version" 錯誤）。如遇到問題，請嘗試其他模型。
-
----
-
-### 常見問題與解決方案
-
-#### 問題 1: "找不到指定的模組" 或 DLL 錯誤
-
-**原因**: NPU DLL 文件不在系統 PATH 中
-
-**解決方案**:
-```powershell
-$env:Path = "C:\Program Files\RyzenAI\1.7.1\deployment;$env:Path"
-```
-
-#### 問題 2: "flat version is not supported for matmulbias"
-
-**原因**: NPU 固件版本與模型編譯版本不兼容（常見於 Llama-3.2）
-
-**解決方案**: 
-- 嘗試其他模型（如 Qwen2.5, Phi-4）
-- 關注 AMD 官方模型更新
-
-#### 問題 3: VLM 路徑重複錯誤
-
-**症狀**: `Cannot read header from model-name\model-name\file.pb.bin`
-
-**解決方案**: `vlm.py` 已自動處理此問題（使用 `.` 作為模型路徑）
-
----
-
-### 進階選項
-
-#### 詳細模式（查看執行細節）
-
-```powershell
-# VLM 模式
-python vlm.py --model ./Gemma-3-4b-it-mm-onnx-ryzenai-npu --image test.jpg --prompt "分析" --verbose
-
-# LLM 模式
-python llm.py --model ./Qwen2.5-3B-Instruct-onnx-ryzenai-npu --prompt "你好" --verbose
-```
-
-#### 調整輸出長度
-
-```powershell
-# VLM 模式: 使用 --max-tokens
-python vlm.py --model <模型> --image <圖像> --prompt "詳細描述" --max-tokens 512
-
-# LLM 模式: 使用 --max-length
-python llm.py --model <模型> --prompt "長文回應" --max-length 1024
-```
-
-### 批次下載腳本
-
-創建 `download_recommended.ps1`：
-
-```powershell
-# 推薦模型列表
-$models = @(
-    "amd/Llama-3.2-1B-Instruct-onnx-ryzenai-npu",
-    "amd/Qwen2.5-3B-Instruct-onnx-ryzenai-npu",
-    "amd/Qwen2.5-Coder-7B-Instruct-onnx-ryzenai-npu",
-    "amd/Meta-Llama-3.1-8B-Instruct-onnx-ryzenai-npu"
-)
-
-foreach ($repo in $models) {
-    $dirName = $repo -replace '^.*/',''
-    hf download $repo --local-dir "./$dirName"
-}
-```
-
-執行：`powershell -ExecutionPolicy Bypass -File download_recommended.ps1`
-
----
-
-## 🤖 Chat Template 自動偵測
-
-推論引擎會從模型目錄名稱自動偵測 Chat Template：
-
-| Template | 適用模型 | 偵測關鍵字 |
-|----------|---------|----------|
-| `qwen` | Qwen、DeepSeek-R1-Distill-Qwen | `qwen` |
-| `llama2` | Llama-2、CodeLlama | `llama-2` |
-| `llama3` | Llama-3.x、DeepSeek-R1-Distill-Llama | `llama-3` |
-| `mistral` | Mistral | `mistral` |
-| `phi3` | Phi-3.x、Phi-4 | `phi` |
-| `gemma3` | Gemma-3 | `gemma` |
-| `chatglm3` | ChatGLM3 | `chatglm` |
-| `gpt` | GPT-OSS | `gpt` |
-
----
-
-## 📂 專案目錄結構
-
-```
-FY115-BCI-Agent/
-├── vlm.py                          # 🎨 VLM 推論模式（多模態：圖像+文本）
-├── llm.py                          # 💬 LLM 推論模式（純文本）
-├── setup_env.ps1                   # 🔧 環境檢查腳本
-├── gemma3.ps1                      # 📜 Gemma-3 便利腳本（可選）
-├── QUICKSTART_V2.md                # 🚀 快速開始指南（推薦）
-├── STANDARDIZATION.md              # 📰 標準化指南
-├── SUMMARY.md                      # 📊 技術總結與測試結果
-├── README.md                       # 📖 本文件（主要文檔）
-├── docs/
-│   ├── INSTALLATION.md             # 詳細安裝指南
-│   ├── USAGE.md                    # 使用教學
-│   ├── PROGRAMMING.md              # API 參考
-│   ├── TROUBLESHOOTING.md          # 故障排除
-│   └── ARCHITECTURE.md             # 系統架構
-└── <模型目錄>/                     # 下載的模型（自行創建）
-    ├── Gemma-3-4b-it-mm-onnx-ryzenai-npu/
-    ├── Qwen2.5-3B-Instruct-onnx-ryzenai-npu/
-    └── ...
-```
-
-**核心檔案說明**:
-- **`vlm.py`**: VLM 推論模式 - 所有視覺語言模型的統一介面
-- **`llm.py`**: LLM 推論模式 - 所有純文本模型的統一介面
-- **`setup_env.ps1`**: 環境診斷工具
-- **`.ps1` 腳本**: PowerShell 便利腳本（可選）
-
----
-
-## � 文檔與資源
-
-**本專案文檔**：
-- [QUICK_REFERENCE.md](QUICK_REFERENCE.md) - 常用命令速查表
-- [docs/INSTALLATION.md](docs/INSTALLATION.md) - 安裝指南
-- [docs/USAGE.md](docs/USAGE.md) - 使用教學
-- [docs/PROGRAMMING.md](docs/PROGRAMMING.md) - API 參考
-- [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md) - 故障排除
-- [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) - 架構說明
-
-**AMD 官方資源**：
-- [AMD Ryzen AI 官網](https://www.amd.com/ryzen-ai)
-- [Ryzen AI 開發者文檔](https://ryzenai.docs.amd.com/)
-- [HuggingFace AMD Organization](https://huggingface.co/amd)
-
-**技術框架**：
-- [ONNX Runtime GenAI](https://github.com/microsoft/onnxruntime-genai)
-- [HuggingFace Hub](https://huggingface.co/)
-
----
-
-**版本**: 1.0.0 | **最後更新**: 2026/05/04 | **授權**: MIT
-
-> 💡 第一次使用建議從小型模型（Llama-3.2-1B-Instruct 或 Qwen2-1.5B）開始。
