@@ -1,8 +1,8 @@
-# AMD Ryzen AI 1.7.1 — NPU 模型部署之路
+# AMD Ryzen AI NPU 模型部署之路
 
-## 📋 執行摘要
+## 📋 摘要
 
-本專案專門為AMD Ryzen AI 系列處理器提供**LLM 推論引擎**，支援 [Ryzen AI Software](https://www.amd.com/en/developer/resources/ryzen-ai-software.html) 官方Collections 釋出的模型 (僅限能完整Offload NPU的模型)。
+本專案專門為 AMD Ryzen AI 系列處理器提供 **LLM 推論引擎**，基於 [Ryzen AI Software 1.7.1](https://www.amd.com/en/developer/resources/ryzen-ai-software.html) 開發，支援官方 Collections 中能完整 Offload 至 NPU 的模型。若使用其他版本的 Ryzen AI Software，部分功能與模型兼容性可能需要調整。
 
 ---
 
@@ -56,6 +56,7 @@ AMD 官方在 HuggingFace 上釋出多個 NPU 模型 Collections，這些模型�
 
 | HuggingFace Repository | Size |  |
 |------------------------|------|--------------|
+|`SmolLM2-135M-Instruct_rai_1.7.1_npu_4K` | 6.2 GB | Language LM |
 | `Gemma-3-4b-it-mm-onnx-ryzenai-npu` | 6.2 GB | Vision LM |
 
 ### 快速開始
