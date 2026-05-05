@@ -23,24 +23,23 @@
 ## 📥 安裝指南
 
 ### 1. 安裝 AMD Ryzen AI Software
-下載並安裝 [AMD Ryzen AI Software](https://www.amd.com/ryzen-ai) 1.7.1 或更新版本。
+
+在取得原裝的Ryzen AI PC後，請依照 [installation instructions](https://ryzenai.docs.amd.com/en/latest/inst.html)下載並安裝**NPU driver 32.0.203.280**及**ryzen-ai-lt 1.7.1** 或更新版本。
 
 ### 2. 啟動AMD Ryzen AI原生 Python 環境
 ```bash
-# 須通過AMD Ryzen AI Software自動安裝
-conda activate ryzen-ai-1.7.1
+conda activate ryzen-ai-1.7.1 # 該環境會由Ryzen AI Software自動安裝
 ```
 
 ### 3. 安裝 HuggingFace CLI
-```powershell
-# 安裝 HuggingFace Hub（包含 hf 命令）
-pip install huggingface-hub[cli]
 
+```powershell
+pip install huggingface-hub[cli]
+```
+```powershell
 # 驗證安裝
 hf --help
 ```
-
-詳細安裝說明請參考 [安裝指南](docs/INSTALLATION.md)。
 
 ---
 
