@@ -1,9 +1,4 @@
-# AMD Ryzen AI NPU 通用模型部署系統
-
-> 支援 30+ AMD 官方優化模型的通用 AI 推論平台  
-> 基於 AMD Ryzen AI NPU 與 ONNX Runtime GenAI
-
----
+# AMD Ryzen AI NPU 通用模型的部署之路
 
 ## 📋 執行摘要
 
@@ -14,32 +9,14 @@
 ## 📰 Ryzen AI 最新發展
 
 - [AMD XDNA NPU 基本架構](https://www.amd.com/en/technologies/xdna.html) - 打造第三代 AI 引擎，提供更高效能的 NPU 設計。
+- [LLM Inference at the Edge: Mobile, NPU, and GPU Performance Efficiency Trade-offs Under Sustained Load](https://arxiv.org/html/2603.23640v1) - 比較 NPU 與 GPU 在邊緣設備上執行 LLM 推理的效能、能耗與熱管理。
 - [AMD 在 COMPUTEX 2024 推出 XDNA 2 NPU (50 TOPS)，並宣布與微軟合作 Copilot+ PC](https://www.amd.com/zh-tw/newsroom/press-releases/2024-6-2-amd-extends-ai-and-high-performance-leadership-in-.html) - 確立 Ryzen AI NPU 作為 Windows PC 上的 AI 推理硬體
 - [AMD 發布首款能在原生 NPU 上推理 Google Gemma-3](https://www.amd.com/en/developer/resources/technical-articles/introducing-amd-support-for-new-gemma-3-models-from-google.html?utm_source=copilot.com) - 展示 NPU 不只支援文字 LLM，也能處理影像、語音等多模態 AI
 - [ONNX Runtime 1.23.3 起新增 Vitis AI Execution Provider，支援 AMD NPU 加速](https://onnxruntime.ai/docs/execution-providers/Vitis-AI-ExecutionProvider.html) - 讓 Hugging Face 與 ONNX 模型能直接在 Ryzen AI NPU 上推理
-- [微軟推出 ONNX Runtime GenAI，提供 Chat、Embedding、Tokenizer 等高階 API。](https://onnxruntime.ai/docs/genai/) - 整合 Hugging Face 模型到 Copilot+ PC
-
-- 
-- [AMD Ryzen AI 1.7 NPU LLM Collection V1](https://huggingface.co/collections/amd/ryzen-ai-17-npu-llm)
-- [AMD Ryzen AI 1.7 NPU LLM Collection V2](https://huggingface.co/collections/amd/ryzen-ai-17-npu-llm-v2)
-
-
-### AMD AI 技術研究
-- [AMD XDNA NPU 架構詳解](https://www.amd.com/en/technologies/xdna.html) - 第三代 AI 引擎技術
-- [Together We Advance_AI](https://community.amd.com/t5/ai/ct-p/ai_zone) - AMD AI 社群與開發者資源
-
-### ONNX Runtime 更新
-- [ONNX Runtime GenAI 0.11.2 發布](https://github.com/microsoft/onnxruntime-genai/releases/tag/v0.11.2) - 支援更多模型與效能優化
-
-
-### 研究論文
-- [On-Device AI: NPU vs GPU Performance Analysis](https://arxiv.org/abs/2024.xxxxx) - NPU 效能研究（參考）
-- [MXFP4 Quantization for Edge AI](https://arxiv.org/abs/2024.xxxxx) - 低位元量化技術（參考）
-
-### 社群資源
-- [HuggingFace AMD Organization](https://huggingface.co/amd) - 425+ AI/ML 工程師貢獻的模型庫
-- [AMD Ryzen AI 1.7 NPU LLM Collection V1](https://huggingface.co/collections/amd/ryzen-ai-17-npu-llm) - 更新至 2026 年 2 月
-- [AMD Ryzen AI 1.7 NPU LLM V2 Collection](https://huggingface.co/collections/amd/ryzen-ai-17-npu-llm-v2) - 更新至 2026 年 3 月（含 DeepSeek-R1, Phi-4, ChatGLM3）
+- [微軟推出 ONNX Runtime GenAI，提供 Chat、Embedding、Tokenizer 等高階 API](https://onnxruntime.ai/docs/genai/) - 整合 Hugging Face 模型到 Copilot+ PC
+- [Bridging the Gap Between Promise and Performance for Microscaling FP4 Quantization](https://arxiv.org/pdf/2509.23202) - 探討 MXFP4 低位元量化技術，提升邊緣 AI 推理效率
+- [2026 年 2 月，AMD 推出 Ryzen AI 1.7 NPU LLM Collection V1](https://huggingface.co/collections/amd/ryzen-ai-17-npu-llm) - 建立第一套 NPU 模型集合，讓開發者能快速驗證 Ryzen AI 的推理性能。
+- [2026 年 3 月，AMD 發布 Ryzen AI 1.7 NPU LLM Collection V2](https://huggingface.co/collections/amd/ryzen-ai-17-npu-llm-v2) - A涵蓋不同地區與語言的生成式 AI，展現生態成熟度。
 
 ---
 
