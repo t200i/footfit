@@ -24,62 +24,65 @@
 
 ### 1. 安裝 AMD Ryzen AI Software
 
-在取得原裝的Ryzen AI PC後，請依照 [installation instructions](https://ryzenai.docs.amd.com/en/latest/inst.html)下載並安裝**NPU driver 32.0.203.280**及**ryzen-ai-lt 1.7.1** 或更新版本。
+在取得原裝的Ryzen AI PC後，請依照 [installation instructions](https://ryzenai.docs.amd.com/en/latest/inst.html)下載並安裝**NPU driver 32.0.203.280**+**ryzen-ai-lt 1.7.1** 或更新版本。
+
 
 ### 2. 啟動AMD Ryzen AI原生 Python 環境
-```bash
-conda activate ryzen-ai-1.7.1 # 該環境會由Ryzen AI Software自動安裝
-```
+
+NPU 推論需要特定的 DLL 文件（`onnx_custom_ops.dll`、`onnxruntime.dll` 等），將 `C:\Program Files\RyzenAI\1.7.1\deployment` 加入系統 PATH 環境變數。
+
+設定方式：
+1. 開啟「系統設定」→「進階系統設定」→「環境變數」
+2. 在「系統變數」區塊中找到 `Path`，點選「編輯」
+3. 點選「新增」，輸入 `C:\Program Files\RyzenAI\1.7.1\deployment`
+4. 點選「確定」儲存
 
 ### 3. 安裝 HuggingFace CLI
 
-```powershell
-pip install huggingface-hub[cli]
+```bash
+conda activate ryzen-ai-1.7.1 # 該環境會由Ryzen AI Software自動安裝
 ```
 ```powershell
-# 驗證安裝
-hf --help
+pip install huggingface-hub[cli]
 ```
 
 ---
 
 ## 📦 AMD Ryzen AI NPU 模型列表
 
-完整列表：[Collection V1](https://huggingface.co/collections/amd/ryzen-ai-17-npu-llm) | [Collection V2](https://huggingface.co/collections/amd/ryzen-ai-17-npu-llm-v2)
+這些模型皆採用 **AWQ 量化技術**，將原始模型的權重壓縮至 `UINT4`（4-bit unsigned integer）格式，並在推論時使用 `BFP16`（Brain Float 16）處理激活值。下表列出所有可用模型的基本資訊。**推論模式**欄位標示該模型的輸入類型：`LLM` 代表純文本模型（如對話、翻譯、程式碼生成），`VLM` 則是視覺語言模型（可同時處理圖像與文本輸入，如圖片描述、視覺問答）。
 
-| HuggingFace Repository | 大小 | Collection | 推論模式 | 用途 |
-|------------------------|------|-----------|---------|------|
-| `amd/Llama-3.2-1B-Instruct-onnx-ryzenai-npu` | 2.0 GB | V2 | 通用 | 輕量/入門 ⭐ |
-| `amd/Llama-3.2-1B-onnx-ryzenai-npu` | 2.0 GB | V2 | 通用 | 輕量 |
-| `amd/Qwen2-1.5B-onnx-ryzenai-npu` | 2.5 GB | V1 | 通用 | 輕量 ⭐ |
-| `amd/Qwen-2.5_1.5B_Instruct-onnx-ryzenai-npu` | 2.5 GB | V2 | 通用 | 輕量 |
-| `amd/Qwen2.5-Coder-1.5B-Instruct-onnx-ryzenai-npu` | 2.5 GB | V2 | 通用 | 程式碼 |
-| `amd/DeepSeek-R1-Distill-Qwen-1.5B-onnx-ryzenai-npu` | 2.5 GB | V2 | 通用 | 推理 |
-| `amd/Qwen2.5-3B-Instruct-onnx-ryzenai-npu` | 4.0 GB | V1 | 通用 | 平衡 ⭐ |
-| `amd/Phi-3-mini-4k-instruct-onnx-ryzenai-npu` | 4.0 GB | V1 | 通用 | 平衡 |
-| `amd/Phi-3-mini-128k-instruct-onnx-ryzenai-npu` | 4.0 GB | V1 | 通用 | 長文本 |
-| `amd/Phi-3.5-mini-instruct-onnx-ryzenai-npu` | 4.0 GB | V1 | 通用 | 平衡 |
-| `amd/Phi-4-mini-instruct-onnx-ryzenai-npu` | 4.5 GB | V2 | 通用 | 平衡 ⭐ |
-| `amd/Gemma-3-4b-it-mm-onnx-ryzenai-npu` | 6.2 GB | V2 | 多模態 | 圖像+文本 🎨 |
-| `amd/ChatGLM3-6B-onnx-ryzenai-npu` | 7.0 GB | V2 | 通用 | 中文 🇨🇳 |
-| `amd/Qwen2-7B-onnx-ryzenai-npu` | 8.0 GB | V1 | 通用 | 高品質 |
-| `amd/Qwen2.5-7B-Instruct-onnx-ryzenai-npu` | 8.0 GB | V1 | 通用 | 高品質 ⭐ |
-| `amd/Qwen1.5-7B-Chat-onnx-ryzenai-npu` | 8.0 GB | V1 | 通用 | 高品質 |
-| `amd/Qwen2.5-Coder-7B-Instruct-onnx-ryzenai-npu` | 8.0 GB | V1 | 通用 | 程式碼 ⭐ |
-| `amd/CodeLlama-7b-Instruct-hf-onnx-ryzenai-npu` | 8.0 GB | V1 | 通用 | 程式碼 |
-| `amd/DeepSeek-R1-Distill-Qwen-7B-onnx-ryzenai-npu` | 8.0 GB | V2 | 通用 | 推理 |
-| `amd/Llama-2-7b-hf-onnx-ryzenai-npu` | 8.0 GB | V1 | 通用 | 通用 |
-| `amd/Llama-2-7b-chat-hf-onnx-ryzenai-npu` | 8.0 GB | V1 | 通用 | 對話 |
-| `amd/Mistral-7B-Instruct-v0.1-onnx-ryzenai-npu` | 8.0 GB | V1 | 通用 | 高品質 |
-| `amd/Mistral-7B-Instruct-v0.2-onnx-ryzenai-npu` | 8.0 GB | V1 | 通用 | 高品質 |
-| `amd/Mistral-7B-Instruct-v0.3-onnx-ryzenai-npu` | 8.0 GB | V1 | 通用 | 高品質 ⭐ |
-| `amd/Meta-Llama-3-8B-onnx-ryzenai-npu` | 9.0 GB | V1 | 通用 | 高品質 |
-| `amd/Llama-3.1-8B-onnx-ryzenai-npu` | 9.0 GB | V1 | 通用 | 高品質 |
-| `amd/Meta-Llama-3.1-8B-Instruct-onnx-ryzenai-npu` | 9.0 GB | V1 | 通用 | 高品質 ⭐ |
-| `amd/DeepSeek-R1-Distill-Llama-8B-onnx-ryzenai-npu` | 9.0 GB | V2 | 通用 | 推理 |
-| `amd/gpt-oss-20b-onnx-ryzenai-npu` | 20.0 GB | V2 | 通用 | 超大型 💪 |
-
-**圖示**: ⭐ 推薦 | 🎨 多模態 | 🇨🇳 中文優化 | 💪 超大型
+| HuggingFace Repository | 大小 | 支援精度 | 推論模式 |
+|------------------------|------|---------|---------|
+| `amd/Llama-3.2-1B-Instruct-onnx-ryzenai-npu` | 2.0 GB | `UINT4`, `BFP16` | LLM |
+| `amd/Llama-3.2-1B-onnx-ryzenai-npu` | 2.0 GB | `UINT4`, `BFP16` | LLM |
+| `amd/Qwen2-1.5B-onnx-ryzenai-npu` | 2.5 GB | `UINT4`, `BFP16` | LLM |
+| `amd/Qwen-2.5_1.5B_Instruct-onnx-ryzenai-npu` | 2.5 GB | `UINT4`, `BFP16` | LLM |
+| `amd/Qwen2.5-Coder-1.5B-Instruct-onnx-ryzenai-npu` | 2.5 GB | `UINT4`, `BFP16` | LLM |
+| `amd/DeepSeek-R1-Distill-Qwen-1.5B-onnx-ryzenai-npu` | 2.5 GB | `UINT4`, `BFP16` | LLM |
+| `amd/Qwen2.5-3B-Instruct-onnx-ryzenai-npu` | 4.0 GB | `UINT4`, `BFP16` | LLM |
+| `amd/Phi-3-mini-4k-instruct-onnx-ryzenai-npu` | 4.0 GB | `UINT4`, `BFP16` | LLM |
+| `amd/Phi-3-mini-128k-instruct-onnx-ryzenai-npu` | 4.0 GB | `UINT4`, `BFP16` | LLM |
+| `amd/Phi-3.5-mini-instruct-onnx-ryzenai-npu` | 4.0 GB | `UINT4`, `BFP16` | LLM |
+| `amd/Phi-4-mini-instruct-onnx-ryzenai-npu` | 4.5 GB | `UINT4`, `BFP16` | LLM |
+| `amd/Gemma-3-4b-it-mm-onnx-ryzenai-npu` | 6.2 GB | `UINT4`, `BFP16` | VLM |
+| `amd/ChatGLM3-6B-onnx-ryzenai-npu` | 7.0 GB | `UINT4`, `BFP16` | LLM |
+| `amd/Qwen2-7B-onnx-ryzenai-npu` | 8.0 GB | `UINT4`, `BFP16` | LLM |
+| `amd/Qwen2.5-7B-Instruct-onnx-ryzenai-npu` | 8.0 GB | `UINT4`, `BFP16` | LLM |
+| `amd/Qwen1.5-7B-Chat-onnx-ryzenai-npu` | 8.0 GB | `UINT4`, `BFP16` | LLM |
+| `amd/Qwen2.5-Coder-7B-Instruct-onnx-ryzenai-npu` | 8.0 GB | `UINT4`, `BFP16` | LLM |
+| `amd/CodeLlama-7b-Instruct-hf-onnx-ryzenai-npu` | 8.0 GB | `UINT4`, `BFP16` | LLM |
+| `amd/DeepSeek-R1-Distill-Qwen-7B-onnx-ryzenai-npu` | 8.0 GB | `UINT4`, `BFP16` | LLM |
+| `amd/Llama-2-7b-hf-onnx-ryzenai-npu` | 8.0 GB | `UINT4`, `BFP16` | LLM |
+| `amd/Llama-2-7b-chat-hf-onnx-ryzenai-npu` | 8.0 GB | `UINT4`, `BFP16` | LLM |
+| `amd/Mistral-7B-Instruct-v0.1-onnx-ryzenai-npu` | 8.0 GB | `UINT4`, `BFP16` | LLM |
+| `amd/Mistral-7B-Instruct-v0.2-onnx-ryzenai-npu` | 8.0 GB | `UINT4`, `BFP16` | LLM |
+| `amd/Mistral-7B-Instruct-v0.3-onnx-ryzenai-npu` | 8.0 GB | `UINT4`, `BFP16` | LLM |
+| `amd/Meta-Llama-3-8B-onnx-ryzenai-npu` | 9.0 GB | `UINT4`, `BFP16` | LLM |
+| `amd/Llama-3.1-8B-onnx-ryzenai-npu` | 9.0 GB | `UINT4`, `BFP16` | LLM |
+| `amd/Meta-Llama-3.1-8B-Instruct-onnx-ryzenai-npu` | 9.0 GB | `UINT4`, `BFP16` | LLM |
+| `amd/DeepSeek-R1-Distill-Llama-8B-onnx-ryzenai-npu` | 9.0 GB | `UINT4`, `BFP16` | LLM |
+| `amd/gpt-oss-20b-onnx-ryzenai-npu` | 20.0 GB | `UINT4`, `BFP16` | LLM |
 
 ---
 
@@ -97,15 +100,6 @@ hf --help
 
 ### 前置準備：環境設置
 
-**步驟 1: 設定系統環境變數**
-
-NPU 推論需要特定的 DLL 文件（`onnx_custom_ops.dll`、`onnxruntime.dll` 等），需將 `C:\Program Files\RyzenAI\1.7.1\deployment` 加入系統 PATH 環境變數。
-
-設定方式：
-1. 開啟「系統設定」→「進階系統設定」→「環境變數」
-2. 在「系統變數」區塊中找到 `Path`，點選「編輯」
-3. 點選「新增」，輸入 `C:\Program Files\RyzenAI\1.7.1\deployment`
-4. 點選「確定」儲存
 
 **步驟 2: 啟動 Conda 環境**（每次使用前執行）
 
