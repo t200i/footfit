@@ -34,7 +34,7 @@
 ### 3. 安裝 HuggingFace CLI
 
 ```bash
-conda activate ryzen-ai-1.7.1 # 該環境會由Ryzen AI Software自動安裝
+conda activate ryzen-ai-1.7.1      # 該環境是由Ryzen AI Software自動安裝
 pip install huggingface-hub[cli]
 ```
 
@@ -60,13 +60,13 @@ AMD 官方在 HuggingFace 上釋出多個 NPU 模型 Collections，這些模型�
 
 ### 快速開始
 
-#### 步驟 1: 啟動 Conda 環境**（每次使用前執行）
+#### 啟動環境（每次使用前執行）
 
 ```powershell
 conda activate ryzen-ai-1.7.1
 ```
 
-#### 步驟 2: 下載模型
+#### 下載模型
 
 使用 HuggingFace CLI 下載模型列表中的模型(如：`Gemma-3-4b-it-mm-onnx-ryzenai-npu`)。
 
@@ -74,7 +74,7 @@ conda activate ryzen-ai-1.7.1
 hf download amd/<模型名稱> --local-dir ./<模型名稱>
 ```
 
-#### 步驟 3: 執行推論
+#### 執行推論
 
 ```powershell
 # for Language LM 推論
