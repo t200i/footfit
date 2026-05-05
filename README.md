@@ -13,12 +13,16 @@
 
 ## 📰 Ryzen AI 最新發展
 
-- [AMD 在 COMPUTEX 2024推出 XDNA 2 NPU (50 TOPS)，並宣布與微軟合作 Copilot+ PC](https://www.amd.com/zh-tw/newsroom/press-releases/2024-6-2-amd-extends-ai-and-high-performance-leadership-in-.html)
-- [AMD 發布 首款能在 NPU 上原生推理的多模態模型 (Google Gemma-3)](https://www.amd.com/en/developer/resources/technical-articles/introducing-amd-support-for-new-gemma-3-models-from-google.html?utm_source=copilot.com)
-- [AMD 與微軟合作，讓 ONNX 模型能直接在 Ryzen AI NPU 上加速](https://onnxruntime.ai/docs/execution-providers/Vitis-AI-ExecutionProvider.html) - ONNX Runtime Vitis AI Execution Provider (v1.23.3)
-- [微軟推出ONNX Runtime GenAI，將 Hugging Face 模型整合到 Copilot+ PC 與 Azure AI](https://onnxruntime.ai/docs/genai/)
+- [AMD XDNA NPU 基本架構](https://www.amd.com/en/technologies/xdna.html) - 打造第三代 AI 引擎，提供更高效能的 NPU 設計。
+- [AMD 在 COMPUTEX 2024 推出 XDNA 2 NPU (50 TOPS)，並宣布與微軟合作 Copilot+ PC](https://www.amd.com/zh-tw/newsroom/press-releases/2024-6-2-amd-extends-ai-and-high-performance-leadership-in-.html) - 確立 Ryzen AI NPU 作為 Windows PC 上的 AI 推理硬體
+- [AMD 發布首款能在原生 NPU 上推理 Google Gemma-3](https://www.amd.com/en/developer/resources/technical-articles/introducing-amd-support-for-new-gemma-3-models-from-google.html?utm_source=copilot.com) - 展示 NPU 不只支援文字 LLM，也能處理影像、語音等多模態 AI
+- [ONNX Runtime 1.23.3 起新增 Vitis AI Execution Provider，支援 AMD NPU 加速](https://onnxruntime.ai/docs/execution-providers/Vitis-AI-ExecutionProvider.html) - 讓 Hugging Face 與 ONNX 模型能直接在 Ryzen AI NPU 上推理
+- [微軟推出 ONNX Runtime GenAI，提供 Chat、Embedding、Tokenizer 等高階 API。](https://onnxruntime.ai/docs/genai/) - 整合 Hugging Face 模型到 Copilot+ PC
+
+- 
 - [AMD Ryzen AI 1.7 NPU LLM Collection V1](https://huggingface.co/collections/amd/ryzen-ai-17-npu-llm)
 - [AMD Ryzen AI 1.7 NPU LLM Collection V2](https://huggingface.co/collections/amd/ryzen-ai-17-npu-llm-v2)
+
 
 ### AMD AI 技術研究
 - [AMD XDNA NPU 架構詳解](https://www.amd.com/en/technologies/xdna.html) - 第三代 AI 引擎技術
