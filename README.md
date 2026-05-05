@@ -15,8 +15,8 @@
 - [ONNX Runtime 1.23.3 新增 Vitis AI Execution Provider](https://onnxruntime.ai/docs/execution-providers/Vitis-AI-ExecutionProvider.html) - Hugging Face 與 ONNX 模型的 NPU 支援
 - [微軟推出 ONNX Runtime GenAI，提供多項Chat API](https://onnxruntime.ai/docs/genai/) - 整合 Hugging Face 模型到 Copilot+ PC
 - [MXFP4 Quantization for Edge AI](https://arxiv.org/pdf/2509.23202) - 探討 MXFP4 低位元量化技術，提升邊緣 AI 推理效率
-- [2026 年 2 月，推出 Ryzen AI 1.7 NPU LLM Collection V1](https://huggingface.co/collections/amd/ryzen-ai-17-npu-llm) - 第一套讓開發者能驗證 Ryzen AI 性能的集合。
-- [2026 年 3 月，發布 Ryzen AI 1.7 NPU LLM Collection V2](https://huggingface.co/collections/amd/ryzen-ai-17-npu-llm-v2) - A涵蓋更多不同地區與語言的生成式 AI模型。
+- [2026 年 2 月，推出 Ryzen AI 1.7 NPU LLM Collection V1](https://huggingface.co/collections/ryzen-ai-17-npu-llm) - 第一套讓開發者能驗證 Ryzen AI 性能的集合。
+- [2026 年 3 月，發布 Ryzen AI 1.7 NPU LLM Collection V2](https://huggingface.co/collections/ryzen-ai-17-npu-llm-v2) - A涵蓋更多不同地區與語言的生成式 AI模型。
 
 ---
 
@@ -42,48 +42,47 @@ pip install huggingface-hub[cli]
 
 ## 📦 AMD Ryzen AI NPU 模型列表
 
-所有模型皆採用 **AWQ 量化技術**，將原始模型的權重壓縮至 `UINT4`（4-bit unsigned integer）格式，並在推論時使用 `BFP16`（Brain Float 16）處理激活值。
+所有模型皆採用 **AWQ 量化技術**預先編譯，權重已壓縮為 `UINT4`（4-bit unsigned integer）格式，推論時自動使用 `BFP16`（Brain Float 16）處理激活值。
 
 ### LLM
 
-| HuggingFace Repository | 大小 | 支援精度 |
-|------------------------|------|---------|
-| `amd/Llama-3.2-1B-Instruct-onnx-ryzenai-npu` | 2.0 GB | `UINT4`, `BFP16` |
-| `amd/Llama-3.2-1B-onnx-ryzenai-npu` | 2.0 GB | `UINT4`, `BFP16` |
-| `amd/Qwen2-1.5B-onnx-ryzenai-npu` | 2.5 GB | `UINT4`, `BFP16` |
-| `amd/Qwen-2.5_1.5B_Instruct-onnx-ryzenai-npu` | 2.5 GB | `UINT4`, `BFP16` |
-| `amd/Qwen2.5-Coder-1.5B-Instruct-onnx-ryzenai-npu` | 2.5 GB | `UINT4`, `BFP16` |
-| `amd/DeepSeek-R1-Distill-Qwen-1.5B-onnx-ryzenai-npu` | 2.5 GB | `UINT4`, `BFP16` |
-| `amd/Qwen2.5-3B-Instruct-onnx-ryzenai-npu` | 4.0 GB | `UINT4`, `BFP16` |
-| `amd/Phi-3-mini-4k-instruct-onnx-ryzenai-npu` | 4.0 GB | `UINT4`, `BFP16` |
-| `amd/Phi-3-mini-128k-instruct-onnx-ryzenai-npu` | 4.0 GB | `UINT4`, `BFP16` |
-| `amd/Phi-3.5-mini-instruct-onnx-ryzenai-npu` | 4.0 GB | `UINT4`, `BFP16` |
-| `amd/Phi-4-mini-instruct-onnx-ryzenai-npu` | 4.5 GB | `UINT4`, `BFP16` |
-| `amd/ChatGLM3-6B-onnx-ryzenai-npu` | 7.0 GB | `UINT4`, `BFP16` |
-| `amd/Qwen2-7B-onnx-ryzenai-npu` | 8.0 GB | `UINT4`, `BFP16` |
-| `amd/Qwen2.5-7B-Instruct-onnx-ryzenai-npu` | 8.0 GB | `UINT4`, `BFP16` |
-| `amd/Qwen1.5-7B-Chat-onnx-ryzenai-npu` | 8.0 GB | `UINT4`, `BFP16` |
-| `amd/Qwen2.5-Coder-7B-Instruct-onnx-ryzenai-npu` | 8.0 GB | `UINT4`, `BFP16` |
-| `amd/CodeLlama-7b-Instruct-hf-onnx-ryzenai-npu` | 8.0 GB | `UINT4`, `BFP16` |
-| `amd/DeepSeek-R1-Distill-Qwen-7B-onnx-ryzenai-npu` | 8.0 GB | `UINT4`, `BFP16` |
-| `amd/Llama-2-7b-hf-onnx-ryzenai-npu` | 8.0 GB | `UINT4`, `BFP16` |
-| `amd/Llama-2-7b-chat-hf-onnx-ryzenai-npu` | 8.0 GB | `UINT4`, `BFP16` |
-| `amd/Mistral-7B-Instruct-v0.1-onnx-ryzenai-npu` | 8.0 GB | `UINT4`, `BFP16` |
-| `amd/Mistral-7B-Instruct-v0.2-onnx-ryzenai-npu` | 8.0 GB | `UINT4`, `BFP16` |
-| `amd/Mistral-7B-Instruct-v0.3-onnx-ryzenai-npu` | 8.0 GB | `UINT4`, `BFP16` |
-| `amd/Meta-Llama-3-8B-onnx-ryzenai-npu` | 9.0 GB | `UINT4`, `BFP16` |
-| `amd/Llama-3.1-8B-onnx-ryzenai-npu` | 9.0 GB | `UINT4`, `BFP16` |
-| `amd/Meta-Llama-3.1-8B-Instruct-onnx-ryzenai-npu` | 9.0 GB | `UINT4`, `BFP16` |
-| `amd/DeepSeek-R1-Distill-Llama-8B-onnx-ryzenai-npu` | 9.0 GB | `UINT4`, `BFP16` |
-| `amd/gpt-oss-20b-onnx-ryzenai-npu` | 20.0 GB | `UINT4`, `BFP16` |
+| HuggingFace Repository | Size | Test Pass (Ryzen AI 350) |
+|------------------------|------|--------------|
+| `Llama-3.2-1B-Instruct-onnx-ryzenai-npu` | 2.0 GB | ❌ |
+| `Llama-3.2-1B-onnx-ryzenai-npu` | 2.0 GB | ❌ |
+| `Qwen2-1.5B-onnx-ryzenai-npu` | 2.5 GB | ⚠️ |
+| `Qwen-2.5_1.5B_Instruct-onnx-ryzenai-npu` | 2.5 GB | ❌ |
+| `Qwen2.5-Coder-1.5B-Instruct-onnx-ryzenai-npu` | 2.5 GB | ❌ |
+| `DeepSeek-R1-Distill-Qwen-1.5B-onnx-ryzenai-npu` | 2.5 GB | ❌ |
+| `Qwen2.5-3B-Instruct-onnx-ryzenai-npu` | 4.0 GB | ❌ |
+| `Phi-3-mini-4k-instruct-onnx-ryzenai-npu` | 4.0 GB | ⚠️ |
+| `Phi-3-mini-128k-instruct-onnx-ryzenai-npu` | 4.0 GB | ⚠️ |
+| `Phi-3.5-mini-instruct-onnx-ryzenai-npu` | 4.0 GB | ⚠️ |
+| `Phi-4-mini-instruct-onnx-ryzenai-npu` | 4.5 GB | ⚠️ |
+| `ChatGLM3-6B-onnx-ryzenai-npu` | 7.0 GB | ⚠️ |
+| `Qwen2-7B-onnx-ryzenai-npu` | 8.0 GB | ⚠️ |
+| `Qwen2.5-7B-Instruct-onnx-ryzenai-npu` | 8.0 GB | ❌ |
+| `Qwen1.5-7B-Chat-onnx-ryzenai-npu` | 8.0 GB | ⚠️ |
+| `Qwen2.5-Coder-7B-Instruct-onnx-ryzenai-npu` | 8.0 GB | ❌ |
+| `CodeLlama-7b-Instruct-hf-onnx-ryzenai-npu` | 8.0 GB | ⚠️ |
+| `DeepSeek-R1-Distill-Qwen-7B-onnx-ryzenai-npu` | 8.0 GB | ❌ |
+| `Llama-2-7b-hf-onnx-ryzenai-npu` | 8.0 GB | ⚠️ |
+| `Llama-2-7b-chat-hf-onnx-ryzenai-npu` | 8.0 GB | ⚠️ |
+| `Mistral-7B-Instruct-v0.1-onnx-ryzenai-npu` | 8.0 GB | ⚠️ |
+| `Mistral-7B-Instruct-v0.2-onnx-ryzenai-npu` | 8.0 GB | ⚠️ |
+| `Mistral-7B-Instruct-v0.3-onnx-ryzenai-npu` | 8.0 GB | ⚠️ |
+| `Meta-Llama-3-8B-onnx-ryzenai-npu` | 9.0 GB | ⚠️ |
+| `Llama-3.1-8B-onnx-ryzenai-npu` | 9.0 GB | ⚠️ |
+| `Meta-Llama-3.1-8B-Instruct-onnx-ryzenai-npu` | 9.0 GB | ⚠️ |
+| `DeepSeek-R1-Distill-Llama-8B-onnx-ryzenai-npu` | 9.0 GB | ⚠️ |
+| `gpt-oss-20b-onnx-ryzenai-npu` | 20.0 GB | ⚠️ |
+
 
 ### VLM
 
-| HuggingFace Repository | 大小 | 支援精度 |
-|------------------------|------|---------|
-| `amd/Gemma-3-4b-it-mm-onnx-ryzenai-npu` | 6.2 GB | `UINT4`, `BFP16` |
-
----
+| HuggingFace Repository | Size | Test Pass (Ryzen AI 350) |
+|------------------------|------|--------------|
+| `Gemma-3-4b-it-mm-onnx-ryzenai-npu` | 6.2 GB | ✅ |
 
 ### 快速開始
 
@@ -96,7 +95,7 @@ conda activate ryzen-ai-1.7.1
 
 #### 步驟 2: 下載模型
 
-使用 HuggingFace CLI 下載模型列表中的模型(如：`amd/Llama-3.2-1B-onnx-ryzenai-npu`)。
+使用 HuggingFace CLI 下載模型列表中的模型(如：`Llama-3.2-1B-onnx-ryzenai-npu`)。
 
 ```powershell
 hf download amd/<模型名稱> --local-dir ./<模型名稱>
@@ -111,4 +110,12 @@ python llm.py --model ./<模型名稱> --prompt "解釋量子計算" --max-lengt
 # VLM 推論模式
 python vlm.py --model ./<模型名稱> --image cat.jpg --prompt "詳細描述這個場景" --max-tokens 512
 ```
-> 將原始模型的權重壓縮至 `UINT4`（4-bit unsigned integer）格式，並在推論時使用 `BFP16`（Brain Float 16）處理激活值，可支援這兩種形式
+
+# 1. Mistral-7B-Instruct-v0.3 (8GB) - 通用對話模型，V1 版本
+hf download Mistral-7B-Instruct-v0.3-onnx-ryzenai-npu --local-dir ./Mistral-7B-Instruct-v0.3-onnx-ryzenai-npu
+
+# 2. Phi-3-mini-4k-instruct (4GB) - 小型高效模型，適合快速測試
+hf download Phi-3-mini-4k-instruct-onnx-ryzenai-npu --local-dir ./Phi-3-mini-4k-instruct-onnx-ryzenai-npu
+
+# 3. Qwen2-7B (8GB) - Qwen2（不是 Qwen2.5），V1 版本
+hf download Qwen2-7B-onnx-ryzenai-npu --local-dir ./Qwen2-7B-onnx-ryzenai-npu

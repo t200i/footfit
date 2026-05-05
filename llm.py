@@ -16,6 +16,12 @@ import subprocess
 import tempfile
 from pathlib import Path
 
+# 設置 UTF-8 輸出以支援 emoji 和中文
+if sys.platform == 'win32':
+    import io
+    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
+    sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8', errors='replace')
+
 
 def get_ryzen_ai_path():
     """取得 Ryzen AI 安裝路徑"""
@@ -48,6 +54,28 @@ def run_llm_inference(model_dir, prompt=None, max_length=256, interactive=False,
     """
     # 設置環境
     ryzen_ai_path = setup_environment()
+    
+    # 檢查已知的不兼容模型
+    model_name = Path(model_dir).name.lower()
+    incompatible_patterns = [
+        'llama-3.2',  # Collection V2 - flat version not supported
+        'qwen2.5',    # Collection V2 - flat version not supported
+        'qwen-2.5',   # Collection V2 - flat version not supported
+        'deepseek-r1-distill-qwen',  # Collection V2
+    ]
+    
+    for pattern in incompatible_patterns:
+        if pattern in model_name:
+            print(f"\n⚠️  警告: 此模型 ({model_name}) 屬於 Collection V2")
+            print(f"   已知問題: NPU 固件 1.0.21.43 不支援 'flat version' 編譯格式")
+            print(f"   錯誤訊息: 'flat version is not supported for matmulbias'")
+            print(f"\n💡 建議:")
+            print(f"   1. 使用 Collection V1 模型（如 Meta-Llama-3.1-8B, Qwen2-7B）")
+            print(f"   2. 等待 AMD 發布新固件版本")
+            print(f"   3. 參考 README.md 查看兼容模型列表\n")
+            
+            # 仍然嘗試執行，讓用戶看到完整錯誤訊息
+            print("繼續嘗試執行（可能會失敗）...\n")
     
     # 優先使用 model_chat.py（支援 chat template）
     llm_script = ryzen_ai_path / 'LLM' / 'example' / 'model_chat.py'
@@ -182,8 +210,8 @@ def main():
         parser.error("請提供 --prompt 或使用 --interactive 模式")
     
     print("=" * 80)
-    print("💬 AMD Ryzen AI NPU - LLM 通用推論介面")
-    print("📦 ONNX Runtime GenAI 0.11.2")
+    print("AMD Ryzen AI NPU - LLM 通用推論介面")
+    print("ONNX Runtime GenAI 0.11.2")
     print("=" * 80)
     
     success = run_llm_inference(

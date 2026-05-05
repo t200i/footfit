@@ -14,6 +14,12 @@ import sys
 import subprocess
 from pathlib import Path
 
+# 設置 UTF-8 輸出以支援 emoji 和中文
+if sys.platform == 'win32':
+    import io
+    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
+    sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8', errors='replace')
+
 
 def get_ryzen_ai_path():
     """取得 Ryzen AI 安裝路徑"""
@@ -145,8 +151,8 @@ def main():
     args = parser.parse_args()
     
     print("=" * 80)
-    print("🎨 AMD Ryzen AI NPU - VLM 通用推論介面")
-    print("📦 ONNX Runtime GenAI 0.11.2")
+    print("AMD Ryzen AI NPU - VLM 通用推論介面")
+    print("ONNX Runtime GenAI 0.11.2")
     print("=" * 80)
     
     success = run_vlm_inference(
