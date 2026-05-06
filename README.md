@@ -45,7 +45,7 @@ AMD 官方在 HuggingFace 上釋出的多個 NPU 模型 Collections：
 * [Ryzen AI 1.7 Whisper NPU Optimized ONNX models](https://huggingface.co/collections/amd/ryzen-ai-17-whisper-npu-optimized-onnx-models) (7+個)
 * [Ryzen-AI-1.7-NPU-creativity-models](https://huggingface.co/collections/amd/ryzen-ai-17-npu-creativity-models) (9+個)
 
-### 經實測適用於PN54 (Ryzen AI 350)的模型
+### 經實測 適用於PN54 (Ryzen AI 350)的模型
 
 | HuggingFace Repository | Size |  |
 |------------------------|------|--------------|
