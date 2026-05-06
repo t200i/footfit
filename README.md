@@ -49,7 +49,6 @@ AMD 官方在 HuggingFace 上釋出多個 NPU 模型 Collections，這些模型�
 
 | HuggingFace Repository | Size |  |
 |------------------------|------|--------------|
-|`SmolLM2-135M-Instruct_rai_1.7.1_npu_4K` | 6.2 GB | Language LM |
 | `Gemma-3-4b-it-mm-onnx-ryzenai-npu` | 6.2 GB | Vision LM |
 
 ### 快速開始
