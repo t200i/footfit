@@ -24,7 +24,7 @@
 
 ### 1. 安裝 AMD Ryzen AI Software 1.7.1
 
-依照 [installation instructions](https://ryzenai.docs.amd.com/en/latest/inst.html)下載並安裝**NPU driver 32.0.203.280**+**ryzen-ai-lt 1.7.1** 或更新版本。
+依照 [installation instructions](https://ryzenai.docs.amd.com/en/latest/inst.html)下載並安裝**NPU driver 32.0.203.280**+**ryzen-ai-lt 1.7.1** 。
 
 
 ### 2. 設定系統環境變數
