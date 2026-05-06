@@ -35,7 +35,7 @@
 
 ## 📦 AMD Ryzen AI NPU 模型列表
 
-AMD 官方在 HuggingFace 上釋出多個 NPU 模型 Collections，這些模型多數採用 **AWQ 量化技術**預先編譯，權重壓縮為 `UINT4` 格式，推論時使用 `BFP16` 處理激活值。以下為 AMD 官方提供的模型 Collections：
+AMD 官方在 HuggingFace 上釋出的多個 NPU 模型 Collections：
 
 * [Ryzen AI 1.7.1 — NPU LFM2 Models](https://huggingface.co/collections/amd/ryzen-ai-171-npu-lfm2-models) (3+)
 * [Ryzen AI 1.7.1 — NPU 16K](https://huggingface.co/collections/amd/ryzen-ai-171-npu-16k) (27+)
@@ -50,6 +50,8 @@ AMD 官方在 HuggingFace 上釋出多個 NPU 模型 Collections，這些模型�
 | HuggingFace Repository | Size |  |
 |------------------------|------|--------------|
 | `Gemma-3-4b-it-mm-onnx-ryzenai-npu` | 6.2 GB | Vision LM |
+
+> 這些模型多數採用 **AWQ 量化技術**預先編譯，權重壓縮為 `UINT4` 格式，推論時使用 `BFP16` 處理激活值。
 
 ### 快速開始
 
