@@ -29,14 +29,7 @@
 
 ### 2. 設定系統環境變數
 
-將 `C:\Program Files\RyzenAI\1.7.1\deployment` 加入系統 PATH 環境變數（以匯入 AMD 自訂的 Vitis AI Execution Provider 執行庫）。
-
-### 3. 安裝 HuggingFace CLI
-
-```bash
-conda activate ryzen-ai-1.7.1      # 該環境是由Ryzen AI Software自動安裝
-pip install huggingface-hub[cli]
-```
+將 `C:\Program Files\RyzenAI\1.7.1\deployment` 加入系統 PATH 環境變數（以匯入 1.7.1版 新增的 Vitis AI Execution Provider 執行庫）。
 
 ---
 
@@ -64,15 +57,15 @@ AMD 官方在 HuggingFace 上釋出多個 NPU 模型 Collections，這些模型�
 #### 啟動環境（每次使用前執行）
 
 ```powershell
-conda activate ryzen-ai-1.7.1
+conda activate ryzen-ai-1.7.1      # 該環境是由Ryzen AI Software自動安裝
 ```
 
 #### 下載模型
 
-使用 HuggingFace CLI 下載模型列表中的模型(如：`Gemma-3-4b-it-mm-onnx-ryzenai-npu`)。
+使用 Git 下載模型列表中的模型(如：`Gemma-3-4b-it-mm-onnx-ryzenai-npu`)。
 
 ```powershell
-hf download amd/<模型名稱> --local-dir ./<模型名稱>
+git clone https://huggingface.co/amd/<模型名稱>
 ```
 
 #### 執行推論
