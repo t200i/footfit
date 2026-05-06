@@ -2,7 +2,7 @@
 
 ## 📋 摘要
 
-本專案專門為 AMD Ryzen AI 系列處理器提供 **LLM 推論引擎**，基於 [Ryzen AI Software 1.7.1](https://www.amd.com/en/developer/resources/ryzen-ai-software.html) 開發，支援官方 Collections 中能完整 Offload 至 NPU 的模型。若使用其他版本的 Ryzen AI Software，部分功能與模型兼容性可能需要調整。
+本專案專門為 AMD Ryzen AI 系列處理器提供 **LLM 推論引擎**，基於 [Ryzen AI Software 1.7.1](https://www.amd.com/en/developer/resources/ryzen-ai-software.html) 開發，支援官方 Collections 中能完整 Offload 至 NPU 的模型。若使用其他版本的 Ryzen AI Software，部分功能與模型兼容性可能需要依照官方Release Notes調整。
 
 ---
 
