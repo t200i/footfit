@@ -43,12 +43,12 @@
 
 建立Python 3.12執行環境，並按照 [PyTorch via PIP installation](https://rocm.docs.amd.com/projects/radeon-ryzen/en/latest/docs/install/installryz/windows/install-pytorch.html) 安裝ROCm+PyTorch及HuggingFace SDK。
 
-```
+```bash
 conda create -name rocm-pytorch python=3.12
 # pip install --no-cache-dir <rocm-dependencies>
 # pip install --no-cache-dir <pytorch-dependencies>
 ```
-```
+```bash
 # HuggingFace SDKs
 pip install -r requirements.txt
 ```
