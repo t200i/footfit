@@ -73,15 +73,13 @@ AMD 官方在 HuggingFace 上釋出的多個 NPU 模型 Collections：
 |------------------------|------|--------------|--------------|
 | `amd/Gemma-3-4b-it-mm-onnx-ryzenai-npu` | 6.2 GB | Vision LM | NPU |
 
-> NPU Offload的模型多數採用 **AWQ 量化技術**預先編譯，權重壓縮為 `UINT4` 格式，推論時使用 `BFP16` 處理激活值。
+> NPU 模型多使用 **AWQ 量化技術**編譯。權重壓縮為 `UINT4` 格式，推論時使用 `BFP16` 處理激活值。
 
 ### 經實測 適用於Vivobook S 15/16 (Ryzen AI 9 HX 370)的模型
 
 | HuggingFace Repository | Size | Type | Offload |
 |------------------------|------|--------------|--------------|
 | `google/gemma-4-E4B-it` | 6.2 GB | Vision LM | iGPU |
-
-
 
 > 在 AMD Ryzen™ AI處理器上執行某些 LLM 工作負載（例如 Llama 31B/3B）時，可能會出現效能低於預期的情況。
 
