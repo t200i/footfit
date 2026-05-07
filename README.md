@@ -71,7 +71,7 @@ AMD 官方在 HuggingFace 上釋出的多個 NPU 模型 Collections：
 
 | HuggingFace Repository | Size | Type | Offload |
 |------------------------|------|--------------|--------------|
-| `Gemma-3-4b-it-mm-onnx-ryzenai-npu` | 6.2 GB | Vision LM | NPU |
+| `amd/Gemma-3-4b-it-mm-onnx-ryzenai-npu` | 6.2 GB | Vision LM | NPU |
 
 > NPU Offload的模型多數採用 **AWQ 量化技術**預先編譯，權重壓縮為 `UINT4` 格式，推論時使用 `BFP16` 處理激活值。
 
@@ -79,7 +79,7 @@ AMD 官方在 HuggingFace 上釋出的多個 NPU 模型 Collections：
 
 | HuggingFace Repository | Size | Type | Offload |
 |------------------------|------|--------------|--------------|
-| `Gemma-3-4b-it-mm-onnx-ryzenai-npu` | 6.2 GB | Vision LM | iGPU |
+| `google/gemma-4-E4B-it` | 6.2 GB | Vision LM | iGPU |
 
 
 

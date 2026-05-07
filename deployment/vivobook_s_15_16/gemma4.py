@@ -4,7 +4,7 @@ import torch
 
 print('GPU Available:', torch.cuda.is_available())
 
-model_id = "google/gemma-4-E2B-it"
+model_id = "google/gemma-4-E4B-it"
 
 print(f"Loading model: {model_id}")
 processor = AutoProcessor.from_pretrained(model_id)
