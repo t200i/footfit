@@ -2,7 +2,7 @@
 
 ## 📋 摘要
 
-本專案專門為 AMD Ryzen AI 系列處理器提供 **推論加速引擎**，支援HuggingFace 上開源及AMD 官方 Collections 中的 語言模型。若非使用指定的軟體版本，部分功能與模型相容性可能會失效。
+本專案專門為 AMD Ryzen AI 系列處理器提供 **推論加速引擎**，支援HuggingFace 上開源及AMD 官方 Collections 中的 語言模型。若不是使用本專案指定的軟體堆疊版本，部分功能與模型相容性可能會失效。
 
 ---
 
