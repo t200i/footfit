@@ -8,25 +8,19 @@
 
 ## 📰 Ryzen AI 最新進展
 
-推出 50 TOPS NPU，宣布與微軟Copilot+PC合作
-- [AMD在COMPUTEX 2024推出全新AMD Instinct、Ryzen與EPYC處理器 擴展在資料中心與PC的AI和高效能領先地位](https://www.amd.com/zh-tw/newsroom/press-releases/2024-6-2-amd-extends-ai-and-high-performance-leadership-in-.html)
-
-支援Ryzen™ APUs (AI Max 300, AI 465及AI 365以上系列) 在Windows及Linux上使用ROCm7.2.1+PyTorch 2.9.1
-
-- [Use ROCm on Radeon and Ryzen](https://rocm.docs.amd.com/projects/radeon-ryzen/en/latest/index.html) - 
-- [Windows support matrices by ROCm version](https://rocm.docs.amd.com/projects/radeon-ryzen/en/latest/docs/compatibility/compatibilityryz/windows/windows_compatibility.html)
-
 
 
 ### XDNA (NPU)
 
 - [2025年3月發布首款能在原生 NPU 上推理 Google Gemma-3](https://www.amd.com/en/developer/resources/technical-articles/introducing-amd-support-for-new-gemma-3-models-from-google.html?utm_source=copilot.com) - 展示 NPU 與影像、語音等模態的相容性
-- [微軟ONNX Runtime 自 1.23.3 新增 Vitis AI EP 以支援 NPU Delegate](https://onnxruntime.ai/docs/execution-providers/Vitis-AI-ExecutionProvider.html)
+- [與微軟Copilot+PC合作，於ONNX Runtime 自 1.23.3 新增 Vitis AI EP 以支援 NPU Delegate](https://onnxruntime.ai/docs/execution-providers/Vitis-AI-ExecutionProvider.html)
 - [採用 MXFP4 低位元量化技術，於HuggingFace開源 NPU Offload 模型](https://arxiv.org/pdf/2509.23202) - Ryzen AI 1.7 NPU LLM Collection [V1](https://huggingface.co/collections/ryzen-ai-17-npu-llm) 與 [V2](https://huggingface.co/collections/ryzen-ai-17-npu-llm-v2) - A涵蓋更多不同地區與語言的生成式 AI模型。
 
 ### RDNA (GPU)
 
-- [2026年3月釋出 ROCm 7.2.1 版，支援於 Windows 11 安裝 PyTorch + ROCm (限定Ryzen AI 365以上型號)](https://rocm.docs.amd.com/projects/radeon-ryzen/en/latest/index.html)
+- 支援Ryzen™ APUs (AI Max 300, AI 465及AI 365以上系列) 在Windows及Linux上使用ROCm7.2.1+PyTorch 2.9.1
+    - [Use ROCm on Radeon and Ryzen](https://rocm.docs.amd.com/projects/radeon-ryzen/en/latest/index.html) - 
+    - [Windows support matrices by ROCm version](https://rocm.docs.amd.com/projects/radeon-ryzen/en/latest/docs/compatibility/compatibilityryz/windows/windows_compatibility.html)
 
 ---
 
