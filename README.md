@@ -27,7 +27,7 @@
 ## 📥 安裝指南
 
 #### 1. 安裝 AMD Ryzen AI Software 1.7.1
-依照 [installation instructions](https://ryzenai.docs.amd.com/en/latest/inst.html)下載並安裝**NPU driver 32.0.203.280**+**ryzen-ai-lt 1.7.1**，此步驟會自動建立Conda for ONNX Runtime環境 (`ryzen-ai-1.7.1`)。
+依照 [installation instructions](https://ryzenai.docs.amd.com/en/latest/inst.html)下載並安裝**NPU driver 32.0.203.280**+**ryzen-ai-lt 1.7.1**，此步驟會自動於Conda 建立 ONNX Runtime 環境 (`ryzen-ai-1.7.1`)。
 
 #### 2. 設定系統環境變數
 
