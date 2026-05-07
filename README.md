@@ -31,7 +31,6 @@
 
 建立Python 3.12虛擬環境，並依照 [https://rocm.docs.amd.com/projects/radeon-ryzen/en/latest/docs/install/installryz/windows/install-pytorch.html](https://www.amd.com/en/resources/support-articles/release-notes/RN-RAD-WIN-26-2-2.html) 安裝ROCm+PyTorch
 
-
 ```
 conda create -name rocm-pytorch python=3.12
 ```
