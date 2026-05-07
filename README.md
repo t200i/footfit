@@ -85,26 +85,103 @@ AMD 官方在 HuggingFace 上釋出的多個 NPU 模型 Collections：
 
 ### 快速開始
 
-#### 啟動環境（每次使用前執行）
+#### 專案架構
 
-```powershell
-conda activate ryzen-ai-1.7.1      # 該環境是由Ryzen AI Software自動安裝
+本專案採用 Clean Architecture，介面與模型完全解耦：
+
+```
+core/base.py           ← LLMService 合約（所有模型必須實作）
+models/<name>.py       ← 各模型實作（Gemma4、LLaMA 等）
+interfaces/
+  api.py               ← 通用 OpenAI 相容 API server
+  cli.py               ← 通用 CLI
+  comfyui.py           ← 通用 ComfyUI custom node
+serve.py               ← 統一入口（--model 選模型，--mode 選介面）
 ```
 
-#### 下載模型
+新增模型只需：
+1. 在 `models/` 新增一個 `.py`，實作 `LLMService`
+2. 在 `serve.py` 的 `MODEL_REGISTRY` 加一行
+3. CLI、API、ComfyUI 自動支援
 
-使用 Git 下載模型列表中的模型(如：`Gemma-3-4b-it-mm-onnx-ryzenai-npu`)。
+---
+
+#### CLI
 
 ```powershell
-git clone https://huggingface.co/amd/<模型名稱>
+# 互動式對話
+python serve.py --model gemma4 --mode cli
+
+# 單次 prompt
+python serve.py --model gemma4 --mode cli --prompt "解釋量子計算"
 ```
 
-#### 執行推論
+#### Python OpenAI SDK
 
 ```powershell
-# for Language LM 推論
-python llm.py --model ./<模型名稱> --prompt "解釋量子計算" --max-length 512
-
-# for Vision LM 推論
-python vlm.py --model ./<模型名稱> --image cat.jpg --prompt "詳細描述這個場景" --max-tokens 512
+# 先啟動 API server
+python serve.py --model gemma4 --mode api
 ```
+
+```python
+from openai import OpenAI
+
+client = OpenAI(base_url="http://localhost:8000/v1", api_key="local")
+
+# 串流輸出
+for chunk in client.chat.completions.create(
+    model="gemma4",
+    messages=[{"role": "user", "content": "你好！"}],
+    stream=True,
+):
+    print(chunk.choices[0].delta.content or "", end="", flush=True)
+```
+
+#### ComfyUI
+
+```powershell
+# 複製（或 symlink）interfaces/comfyui.py 到 ComfyUI custom_nodes 資料夾
+cp interfaces\comfyui.py C:\path\to\ComfyUI\custom_nodes\ryzen_ai_llm.py
+
+# 設定要載入的模型（預設 gemma4）
+$env:MODEL_NAME = "gemma4"
+$env:RYZEN_AI_PROJECT_ROOT = "C:\path\to\amd-ryzen-ai-benchmark"
+```
+
+重啟 ComfyUI 後，在節點選單 **Ryzen AI / LLM** 分類下找到 **Ryzen AI LLM** 節點。
+
+---
+
+#### 如何新增一個模型
+
+```python
+# models/my_model.py
+from core.base import LLMService, ModelInfo
+
+class MyModelService(LLMService):
+    def __init__(self):
+        # 載入模型...
+        self.info = ModelInfo(
+            model_id="org/model-name",
+            name="my_model",
+            description="My custom model",
+            device="cuda:0",
+        )
+
+    def generate(self, messages, max_new_tokens=200) -> str:
+        ...
+
+    def generate_stream(self, messages, max_new_tokens=200):
+        # yield text chunks
+        ...
+```
+
+```python
+# serve.py — MODEL_REGISTRY 加一行
+MODEL_REGISTRY = {
+    "gemma4":   ("models.gemma4",    "Gemma4Service"),
+    "my_model": ("models.my_model",  "MyModelService"),  # ← 新增
+}
+```
+
+
