@@ -8,7 +8,15 @@
 
 ## 📰 Ryzen AI 最新進展
 
-- [於 COMPUTEX 2024 推出 50 TOPS NPU，宣布與微軟Copilot+PC合作](https://www.amd.com/zh-tw/newsroom/press-releases/2024-6-2-amd-extends-ai-and-high-performance-leadership-in-.html)
+推出 50 TOPS NPU，宣布與微軟Copilot+PC合作
+- [AMD在COMPUTEX 2024推出全新AMD Instinct、Ryzen與EPYC處理器 擴展在資料中心與PC的AI和高效能領先地位](https://www.amd.com/zh-tw/newsroom/press-releases/2024-6-2-amd-extends-ai-and-high-performance-leadership-in-.html)
+
+支援Ryzen™ APUs (AI Max 300, AI 465及AI 365以上系列) 在Windows及Linux上使用ROCm7.2.1+PyTorch 2.9.1
+
+- [Use ROCm on Radeon and Ryzen](https://rocm.docs.amd.com/projects/radeon-ryzen/en/latest/index.html) - 
+- [Windows support matrices by ROCm version](https://rocm.docs.amd.com/projects/radeon-ryzen/en/latest/docs/compatibility/compatibilityryz/windows/windows_compatibility.html)
+
+
 
 ### XDNA (NPU)
 
@@ -75,11 +83,21 @@ AMD 官方在 HuggingFace 上釋出的多個 NPU 模型 Collections：
 
 ### 經實測 適用於PN54 (Ryzen AI 350)的模型
 
-| HuggingFace Repository | Size |  |
-|------------------------|------|--------------|
-| `Gemma-3-4b-it-mm-onnx-ryzenai-npu` | 6.2 GB | Vision LM |
+| HuggingFace Repository | Size | Type | Offload |
+|------------------------|------|--------------|--------------|
+| `Gemma-3-4b-it-mm-onnx-ryzenai-npu` | 6.2 GB | Vision LM | NPU |
 
-> 這些模型多數採用 **AWQ 量化技術**預先編譯，權重壓縮為 `UINT4` 格式，推論時使用 `BFP16` 處理激活值。
+> NPU Offload的模型多數採用 **AWQ 量化技術**預先編譯，權重壓縮為 `UINT4` 格式，推論時使用 `BFP16` 處理激活值。
+
+### 經實測 適用於Vivobook S 15/16 (Ryzen AI 9 HX 370)的模型
+
+| HuggingFace Repository | Size | Type | Offload |
+|------------------------|------|--------------|--------------|
+| `Gemma-3-4b-it-mm-onnx-ryzenai-npu` | 6.2 GB | Vision LM | iGPU |
+
+
+
+> 在 AMD Ryzen™ AI處理器上執行某些 LLM 工作負載（例如 Llama 31B/3B）時，可能會出現效能低於預期的情況。
 
 ### 快速開始
 
