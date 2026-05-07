@@ -2,7 +2,7 @@
 
 ## 📋 摘要
 
-本專案專門為 AMD Ryzen AI 系列處理器提供 **LLM 推論加速引擎**，基於 [AMD Software: Adrenalin Edition 26.2.2](https://www.amd.com/en/developer/resources/ryzen-ai-software.html) 及 [Ryzen AI Software 1.7.1](https://www.amd.com/en/developer/resources/ryzen-ai-software.html) 開發，支援HuggingFace 上開源及AMD 官方 Collections 中的模型。若使用其他版本，部分功能與模型相容性可能需要依照官方Release Notes調整。
+本專案專門為 AMD Ryzen AI 系列處理器提供 **LLM 推論加速引擎**，支援HuggingFace 上開源及AMD 官方 Collections 中的模型。若使用其他版本，部分功能與模型相容性可能需要依照官方Release Notes調整。
 
 ---
 
