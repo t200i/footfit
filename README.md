@@ -31,7 +31,7 @@
 
 #### 2. 設定系統環境變數
 
-將 `C:\Program Files\RyzenAI\1.7.1\deployment` 加入系統 PATH 環境變數（以匯入新版的 Vitis AI Execution Provider）。
+將 `C:\Program Files\RyzenAI\1.7.1\deployment` 加入系統 PATH 環境變數（以匯入新版的 Vitis AI EP）。
 
 ### GPU Only (限 AI Max 300, AI 465 及 AI 365 系列以上以上型號)
 
