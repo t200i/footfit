@@ -12,7 +12,7 @@
 
 ### RDNA (GPU)
 
-- [2026年3月釋出ROCm 7.2.1 版，支援Windows 11安裝PyTorch + ROCm (限Ryzen AI 365以上型號)](https://rocm.docs.amd.com/projects/radeon-ryzen/en/latest/index.html)
+- [2026年3月釋出ROCm 7.2.1 版，支援Windows 11安裝PyTorch + ROCm (限定Ryzen AI 365以上型號)](https://rocm.docs.amd.com/projects/radeon-ryzen/en/latest/index.html)
 
 ### XDNA (NPU)
 
@@ -28,7 +28,24 @@
 依照 [installation instructions](https://www.amd.com/en/resources/support-articles/release-notes/RN-RAD-WIN-26-2-2.html)下載並安裝**whql-amd-software-adrenalin-edition-26.2.2-win11-c.exe** 。
 
 ### 2. 建立Conda虛擬環境
+
 ```
+conda create -name rocm-pytorch python=3.12
+```
+```
+# install ROCm for Python
+pip install --no-cache-dir `
+    https://repo.radeon.com/rocm/windows/rocm-rel-7.2.1/rocm_sdk_core-7.2.1-py3-none-win_amd64.whl `
+    https://repo.radeon.com/rocm/windows/rocm-rel-7.2.1/rocm_sdk_devel-7.2.1-py3-none-win_amd64.whl `
+    https://repo.radeon.com/rocm/windows/rocm-rel-7.2.1/rocm_sdk_libraries_custom-7.2.1-py3-none-win_amd64.whl `
+    https://repo.radeon.com/rocm/windows/rocm-rel-7.2.1/rocm-7.2.1.tar.gz
+```
+```
+# install PyTorch with ROCm
+pip install --no-cache-dir `
+    https://repo.radeon.com/rocm/windows/rocm-rel-7.2.1/torch-2.9.1%2Brocm7.2.1-cp312-cp312-win_amd64.whl `
+    https://repo.radeon.com/rocm/windows/rocm-rel-7.2.1/torchaudio-2.9.1%2Brocm7.2.1-cp312-cp312-win_amd64.whl `
+    https://repo.radeon.com/rocm/windows/rocm-rel-7.2.1/torchvision-0.24.1%2Brocm7.2.1-cp312-cp312-win_amd64.whl
 ```
 
 
