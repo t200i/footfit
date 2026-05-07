@@ -81,7 +81,7 @@ AMD 官方在 HuggingFace 上釋出的多個 NPU 模型 Collections：
 |------------------------|------|--------------|--------------|
 | `google/gemma-4-E4B-it` | 6.2 GB | Vision LM | iGPU |
 
-> ROCm在 iGPU 上執行某些 LLM 工作負載（例如 Llama 31B/3B）時，可能會出現效能低於預期的情況。
+> ROCm在 iGPU 上執行某些 LLM 工作負載（例如 Llama 1B/3B）時，可能會出現效能低於預期的情況。
 
 ### 快速開始
 
