@@ -18,9 +18,10 @@
 
 ### GPU (RDNA)
 
-- Ryzen™ APUs (AI Max 300, AI 465及AI 365以上系列) 開始支援在Windows及Linux上使用ROCm7.2.1+PyTorch 2.9.1
-    - [Use ROCm on Radeon and Ryzen](https://rocm.docs.amd.com/projects/radeon-ryzen/en/latest/index.html) - 
+- Ryzen™ APUs 開始支援在Windows及Linux上使用ROCm7.2.1+PyTorch 2.9.1
+    - [Use ROCm on Radeon and Ryzen](https://rocm.docs.amd.com/projects/radeon-ryzen/en/latest/index.html) 
     - [Windows support matrices by ROCm version](https://rocm.docs.amd.com/projects/radeon-ryzen/en/latest/docs/compatibility/compatibilityryz/windows/windows_compatibility.html)
+> 僅限AI Max 300, AI 465及AI 365以上系列
 
 ---
 
