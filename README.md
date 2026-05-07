@@ -1,12 +1,12 @@
-# AMD Ryzen AI NPU 模型部署之路
+# AMD Ryzen AI 模型部署之路
 
 ## 📋 摘要
 
-本專案專門為 AMD Ryzen AI 系列處理器提供 **LLM 推論引擎**，基於 [Ryzen AI Software 1.7.1](https://www.amd.com/en/developer/resources/ryzen-ai-software.html) 開發，支援官方 Collections 中能完整 Offload 至 NPU 的模型。若使用其他版本的 Ryzen AI Software，部分功能與模型兼容性可能需要依照官方Release Notes調整。
+本專案專門為 AMD Ryzen AI 系列處理器提供 **LLM 推論加速引擎**，基於 [AMD Software: Adrenalin Edition 26.2.2](https://www.amd.com/en/developer/resources/ryzen-ai-software.html) 及 [Ryzen AI Software 1.7.1](https://www.amd.com/en/developer/resources/ryzen-ai-software.html) 開發，支援HuggingFace 上開源及AMD 官方 Collections 中的模型。若使用其他版本，部分功能與模型相容性可能需要依照官方Release Notes調整。
 
 ---
 
-## 📰 Ryzen AI News
+## 📰 Ryzen AI 最新進展
 
 - [於 COMPUTEX 2024 推出 50 TOPS NPU，宣布與微軟Copilot+PC合作](https://www.amd.com/zh-tw/newsroom/press-releases/2024-6-2-amd-extends-ai-and-high-performance-leadership-in-.html)
 
