@@ -37,11 +37,11 @@
 
 #### 1. 安裝 AMD Software: Adrenalin Edition 26.2.2
 
-依照 [installation instructions](https://www.amd.com/en/resources/support-articles/release-notes/RN-RAD-WIN-26-2-2.html)下載並安裝**whql-amd-software-adrenalin-edition-26.2.2-win11-c.exe** 。
+依照 [Installation Instructions](https://www.amd.com/en/resources/support-articles/release-notes/RN-RAD-WIN-26-2-2.html)下載並安裝**whql-amd-software-adrenalin-edition-26.2.2-win11-c** 。
 
 ####  2. 建立Conda虛擬環境
 
-建立Python 3.12虛擬環境，並依照 [https://rocm.docs.amd.com/projects/radeon-ryzen/en/latest/docs/install/installryz/windows/install-pytorch.html](https://www.amd.com/en/resources/support-articles/release-notes/RN-RAD-WIN-26-2-2.html) 安裝ROCm+PyTorch
+建立Python 3.12執行環境，並從 [Release Note](https://www.amd.com/en/resources/support-articles/release-notes/RN-RAD-WIN-26-2-2.html) 安裝ROCm+PyTorch
 
 ```
 conda create -name rocm-pytorch python=3.12
@@ -65,10 +65,6 @@ pip install --no-cache-dir `
 # install HuggingFace SDK
 pip install -r requirements.txt
 ```
-
-
-
-
 
 ---
 
