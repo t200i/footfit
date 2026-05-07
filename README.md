@@ -18,7 +18,7 @@
 
 ### GPU (RDNA)
 
-- 部分Ryzen™ APUs 型號開始支援在Windows及Linux上使用ROCm7.2.1+PyTorch 2.9.1。
+- 部分Ryzen™ APUs 型號開始支援Windows及Linux使用ROCm7.2.1+PyTorch 2.9.1。
     - [Use ROCm on Radeon and Ryzen](https://rocm.docs.amd.com/projects/radeon-ryzen/en/latest/index.html) 
     - [Windows support matrices by ROCm version](https://rocm.docs.amd.com/projects/radeon-ryzen/en/latest/docs/compatibility/compatibilityryz/windows/windows_compatibility.html)
 
