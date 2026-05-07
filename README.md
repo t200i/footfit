@@ -85,27 +85,6 @@ AMD 官方在 HuggingFace 上釋出的多個 NPU 模型 Collections：
 
 ### 快速開始
 
-#### 專案架構
-
-本專案採用 Clean Architecture，介面與模型完全解耦：
-
-```
-core/base.py           ← LLMService 合約（所有模型必須實作）
-models/<name>.py       ← 各模型實作（Gemma4、LLaMA 等）
-interfaces/
-  api.py               ← 通用 OpenAI 相容 API server
-  cli.py               ← 通用 CLI
-  comfyui.py           ← 通用 ComfyUI custom node
-serve.py               ← 統一入口（--model 選模型，--mode 選介面）
-```
-
-新增模型只需：
-1. 在 `models/` 新增一個 `.py`，實作 `LLMService`
-2. 在 `serve.py` 的 `MODEL_REGISTRY` 加一行
-3. CLI、API、ComfyUI 自動支援
-
----
-
 #### CLI
 
 ```powershell
@@ -149,39 +128,5 @@ $env:RYZEN_AI_PROJECT_ROOT = "C:\path\to\amd-ryzen-ai-benchmark"
 ```
 
 重啟 ComfyUI 後，在節點選單 **Ryzen AI / LLM** 分類下找到 **Ryzen AI LLM** 節點。
-
----
-
-#### 如何新增一個模型
-
-```python
-# models/my_model.py
-from core.base import LLMService, ModelInfo
-
-class MyModelService(LLMService):
-    def __init__(self):
-        # 載入模型...
-        self.info = ModelInfo(
-            model_id="org/model-name",
-            name="my_model",
-            description="My custom model",
-            device="cuda:0",
-        )
-
-    def generate(self, messages, max_new_tokens=200) -> str:
-        ...
-
-    def generate_stream(self, messages, max_new_tokens=200):
-        # yield text chunks
-        ...
-```
-
-```python
-# serve.py — MODEL_REGISTRY 加一行
-MODEL_REGISTRY = {
-    "gemma4":   ("models.gemma4",    "Gemma4Service"),
-    "my_model": ("models.my_model",  "MyModelService"),  # ← 新增
-}
-```
 
 

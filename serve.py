@@ -1,98 +1,68 @@
 """
-serve.py — Unified entry point
-================================
-Wires a model from models/ to an interface (api | cli | comfyui-hint).
+serve.py — OpenAI-compatible API server
+=========================================
+Loads a model by HuggingFace repo ID and starts an HTTP server.
 
 Usage:
-  python serve.py --model gemma4 --mode api
-  python serve.py --model gemma4 --mode api --host 0.0.0.0 --port 8000
-  python serve.py --model gemma4 --mode cli
-  python serve.py --model gemma4 --mode cli --prompt "你好"
+  python serve.py --model google/gemma-4-E4B-it
+  python serve.py --model google/gemma-4-E4B-it --host 0.0.0.0 --port 8000
 
-Adding a new model:
-  1. Create models/<your_model>.py — implement LLMService from core.base.
-  2. Register it in MODEL_REGISTRY below.
-  That's it. CLI, API, and ComfyUI support it automatically.
+For CLI usage, see cli.py.
+
+Adding a new model family:
+  1. Create models/<name>.py — implement LLMService from core.base.
+  2. Add a prefix entry to MODEL_REGISTRY below.
 """
 
 from __future__ import annotations
 
-import argparse
 import importlib
 
 from core.base import LLMService
 
 # ── Model registry ────────────────────────────────────────────────────────────
-# key: CLI name  →  value: (module path, class name)
-# Add new models here — no other file needs to change.
+# key: HuggingFace repo ID prefix  →  value: (module path, class name)
+# Prefix matching allows one entry to cover an entire model family.
+# Example: "google/gemma-4" covers google/gemma-4-E2B-it, google/gemma-4-E4B-it …
 
 MODEL_REGISTRY: dict[str, tuple[str, str]] = {
-    "gemma4": ("models.gemma4", "Gemma4Service"),
-    # "llama":   ("models.llama",  "LlamaService"),
-    # "smollm2": ("models.smollm2", "SmolLM2Service"),
+    "google/gemma-4": ("models.gemma4", "Gemma4Service"),
+    # "meta-llama/":  ("models.llama",   "LlamaService"),
+    # "HuggingFaceTB/SmolLM2": ("models.smollm2", "SmolLM2Service"),
 }
 
 
-def load_model(name: str) -> LLMService:
-    if name not in MODEL_REGISTRY:
-        available = ", ".join(MODEL_REGISTRY)
-        raise ValueError(f"Unknown model '{name}'. Available: {available}")
-    module_path, class_name = MODEL_REGISTRY[name]
-    module = importlib.import_module(module_path)
-    cls = getattr(module, class_name)
-    return cls()
-
-
-# ── Interface runners ─────────────────────────────────────────────────────────
-
-
-def run_api(model: LLMService, host: str, port: int) -> None:
-    from interfaces.api import build_app
-    import uvicorn
-
-    app = build_app(model)
-    print(f"[serve] API server → http://{host}:{port}/v1")
-    uvicorn.run(app, host=host, port=port)
-
-
-def run_cli(model: LLMService, prompt: str | None, max_tokens: int) -> None:
-    from interfaces.cli import run_interactive, run_single
-
-    if prompt:
-        run_single(model, prompt, max_tokens)
-    else:
-        run_interactive(model, max_tokens)
+def load_model(model_id: str) -> LLMService:
+    for prefix, (module_path, class_name) in MODEL_REGISTRY.items():
+        if model_id.startswith(prefix):
+            module = importlib.import_module(module_path)
+            cls = getattr(module, class_name)
+            return cls(model_id=model_id)
+    available = "\n  ".join(MODEL_REGISTRY)
+    raise ValueError(
+        f"No handler registered for '{model_id}'.\n"
+        f"Registered prefixes:\n  {available}"
+    )
 
 
 # ── Main ──────────────────────────────────────────────────────────────────────
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Unified model server / CLI")
-    parser.add_argument(
-        "--model", required=True,
-        choices=list(MODEL_REGISTRY),
-        help="Model to load",
-    )
-    parser.add_argument(
-        "--mode", required=True,
-        choices=["api", "cli"],
-        help="Interface to expose",
-    )
-    # API options
-    parser.add_argument("--host", default="127.0.0.1")
-    parser.add_argument("--port", type=int, default=8000)
-    # CLI options
-    parser.add_argument("--prompt", "-p", default=None)
-    parser.add_argument("--max-tokens", type=int, default=200)
+    import argparse
+    import uvicorn
+    from interfaces.api import build_app
+
+    parser = argparse.ArgumentParser(description="Gemma4 OpenAI-Compatible API Server")
+    parser.add_argument("--model", required=True, help="HuggingFace repo ID (e.g. google/gemma-4-E4B-it)")
+    parser.add_argument("--host", default="127.0.0.1", help="Bind host (default: 127.0.0.1)")
+    parser.add_argument("--port", type=int, default=8000, help="Bind port (default: 8000)")
     args = parser.parse_args()
 
     svc = load_model(args.model)
-
-    if args.mode == "api":
-        run_api(svc, args.host, args.port)
-    elif args.mode == "cli":
-        run_cli(svc, args.prompt, args.max_tokens)
+    app = build_app(svc)
+    print(f"[serve] {args.model} → http://{args.host}:{args.port}/v1")
+    uvicorn.run(app, host=args.host, port=args.port)
 
 
 if __name__ == "__main__":
