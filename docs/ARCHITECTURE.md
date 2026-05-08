@@ -16,14 +16,14 @@
 #### 領域層 (Domain Layer)：
 
 這是程式庫的最中心，包含與技術無關的業務規則。
-  - **領域模型 (Entities/Value Objects)**：定義 Model（統一模型類型的實體。e.x, LLM - Text2Text； VLM - ImageText2Text）、Hardware（統一模型呼叫軟體堆疊的介面。NPU - onnxruntime with ryzen ai software； GPU - pytorch with rocm），並透過繼承Model(Hardware)讓使用者自行定義從huggingface下載的native or amd collected模型。
-  - **領域服務 (Domain Services)**：定義推論的抽象邏輯，例如 InteractiveService 接口。
-  - **儲存庫接口 (Repository Interface)**：定義如何「取得」模型的接口（例如從 HF 或 AMD Collection 加載），但不涉及具體下載實作。
+  - **領域模型 (Entities/Value Objects)**：定義 Model（統一模型類型的實體。e.x, LLM - Text2Text； VLM - ImageText2Text）、Backend（統一模型呼叫軟體堆疊的介面。NPU - onnxruntime with ryzen ai software； GPU - pytorch with rocm）。
+  - **領域服務 (Domain Services)**：定義Model類的推論抽象邏輯，例如 Backend提供ONNX Runtime或transformers的Inference Pipeline。
+  - **儲存庫接口 (Repository Interface)**：使用者可以透過Python Class定義模型(如：Gemma3, 繼承Model 與 Backend)，將從huggingface下載的native or amd collected模型定義成本專案可使用的模型實例。
 
 #### 應用層 (Application Layer)：
 
 負責協調任務，實現你的功能需求（Use Cases）。
-- 推論案例 (Use Cases)：例如 RunOneShotInference（一次性回覆）與 StartInteractiveSession（互動式對話）。
+- 推論案例 (Use Cases)：例如 OneShotInference（一次性回覆）與 InteractiveSession（互動式對話）。
 - 它會呼叫領域層的接口，但不關心底層是用 PyTorch 還是 ONNX Runtime。
 
 #### 基礎架構層 (Infrastructure Layer)：
