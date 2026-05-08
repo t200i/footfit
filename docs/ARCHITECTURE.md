@@ -22,16 +22,24 @@
 
 #### 應用層 (Application Layer)：
 
-負責協調任務，實現你的功能需求（Use Cases）。
-- 推論案例 (Use Cases)：例如 OneShotInference（一次性回覆）與 InteractiveSession（互動式對話）。
-- 它會呼叫領域層的接口，但不關心底層是用 PyTorch 還是 ONNX Runtime。
+負責協調任務，實現基本功能需求。
+- 推論案例 (Use Cases)：
+  - OneShotInference（一次性回覆）：一次性推論，適合測試或單次回覆。
+  - InteractiveSession（互動式對話）：互動式推論，維持上下文，適合 demo 或應用。
 
 #### 基礎架構層 (Infrastructure Layer)：
 
-處理所有硬體與 SDK 的技術細節。這是你實現 Ryzen AI 堆疊的地方。
-- 推論引擎實現：在此實作領域層定義的接口。例如 ROCmPyTorchEngine 用於 GPU 模型，ONNXRuntimeNPUEngine 用於 NPU 模型。
-- 硬體抽象層 (HAL)：考慮到硬體（NPU/GPU）會隨驅動或軟體堆疊更新，應將硬體細節隱藏在 HAL 之後，讓上層軟體能保持穩定。
-- OpenAI SDK 整合：在此實作 ACL，將 OpenAI Python SDK 的請求映射到你的應用層 Use Case。
+處理所有硬體與 SDK 的技術細節，將 PyTorch 與 ONNX Runtime 的差異標準化，並提供統一的推論引擎介面。
+
+- 推論引擎 (Inference Backends)：
+  - 提供抽象類別 `InferenceEngine`，定義統一的 `run(model: Model, *args, **kwargs)` 方法，保持所有Backend方法一致。
+  - `PyTorchROCmBackend (GPU)` 繼承 `InferenceEngine`，封裝 PyTorch + ROCm Conda 環境，支援各種模型類型的推論。
+  - `OnnxVitisAIBackend (NPU)` 繼承 `InferenceEngine`，封裝 ONNX Runtime + Vitis AI EP，同樣支援各種模型類型的推論。
+- 管理 硬體SDK 的差異，提供統一的設備管理。
+- DeviceManager：隱藏硬體與 
+- `get_available_devices()` → 回傳 GPU/NPU 狀態。
+- `allocate(model: Model)` → 根據模型需求與硬體可用性選擇合適的引擎。
+- `fallback()` → 若指定硬體不可用，自動切換到另一個可用後端。
 
 #### 表現層 (Presentation Layer)：
 這是你定義的 Input/Output 邊界所在地。
