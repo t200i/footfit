@@ -16,7 +16,7 @@ for chunk in client.chat.completions.create(
   print(chunk.choices[0]delta.content, end="", flush=True)
 ```
 ```bash
-docker pull ryzen-ai-gemma4:latest
-docker run -d -p 8080:80 ryzen-ai-gemma4
+docker pull ai-hub/ryzen-ai-gemma4:latest
+docker run -d -p 8080:80 ai-hub/ryzen-ai-gemma4
 ```
 Then open `http://localhost:8080`.
