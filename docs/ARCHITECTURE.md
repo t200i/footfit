@@ -126,6 +126,3 @@ for chunk in client.chat.completions.create(
     print(chunk.choices[0].delta.content or "", end="", flush=True)
 ```
 - WebUI Demo：整合 Open WebUI 作為前端展示介面，提供指定Model+Backend推論的圖形化操作Demo，WebUI 會透過 `/v1/chat/completions` 呼叫 API。。
-
-
-
