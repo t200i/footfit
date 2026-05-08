@@ -18,7 +18,7 @@
 
   - Model(Entities)：代表可被呼叫的模型實體，定義模型類型並固定綁定其 Backend。
     - **LLM — Text2Text**：大型語言模型，純文字輸入/輸出。
-    - **VLM — ImageText2Text**：大型語言模型，純文字輸入/輸出。文字）。
+    - **VLM — ImageText2Text**：視覺語言模型，影像 + 文字輸入 → 文字輸出。
 
   - Backend(Entities)：：代表硬體/軟體堆疊的描述性實體，提供 Infrastructure 所需的識別與能力描述。
     - **NPU — ONNXVitisAIBackend(Backend Entities)**：`onnxruntime + ryzenai EP`，部署需求：`conda activate ryzen-ai-1.7.1`。
