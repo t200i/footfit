@@ -41,9 +41,8 @@
 處理所有硬體與 SDK 的技術細節，將 PyTorch 與 ONNX Runtime 的差異標準化，並提供統一的推論引擎介面。
 - 推論引擎 (Inference Backends)：
   - 提供抽象類別 `InferenceEngine`，定義統一的 `run(model: Model, *args, **kwargs)` 方法，保持所有Backend方法一致。
-    - **PyTorchROCmBackend (GPU)**：繼承 InferenceEngine，封裝 PyTorch + ROCm Conda 環境，負責執行綁定 GPU 的模型。
-    - **OnnxVitisAIBackend (NPU)**：繼承 InferenceEngine，封裝 ONNX Runtime + Ryzen AI/Vitis AI EP，負責執行綁定 NPU 的模型。
-    - **OnnxDirectMLBackend (GPU)**：繼承 InferenceEngine，封裝 ONNX Runtime + Ryzen AI/DirectML EP，負責執行綁定 GPU 的模型。
+    - **transformers**：透過transformers （Pytorch）原生的GPU支援選項提供推論運算。
+    - **onnxruntime_genai**：透過onnxruntime_genai原生提供的Vitis AI EP/DirectML EP提供推論運算。
     - 範例：
       ```python
       class Gemma3(Text2Text):
