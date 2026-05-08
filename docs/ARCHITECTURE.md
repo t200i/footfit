@@ -33,8 +33,18 @@
 
 - 推論引擎 (Inference Backends)：
   - 提供抽象類別 `InferenceEngine`，定義統一的 `run(model: Model, *args, **kwargs)` 方法，保持所有Backend方法一致。
-    - PyTorchEngine (GPU)：繼承 InferenceEngine，封裝 PyTorch + ROCm Conda 環境，負責執行綁定 GPU 的模型。
-    - OnnxEngine (NPU)：繼承 InferenceEngine，封裝 ONNX Runtime + Ryzen AI/Vitis AI EP，負責執行綁定 NPU 的模型。
+    - PyTorchROCmBackend (GPU)：繼承 InferenceEngine，封裝 PyTorch + ROCm Conda 環境，負責執行綁定 GPU 的模型。
+    - OnnxVitisAIBackend (NPU)：繼承 InferenceEngine，封裝 ONNX Runtime + Ryzen AI/Vitis AI EP，負責執行綁定 NPU 的模型。
+    - - OnnxDirectMLBackend (GPU)：繼承 InferenceEngine，封裝 ONNX Runtime + Ryzen AI/DirectML EP，負責執行綁定 GPU 的模型。
+    - 範例：
+      ```python
+      class Gemma3(Text2Text):
+        backend = PyTorchROCmBackend()
+      ```
+      ```python
+      class CustomVLM(ImageText2Text):
+        backend = OnnxVitisAIBackend()
+      ```
 
 #### 表現層 (Presentation Layer)：
 這是你定義的 Input/Output 邊界所在地。
