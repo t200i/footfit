@@ -13,3 +13,6 @@ response = ollama.chat(
 )
 print(response['message']['content'])
 ```
+```
+docker run -d -p 3000:8080
+```
