@@ -13,7 +13,7 @@ for chunk in client.chat.completions.create(
   messages=[{'role': 'user', 'content': 'Hello!'}],
   stream=True
 ):
-  print(chunk.choices[0]delta.content or "", end="", flush=True)
+  print(chunk.choices[0]delta.content, end="", flush=True)
 ```
 ```bash
 docker pull ryzen-ai-benchmark:latest
