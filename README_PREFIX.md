@@ -9,7 +9,9 @@ curl http://localhost:11434/api/generate -d '{
 from openai import OpenAI
 client = OpenAI(base_url="http://localhost:11434", api_key="local")
 for chunk in client.chat.completions.create(
-  model='gemma4',  messages=[{'role': 'user', 'content': 'Hello!'}], stream=True
+  model='gemma4',
+  messages=[{'role': 'user', 'content': 'Hello!'}],
+  stream=True
 ):
   print(chunk.choices[0]delta.content or "", end="", flush=True)
 ```
