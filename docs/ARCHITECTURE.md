@@ -20,7 +20,7 @@
     - **LLM — Text2Text**：大型語言模型，純文字輸入/輸出。
     - **VLM — ImageText2Text**：視覺語言模型，影像 + 文字輸入 → 文字輸出。
 
-  - Backend(Entities)：：代表硬體/軟體堆疊的描述性實體，提供 Infrastructure 所需的識別與能力描述。
+  - Backend(Entities)：代表硬體/軟體堆疊的描述性實體，提供 Infrastructure 所需的識別與能力描述。
     - **NPU — ONNXVitisAIBackend**：`onnxruntime + ryzenai EP`，部署需求：`conda activate ryzen-ai-1.7.1`。
     - **GPU — ONNXDirectMLBackend**：`onnxruntime + DirectML`，部署需求：conda activate ryzen-ai-1.7.1`。
     - **GPU — PyTorchROCmBackend**：`pytorch + rocm`，部署需求：`conda activate rocm-pytorch`。
@@ -46,11 +46,11 @@
     - 範例：
       ```python
       class Gemma3(Text2Text):
-        backend = PyTorchROCmBackend()
+        super.backend = PyTorchROCmBackend()
       ```
       ```python
       class CustomVLM(ImageText2Text):
-        backend = OnnxVitisAIBackend()
+        super.backend = OnnxVitisAIBackend()
       ```
 
 #### 表現層 (Presentation Layer)：
