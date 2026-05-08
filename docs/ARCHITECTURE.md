@@ -1,19 +1,16 @@
-要設計一個符合領域驅動設計 (DDD) 且能整合 Ryzen AI APU 軟體堆疊（PyTorch-ROCm 與 ONNX Runtime）的專案程式庫，核心關鍵在於將「推論邏輯」（策略）與「硬體實現」（機制）完全分離
-。
+# 架構設計
+
+要設計一個符合領域驅動設計 (DDD) 且能整合 Ryzen AI APU 軟體堆疊（PyTorch-ROCm 與 ONNX Runtime）的專案程式庫，核心關鍵在於將「推論邏輯」（策略）與「硬體實現」（機制）完全分離。
+
 以下是針對本專案輸入與輸出邊界設計的 DDD 開發流程與架構規範：
-1. 策略設計 (Strategic Design)：定義邊界與語言
-首先，你必須定義專案的限界上下文 (Bounded Context)，例如「AI 推論服務上下文」
-。
-通用語言 (Ubiquitous Language)：確保開發者與硬體專家（NPU/GPU）對詞彙有一致理解。例如：Model（模型）、Provider（硬體供應者）、InferenceTask（推論任務）、APUStack
-。
-上下文映射 (Context Mapping)：由於你需要整合 OpenAI SDK，這屬於外部系統，建議建立防腐層 (Anti-Corruption Layer, ACL)，將 OpenAI 的數據結構轉換為你內部的領域模型，避免外部 SDK 的變動感染你的核心程式碼
-。
-2. 技術架構：採用整潔架構 (Clean Architecture) 分層
-根據來源，建議將程式庫分為以下四層，並嚴格遵守相依性規則 (Dependency Rule)：相依性只能指向內圓（核心）
-。
-核心層：領域層 (Domain Layer)
-這是程式庫的最中心，包含與技術無關的業務規則
-。
+
+1. 本專案的限界 (Bounded Context)為「AI 上下文推論服務」。開發者需按照與硬體專家（NPU/GPU）共同的詞彙來命名變數。
+  - Model（模型）：來是HuggingFace原生transformers 提供的PyTorch模型及amd npu collection提供的onnx模型 
+  - Backend（硬體供應者）：Ryzen AI APU內搭載GPU及NPU，GPU需要通過PyTorch ROCm Conda虛擬環境 offload模型，NPU需要通過Ryzen AI 1.7.1 Conda虛擬環境 offload模型 (這兩整生態系對模型推論的方法沒有一致的標準，需給一個類似nn.Module這樣的繼承類來將不統一的過程變成統一的過程，以此最小化開發負擔、最大化相容性)
+  - InferenceTask（推論任務）：原則上提供一次性與互動式兩種方式。前者主要用於測試，後者則是用於實際應用與demo。
+
+3. 技術架構採用整潔架構 (Clean Architecture) 分層，建議程式庫將分為以下四層，並嚴格遵守相依性規則 (Dependency Rule)：相依性只能指向內圓（核心）。
+  - 核心層：領域層 (Domain Layer)這是程式庫的最中心，包含與技術無關的業務規則。
 領域模型 (Entities/Value Objects)：定義 ModelSpec（模型規格）、HardwareTarget（硬體目標：NPU 或 GPU）
 。
 領域服務 (Domain Services)：定義推論的抽象邏輯，例如 InferenceService 接口
@@ -44,7 +41,7 @@ API 服務：實作 Docker API 服務，將你的推論功能暴露為 REST 接�
 。
 WebUI Demo：整合 Open WebUI 作為前端呈現
 。
-3. 符合 DDD 的開發流程建議
+4. 符合 DDD 的開發流程建議
 為了確保專案不淪為亂糟糟的「大泥球」(Big Ball of Mud)
 ，建議遵循以下流程：
 定義核心領域：先寫領域層的 Python 抽象類（Abstract Base Classes），定義推論任務的 Input（Prompt, Config）與 Output（Tensor, String）
