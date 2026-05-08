@@ -24,17 +24,17 @@
 
 負責協調任務，實現基本功能需求。
 - 推論案例 (Use Cases)：
-  - OneShotInference（一次性回覆）：一次性推論，適合測試或單次回覆。
-  - InteractiveSession（互動式對話）：互動式推論，維持上下文，適合 demo 或應用。
+  - **OneShotInference（一次性回覆）**：一次性推論，適合測試或單次回覆。
+  - **InteractiveSession（互動式對話）**：互動式推論，維持上下文，適合 demo 或應用。
 
 #### 基礎架構層 (Infrastructure Layer)：
 
 處理所有硬體與 SDK 的技術細節，將 PyTorch 與 ONNX Runtime 的差異標準化，並提供統一的推論引擎介面。
 - 推論引擎 (Inference Backends)：
   - 提供抽象類別 `InferenceEngine`，定義統一的 `run(model: Model, *args, **kwargs)` 方法，保持所有Backend方法一致。
-    - PyTorchROCmBackend (GPU)：繼承 InferenceEngine，封裝 PyTorch + ROCm Conda 環境，負責執行綁定 GPU 的模型。
-    - OnnxVitisAIBackend (NPU)：繼承 InferenceEngine，封裝 ONNX Runtime + Ryzen AI/Vitis AI EP，負責執行綁定 NPU 的模型。
-    - - OnnxDirectMLBackend (GPU)：繼承 InferenceEngine，封裝 ONNX Runtime + Ryzen AI/DirectML EP，負責執行綁定 GPU 的模型。
+    - **PyTorchROCmBackend (GPU)**：繼承 InferenceEngine，封裝 PyTorch + ROCm Conda 環境，負責執行綁定 GPU 的模型。
+    - **OnnxVitisAIBackend (NPU)**：繼承 InferenceEngine，封裝 ONNX Runtime + Ryzen AI/Vitis AI EP，負責執行綁定 NPU 的模型。
+    - **OnnxDirectMLBackend (GPU)**：繼承 InferenceEngine，封裝 ONNX Runtime + Ryzen AI/DirectML EP，負責執行綁定 GPU 的模型。
     - 範例：
       ```python
       class Gemma3(Text2Text):
@@ -47,14 +47,74 @@
 
 #### 表現層 (Presentation Layer)：
 
-CLI 模組 (Command Line Interface)
+定義 Input/Output 邊界所在地，負責與使用者或外部系統互動。
 - CLI 模組：提供一次性回覆與互動式推論的命令列工具。
   ```
-  cli.py --task oneshot --model <offloaded-gemma3-implementation>
-  cli.py --task interactive --model <offloaded-customvlm-implementation>
+  cli.py --task oneshot --model gemma3
+  cli.py --task interactive --model customvlm
   ```
-- API 服務：將推論功能暴露為 REST API，支援 JSON 請求與回應，且可部署於 Docker 容器。
-- WebUI Demo：整合 Open WebUI 作為前端展示介面，提供指定Model+Backend推論的圖形化操作Demo。
+- API 服務：將推論功能暴露為 REST API，支援 JSON 請求與回應，且可部署於 Docker 容器。API 規格完全遵循 OpenAI API 規格，支援 /v1/chat/completions 端點，一律投入完整上下文，並透過 `stream=True` 或 `stream=False` 控制回應模式。
+```http
+POST /v1/chat/completions
+{
+  "model": "gemma3",
+  "messages": [
+    {"role": "user", "content": "解釋量子計算"}
+  ],
+  "stream": true
+}
+```
+```json
+#stream=False → 一次性回傳完整結果
+{
+  "id": "chatcmpl-123",
+  "object": "chat.completion",
+  "choices": [
+    {
+      "index": 0,
+      "message": {"role": "assistant", "content": "量子計算是一種基於量子力學的計算方式..."},
+      "finish_reason": "stop"
+    }
+  ]
+}
+```
+```json
+# stream=True → 逐步回傳事件流 (Server-Sent Events)，每個 chunk 包含 delta
+{
+  "id": "chatcmpl-123",
+  "object": "chat.completion.chunk",
+  "choices": [
+    {
+      "delta": {"content": "量子"},
+      "index": 0,
+      "finish_reason": null
+    }
+  ]
+}
+```
+- Python SDK 整合：提供 Python SDK，直接整合 OpenAI Python SDK 的呼叫方式。
+```python
+from openai import OpenAI
+
+client = OpenAI(base_url="http://localhost:8000/v1", api_key="local")
+
+# 非串流模式
+response = client.chat.completions.create(
+    model="gemma3",
+    messages=[{"role": "user", "content": "解釋量子計算"}],
+    stream=False,
+)
+print(response.choices[0].message.content)
+
+# 串流模式
+for chunk in client.chat.completions.create(
+    model="gemma3",
+    messages=[{"role": "user", "content": "解釋量子計算"}],
+    stream=True,
+):
+    print(chunk.choices[0].delta.content or "", end="", flush=True)
+```
+- WebUI Demo：整合 Open WebUI 作為前端展示介面，提供指定Model+Backend推論的圖形化操作Demo，WebUI 會透過 `/v1/chat/completions` 呼叫 API。。
 
 
 
