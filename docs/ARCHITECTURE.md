@@ -17,7 +17,7 @@
 
 這是程式庫的最中心，包含與技術無關的業務規則。
   - **領域模型 (Entities/Value Objects)**：定義 Model（統一模型類型的實體。e.x, LLM - Text2Text； VLM - ImageText2Text）、Backend（統一模型呼叫軟體堆疊的介面。NPU - onnxruntime with ryzen ai software； GPU - pytorch with rocm）。
-  - **領域服務 (Domain Services)**：定義Model類的推論抽象邏輯，例如 Backend提供ONNX Runtime或transformers的Inference Pipeline。
+  - **領域服務 (Domain Services)**：定義Model類的推論抽象邏輯，例如：相容性檢查。
   - **儲存庫接口 (Repository Interface)**：使用者可以透過Python Class定義模型(如：Gemma3, 繼承Model 與 Backend)，將從huggingface下載的native or amd collected模型定義成本專案可使用的模型實例。
 
 #### 應用層 (Application Layer)：
