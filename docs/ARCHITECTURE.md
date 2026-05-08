@@ -7,17 +7,17 @@
 本專案的限界 (Bounded Context)為「AI 上下文推論服務」。開發者需按照與硬體專家（NPU/GPU）共同的詞彙來命名變數。
   - Model（模型）：來是HuggingFace原生transformers 提供的PyTorch模型及amd npu collection提供的onnx模型 
   - Backend（硬體供應者）：Ryzen AI APU內搭載GPU及NPU，GPU需要通過PyTorch ROCm Conda虛擬環境 offload模型，NPU需要通過Ryzen AI 1.7.1 Conda虛擬環境 offload模型 (這兩整生態系對模型推論的方法沒有一致的標準，需給一個類似nn.Module這樣的繼承類來將不統一的過程變成統一的過程，以此最小化開發負擔、最大化相容性)
-  - InferenceTask（推論任務）：原則上提供一次性與互動式兩種方式。前者主要用於測試，後者則是用於實際應用與demo。
+  - Task（推論任務）：原則上提供一次性與互動式兩種推論的模式。前者主要用於測試，後者則是用於實際應用與demo。
 
 ### 1. 技術架構
 
-技術採用整潔架構 (Clean Architecture) 分層，建議程式庫將分為以下四層，並嚴格遵守相依性規則 (Dependency Rule)：相依性只能指向內圓（核心）。
+技術採用整潔架構 (Clean Architecture) 分層，程式庫將分為以下四層，並嚴格遵守相依性規則 (Dependency Rule)：相依性只能指向內圓（核心）。
 
 #### 領域層 (Domain Layer)：
 
 這是程式庫的最中心，包含與技術無關的業務規則。
-  - 領域模型 (Entities/Value Objects)：定義 ModelSpec（模型規格）、HardwareTarget（硬體目標：NPU 或 GPU）。
-  - 領域服務 (Domain Services)：定義推論的抽象邏輯，例如 InferenceService 接口。
+  - 領域模型 (Entities/Value Objects)：定義 Model（統一模型類型的實體。e.x, LLM - Text2Text； VLM - ImageText2Text）、Hardware（統一模型呼叫軟體堆疊的介面。NPU - onnxruntime with ryzen ai software； GPU - pytorch with rocm），並透過繼承Model(Hardware)讓使用者自行定義從huggingface下載的native or amd collected模型。
+  - 領域服務 (Domain Services)：定義推論的抽象邏輯，例如 InteractiveService 接口。
   - 儲存庫接口 (Repository Interface)：定義如何「取得」模型的接口（例如從 HF 或 AMD Collection 加載），但不涉及具體下載實作。
 
 #### 應用層 (Application Layer)：
