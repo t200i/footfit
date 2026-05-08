@@ -7,11 +7,11 @@ curl http://localhost:11434/api/generate -d '{
 與Open AI Python SDK整合
 ```python
 from openai import OpenAI
-response = ollama.chat(
-  model='gemma4', 
-  messages=[{'role': 'user', 'content': 'Hello!'}]
-)
-print(response['message']['content'])
+client = OpenAI(base_url="http://localhost:11434", api_key="local")
+for chunk in client.chat.completions.create(
+  model='gemma4',  messages=[{'role': 'user', 'content': 'Hello!'}], stream=True
+):
+  print(chunk.choices[0]delta.content or "", end="", flush=True)
 ```
 ```bash
 docker pull ryzen-ai-benchmark:latest
