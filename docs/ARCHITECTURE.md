@@ -28,8 +28,8 @@
     - **GPU — PyTorchROCmBackend(Backend Entities)**：`pytorch + rocm`，部署需求：`conda activate rocm-pytorch`。
   
   - Conversation(Value Objects)：推論會話上下文。
-    - **Message：單一訊息項目**，結構為 `Message(role, content, timestamp)`，其中 role 可為 user/system/assistant，content 為文字或資源，timestamp 為 ISO8601 格式。
-    - **Context(Value Objects)**：會話上下文，結構為 `ConversationContext(messages, metadata)`，其中 messages 為 `List[Message]`，metadata 為附加描述（例如 session_id、language、client_info）。
+    - **Message**：單一訊息項目，結構為 `Message(role, content, timestamp)`，其中 role 可為 user/system/assistant，content 為文字或資源，timestamp 為 ISO8601 格式。
+    - **Context**：會話上下文，結構為 `ConversationContext(messages, metadata)`，其中 messages 為 `List[Message]`，metadata 為附加描述（例如 session_id、language、client_info）。
 
 #### 應用層 (Application Layer)：
 
