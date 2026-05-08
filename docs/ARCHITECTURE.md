@@ -13,25 +13,32 @@
 
 技術採用整潔架構 (Clean Architecture) 分層，建議程式庫將分為以下四層，並嚴格遵守相依性規則 (Dependency Rule)：相依性只能指向內圓（核心）。
 
-#### 領域層 (Domain Layer)：這是程式庫的最中心，包含與技術無關的業務規則。
+#### 領域層 (Domain Layer)：
+
+這是程式庫的最中心，包含與技術無關的業務規則。
   - 領域模型 (Entities/Value Objects)：定義 ModelSpec（模型規格）、HardwareTarget（硬體目標：NPU 或 GPU）。
   - 領域服務 (Domain Services)：定義推論的抽象邏輯，例如 InferenceService 接口。
   - 儲存庫接口 (Repository Interface)：定義如何「取得」模型的接口（例如從 HF 或 AMD Collection 加載），但不涉及具體下載實作。
 
-#### 應用層 (Application Layer)：負責協調任務，實現你的功能需求（Use Cases）。
+#### 應用層 (Application Layer)：
+
+負責協調任務，實現你的功能需求（Use Cases）。
 - 推論案例 (Use Cases)：例如 RunOneShotInference（一次性回覆）與 StartInteractiveSession（互動式對話）。
 - 它會呼叫領域層的接口，但不關心底層是用 PyTorch 還是 ONNX Runtime。
 
-#### 基礎架構層 (Infrastructure Layer)：處理所有硬體與 SDK 的技術細節。這是你實現 Ryzen AI 堆疊的地方。
+#### 基礎架構層 (Infrastructure Layer)：
+
+處理所有硬體與 SDK 的技術細節。這是你實現 Ryzen AI 堆疊的地方。
 - 推論引擎實現：在此實作領域層定義的接口。例如 ROCmPyTorchEngine 用於 GPU 模型，ONNXRuntimeNPUEngine 用於 NPU 模型。
 - 硬體抽象層 (HAL)：考慮到硬體（NPU/GPU）會隨驅動或軟體堆疊更新，應將硬體細節隱藏在 HAL 之後，讓上層軟體能保持穩定。
 - OpenAI SDK 整合：在此實作 ACL，將 OpenAI Python SDK 的請求映射到你的應用層 Use Case。
 
-#### 表現層 (Presentation Layer)：這是你定義的 Input/Output 邊界所在地。
+#### 表現層 (Presentation Layer)：
+這是你定義的 Input/Output 邊界所在地。
 - CLI 模組：實作一次性回覆與互動式 CLI。
 - API 服務：實作 Docker API 服務，將你的推論功能暴露為 REST 接口。
 - WebUI Demo：整合 Open WebUI 作為前端呈現。
-- 
+
 4. 符合 DDD 的開發流程建議
 為了確保專案不淪為亂糟糟的「大泥球」(Big Ball of Mud)
 ，建議遵循以下流程：
