@@ -21,9 +21,9 @@
     - **VLM — ImageText2Text**：視覺語言模型，影像 + 文字輸入 → 文字輸出。
 
   - Backend(Entities)：：代表硬體/軟體堆疊的描述性實體，提供 Infrastructure 所需的識別與能力描述。
-    - **NPU — ONNXVitisAIBackend(Backend Entities)**：`onnxruntime + ryzenai EP`，部署需求：`conda activate ryzen-ai-1.7.1`。
-    - **GPU — ONNXDirectMLBackend(Backend Entities)**：`onnxruntime + DirectML`，部署需求：conda activate ryzen-ai-1.7.1`。
-    - **GPU — PyTorchROCmBackend(Backend Entities)**：`pytorch + rocm`，部署需求：`conda activate rocm-pytorch`。
+    - **NPU — ONNXVitisAIBackend**：`onnxruntime + ryzenai EP`，部署需求：`conda activate ryzen-ai-1.7.1`。
+    - **GPU — ONNXDirectMLBackend**：`onnxruntime + DirectML`，部署需求：conda activate ryzen-ai-1.7.1`。
+    - **GPU — PyTorchROCmBackend**：`pytorch + rocm`，部署需求：`conda activate rocm-pytorch`。
   
   - Conversation(Value Objects)：推論會話上下文。
     - **Message**：單一訊息項目，結構為 `Message(role, content, timestamp)`，其中 role 可為 user/system/assistant，content 為文字或資源，timestamp 為 ISO8601 格式。
