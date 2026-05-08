@@ -2,7 +2,7 @@
 
 要設計一個符合領域驅動設計 (DDD) 且能整合 Ryzen AI APU 軟體堆疊（PyTorch-ROCm 與 ONNX Runtime）的專案程式庫，核心關鍵在於將「推論邏輯」（策略）與「硬體實現」（機制）完全分離。以下是針對本專案輸入與輸出邊界設計的 DDD 開發流程與架構規範：
 
-### 1. 設計策略
+### 1. 設計目標及策略
 
   - **Model（模型）**：來是HuggingFace原生transformers 提供的PyTorch模型及amd npu collection提供的onnx模型 
   - **Backend（硬體供應者）**：Ryzen AI APU內搭載GPU及NPU，GPU需要通過PyTorch ROCm Conda虛擬環境 offload模型，NPU需要通過Ryzen AI 1.7.1 Conda虛擬環境 offload模型 (這兩整生態系對模型推論的方法沒有一致的標準，需給一個類似nn.Module這樣的繼承類來將不統一的過程變成統一的過程，以此最小化開發負擔、最大化相容性)
