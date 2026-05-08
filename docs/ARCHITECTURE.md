@@ -16,16 +16,29 @@
 
 #### 領域層 (Domain Layer)：
 
-- **領域模型 (Entities/Value Objects)**：這是程式庫的最中心，包含與技術無關的業務規則。Model 與 Backend 為兩個領域實體（Entities），且模型在定義時即固定綁定其 Backend
-  - Model（Entities）：代表可被呼叫的模型實體，直接包含描述性屬性與其固定綁定的 Backend 實體。
-    - LLM — Text2Text（例如大型語言模型，用於純文字輸入/輸出）。
-    - VLM — ImageText2Text（例如視覺語言模型，支援影像輸入並輸出文字）。
-  - Backend（Entities）代表硬體/軟體堆疊的描述性實體，包含 Infrastructure 需要的識別與能力描述。
-    - NPU — onnxruntime with Ryzen AI software（例如 onnxruntime + ryzenai EP，對應 NPU 執行環境）。
-    - GPU — PyTorch with ROCm（例如 pytorch + rocm，對應 GPU 執行環境）。
-  - XXXX（Value Objects）：定義推論上下文與輸入輸出格式，
-    - Message(role, content, timestamp)
-    - ConversationContext(messages, metadata)
+本案的領域層設計，限界為「AI 上下文推論服務」，直接以模型與硬體後端的綁定為核心，並以上下文推論的需求來規劃各個元素。
+
+  - Model(Entities)：代表可被呼叫的模型實體，定義模型類型並固定綁定其 Backend。
+    - **LLM — Text2Text**：大型語言模型，純文字輸入/輸出。
+    - **VLM — ImageText2Text**：大型語言模型，純文字輸入/輸出。文字）。
+
+  - Backend(Entities)：：代表硬體/軟體堆疊的描述性實體，提供 Infrastructure 所需的識別與能力描述。
+    - **NPU — ONNXVitisAIBackend(Backend Entities)**：`onnxruntime + ryzenai EP`，部署需求：`conda activate ryzen-ai-1.7.1`。
+    - **GPU — ONNXDirectMLBackend(Backend Entities)**：`onnxruntime + DirectML`，部署需求：conda activate ryzen-ai-1.7.1`。
+    - **GPU — PyTorchROCmBackend(Backend Entities)**：`pytorch + rocm`，部署需求：`conda activate rocm-pytorch`。
+  
+  - Conversation(Value Objects)：推論會話上下文。
+    - Message：單一訊息項目，結構為 `Message(role, content, timestamp)`，其中 role 可為 user/system/assistant，content 為文字或資源，timestamp 為 ISO8601 格式。
+    - Context(Value Objects)：會話上下文，結構為 `ConversationContext(messages, metadata)`，其中 messages 為 `List[Message]`，metadata 為附加描述（例如 session_id、language、client_info）。
+    
+  - InferenceSession(Aggregates)：聚合 Model、Backend、ConversationContext，代表一次完整的推論會話，確保模型與後端的綁定在上下文中保持一致。
+  - ModelDefinition(Aggregates)：聚合 Model 與 Backend，確保模型在定義時即固定綁定其後端，避免執行階段的自動切換。
+  - ChatOrchestrationService(Domain Services)：定義與推論相關的業務規則與抽象。
+  - ModelRepository(Repository Interfaces)：提供模型的 CRUD 與查詢契約。
+  - BackendRepository(Repository Interfaces)：提供後端的 CRUD 與查詢契約。
+
+  
+
       
   - **領域服務 (Domain Services)**：定義Model類的推論抽象邏輯，例如：相容性託管與檢查、自動後端服務(如pytorch gpu availible就自動調用, 或onnx看有沒有vitis ep，也另外提供device='<使用者指定>'的管道。)。
   - **儲存庫接口 (Repository Interface)**：使用者可以透過Python Class定義模型(如：Gemma3, 繼承ImageText2Text)，將從huggingface下載的native or amd collected模型定義成本專案可使用的模型實例。
