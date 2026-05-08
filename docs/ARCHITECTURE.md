@@ -1,6 +1,6 @@
 # Repository Architecture Design Pattern
 
-要設計一個符合領域驅動設計 (DDD) 且能整合 Ryzen AI APU 軟體堆疊（PyTorch-ROCm 與 ONNX Runtime）的專案程式庫，核心關鍵在於將特定「Model」（權重）與「Backend」（運算硬體）綁定，組成1 by 1的推論解決方案 （不支援替換，隨插即用）。以下是針對本專案輸入與輸出邊界設計的 DDD 開發流程與架構規範：
+要設計一個符合領域驅動設計 (DDD) 且能整合 Ryzen AI APU 軟體堆疊（PyTorch-ROCm 與 ONNX-Ryzen AI Software）的專案程式庫，核心關鍵在於將特定「Model」（權重）與「Backend」（運算硬體）綁定，組成1 by 1的推論解決方案 （不支援替換，隨插即用）。以下是針對本專案輸入與輸出邊界設計的 DDD 開發流程與架構規範：
 
 ### 1. 設計目標及策略
 
