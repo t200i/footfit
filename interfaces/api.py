@@ -1,8 +1,8 @@
 """
 interfaces/api.py — Generic OpenAI-compatible FastAPI server
 =============================================================
-Does NOT import any concrete model — only depends on core.base.LLMService.
-Called by serve.py via build_app(model).
+Does NOT import any concrete model — only depends on core.module.ChatModel.
+Called by deployment serve.py via build_app(model).
 """
 
 from __future__ import annotations
@@ -10,18 +10,18 @@ from __future__ import annotations
 import json
 import time
 import uuid
-from typing import Iterator
+from typing import Iterator, Union
 
 from fastapi import FastAPI
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 
-from core.base import LLMService
+from core.module import ChatModel
 
 
 class Message(BaseModel):
     role: str
-    content: str
+    content: Union[str, list]   # list for multimodal (OpenAI content-parts)
 
 
 class ChatCompletionRequest(BaseModel):
@@ -31,10 +31,10 @@ class ChatCompletionRequest(BaseModel):
     stream: bool = False
 
 
-def build_app(svc: LLMService) -> FastAPI:
-    """Return a FastAPI app bound to the given LLMService instance."""
+def build_app(svc: ChatModel) -> FastAPI:
+    """Return a FastAPI app bound to the given ChatModel instance."""
 
-    app = FastAPI(title=f"{svc.info.name} — OpenAI-Compatible API", version="1.0.0")
+    app = FastAPI(title=f"{svc.model_id} — OpenAI-Compatible API", version="1.0.0")
 
     @app.get("/v1/models")
     def list_models():
@@ -42,11 +42,11 @@ def build_app(svc: LLMService) -> FastAPI:
             "object": "list",
             "data": [
                 {
-                    "id": svc.info.model_id,
+                    "id": svc.model_id,
                     "object": "model",
                     "created": int(time.time()),
                     "owned_by": "local",
-                    "description": svc.info.description,
+                    "description": svc.description,
                 }
             ],
         }
@@ -61,18 +61,18 @@ def build_app(svc: LLMService) -> FastAPI:
                 media_type="text/event-stream",
             )
 
-        text = svc.generate(messages, max_new_tokens=req.max_tokens)
-        return _completion_response(svc, req.model, text)
+        text = "".join(svc.create(messages, max_tokens=req.max_tokens))
+        return _completion_response(svc.model_id, text)
 
     return app
 
 
-def _completion_response(svc: LLMService, model: str, text: str) -> dict:
+def _completion_response(model_id: str, text: str) -> dict:
     return {
         "id": f"chatcmpl-{uuid.uuid4().hex}",
         "object": "chat.completion",
         "created": int(time.time()),
-        "model": model,
+        "model": model_id,
         "choices": [
             {
                 "index": 0,
@@ -85,17 +85,17 @@ def _completion_response(svc: LLMService, model: str, text: str) -> dict:
 
 
 def _stream(
-    svc: LLMService, messages: list[dict], req: ChatCompletionRequest
+    svc: ChatModel, messages: list[dict], req: ChatCompletionRequest
 ) -> Iterator[str]:
     cid = f"chatcmpl-{uuid.uuid4().hex}"
-    ts = int(time.time())
+    ts  = int(time.time())
 
-    for chunk in svc.generate_stream(messages, max_new_tokens=req.max_tokens):
+    for chunk in svc.create(messages, max_tokens=req.max_tokens):
         payload = {
             "id": cid,
             "object": "chat.completion.chunk",
             "created": ts,
-            "model": req.model,
+            "model": svc.model_id,
             "choices": [{"index": 0, "delta": {"content": chunk}, "finish_reason": None}],
         }
         yield f"data: {json.dumps(payload, ensure_ascii=False)}\n\n"
@@ -104,7 +104,7 @@ def _stream(
         "id": cid,
         "object": "chat.completion.chunk",
         "created": ts,
-        "model": req.model,
+        "model": svc.model_id,
         "choices": [{"index": 0, "delta": {}, "finish_reason": "stop"}],
     }
     yield f"data: {json.dumps(final)}\n\n"

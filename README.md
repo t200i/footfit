@@ -79,54 +79,99 @@ AMD 官方在 HuggingFace 上釋出的多個 NPU 模型 Collections：
 
 | HuggingFace Repository | Size | Type | Offload |
 |------------------------|------|--------------|--------------|
+| `google/gemma-4-E2B-it` | 6.2 GB | Vision LM | iGPU |
 | `google/gemma-4-E4B-it` | 6.2 GB | Vision LM | iGPU |
 
 > ROCm在 iGPU 上執行某些 LLM 工作負載（例如 Llama 1B/3B）時，可能會出現效能低於預期的情況。
 
 ### 快速開始
 
-#### CLI
+> 專案架構說明請參閱 [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)。
+
+#### 步驟一：根據硬體啟動環境（擇一）
 
 ```powershell
-# 互動式對話
-python serve.py --model gemma4 --mode cli
+# Vivobook S 15/16 (iGPU / ROCm)
+conda activate rocm-pytorch
+$DEPLOY = "deployment/vivobook_s_15_16"
 
-# 單次 prompt
-python serve.py --model gemma4 --mode cli --prompt "解釋量子計算"
+# PN54 (NPU) — 需先 git clone 模型到本地
+conda activate ryzen-ai-1.7.1
+$DEPLOY = "deployment/PN54"
 ```
 
-#### Python OpenAI SDK
+設定後，以下所有指令對兩種硬體完全相同。
+
+---
+
+#### 文字對話
 
 ```powershell
-# 先啟動 API server
-python serve.py --model gemma4 --mode api
+# CLI 互動
+python $DEPLOY/cli.py --model <model-id>
+
+# CLI 單次
+python $DEPLOY/cli.py --model <model-id> --prompt "解釋量子計算"
+
+# 啟動 API server
+python $DEPLOY/serve.py --model <model-id>
 ```
 
 ```python
+# Python OpenAI SDK
 from openai import OpenAI
-
 client = OpenAI(base_url="http://localhost:8000/v1", api_key="local")
 
-# 串流輸出
 for chunk in client.chat.completions.create(
-    model="gemma4",
-    messages=[{"role": "user", "content": "你好！"}],
+    model="<model-id>",
+    messages=[{"role": "user", "content": "解釋量子計算"}],
     stream=True,
 ):
     print(chunk.choices[0].delta.content or "", end="", flush=True)
 ```
 
+---
+
+#### 圖文對話（Vision LM）
+
+```powershell
+# CLI
+python $DEPLOY/cli.py --model <model-id> --image cat.jpg --prompt "描述這張圖片"
+
+# API server（同文字，無需額外參數）
+python $DEPLOY/serve.py --model <model-id>
+```
+
+```python
+# Python OpenAI SDK — multimodal content
+import base64
+image_b64 = base64.b64encode(open("cat.jpg", "rb").read()).decode()
+
+for chunk in client.chat.completions.create(
+    model="<model-id>",
+    messages=[{"role": "user", "content": [
+        {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{image_b64}"}},
+        {"type": "text", "text": "描述這張圖片"},
+    ]}],
+    stream=True,
+):
+    print(chunk.choices[0].delta.content or "", end="", flush=True)
+```
+
+> 圖片輸入僅適用於 Vision LM（表格中 Type 欄為 `Vision LM` 的模型）。
+
+---
+
 #### ComfyUI
 
 ```powershell
-# 複製（或 symlink）interfaces/comfyui.py 到 ComfyUI custom_nodes 資料夾
-cp interfaces\comfyui.py C:\path\to\ComfyUI\custom_nodes\ryzen_ai_llm.py
-
-# 設定要載入的模型（預設 gemma4）
-$env:MODEL_NAME = "gemma4"
 $env:RYZEN_AI_PROJECT_ROOT = "C:\path\to\amd-ryzen-ai-benchmark"
+$env:MODEL_ID = "<model-id>"
+cp interfaces\comfyui.py C:\path\to\ComfyUI\custom_nodes\ryzen_ai_llm.py
 ```
 
-重啟 ComfyUI 後，在節點選單 **Ryzen AI / LLM** 分類下找到 **Ryzen AI LLM** 節點。
+重啟 ComfyUI 後，在節點選單 **Ryzen AI / LLM** 分類下找到 **Ryzen AI LLM** 節點。支援 Vision LM 的模型會自動顯示圖片輸入端口。
+
+
 
 

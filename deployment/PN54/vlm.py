@@ -1,24 +1,49 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
-AMD Ryzen AI NPU - 通用視覺語言模型 (VLM) 推論介面
-支援所有多模態模型（Gemma-3 等）
+deployment/PN54/vlm.py — NPU Vision LM API server (Composition Root)
+======================================================================
+Environment: ryzen-ai-1.7.1
+Hardware:    Ryzen AI 350 (XDNA NPU)
 
-使用方式:
-    python run_vlm.py --model <模型目錄> --image <圖像路徑> --prompt "描述這張圖片"
+Usage:
+  conda activate ryzen-ai-1.7.1
+  python deployment/PN54/vlm.py --model ./Gemma-3-4b-it-mm-onnx-ryzenai-npu
+  python deployment/PN54/vlm.py --model ./Gemma-3-4b-it-mm-onnx-ryzenai-npu --host 0.0.0.0
 """
+
+from __future__ import annotations
 
 import argparse
-import os
 import sys
-import subprocess
 from pathlib import Path
 
-# 設置 UTF-8 輸出以支援 emoji 和中文
-if sys.platform == 'win32':
-    import io
-    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
-    sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8', errors='replace')
+sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+
+from models.npu.base import NpuVisionLm
+from interfaces.api import build_app
+
+
+def main() -> None:
+    import uvicorn
+
+    parser = argparse.ArgumentParser(description="NPU Vision LM API server — PN54")
+    parser.add_argument(
+        "--model",
+        required=True,
+        help="Local path to AMD NPU VLM model directory (e.g. ./Gemma-3-4b-it-mm-onnx-ryzenai-npu)",
+    )
+    parser.add_argument("--host", default="127.0.0.1")
+    parser.add_argument("--port", type=int, default=8000)
+    args = parser.parse_args()
+
+    svc = NpuVisionLm(model_id=args.model)
+    app = build_app(svc)
+    print(f"[serve] {svc.model_id} → http://{args.host}:{args.port}/v1")
+    uvicorn.run(app, host=args.host, port=args.port)
+
+
+if __name__ == "__main__":
+    main()
+
 
 
 def get_ryzen_ai_path():
