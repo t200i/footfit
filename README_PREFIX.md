@@ -1,8 +1,7 @@
 
 ```bash
 curl http://localhost:11434/api/generate -d '{
-  "model": "gemma4",
-  "prompt": "Hello!"
+  "model": "gemma4", "prompt": "Hello!"
 }'
 ```
 與Open AI Python SDK整合
