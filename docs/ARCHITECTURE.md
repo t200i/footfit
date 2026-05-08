@@ -40,7 +40,7 @@
 
 處理所有硬體與 SDK 的技術細節，將 PyTorch 與 ONNX Runtime 的差異標準化，並提供統一的推論引擎介面。
 - 計算實體 (Compute Instance):
-  - 提供繼承Model必須配置backend屬性的抽象，並定義統一的 `run(*args, **kwargs)` 方法提供運算。
+  - 提供繼承Model必須配置backend屬性的抽象，並定義統一的 `run(*args, **kwargs)` 方法提供自訂運算流程。
     - **transformers**：透過transformers （Pytorch）原生的GPU支援選項提供推論運算。
     - **onnxruntime_genai**：透過onnxruntime_genai原生提供的Vitis AI EP/DirectML EP提供推論運算。
     - 範例：
