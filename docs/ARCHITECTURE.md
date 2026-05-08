@@ -28,20 +28,8 @@
     - **GPU — PyTorchROCmBackend(Backend Entities)**：`pytorch + rocm`，部署需求：`conda activate rocm-pytorch`。
   
   - Conversation(Value Objects)：推論會話上下文。
-    - Message：單一訊息項目，結構為 `Message(role, content, timestamp)`，其中 role 可為 user/system/assistant，content 為文字或資源，timestamp 為 ISO8601 格式。
-    - Context(Value Objects)：會話上下文，結構為 `ConversationContext(messages, metadata)`，其中 messages 為 `List[Message]`，metadata 為附加描述（例如 session_id、language、client_info）。
-    
-  - InferenceSession(Aggregates)：聚合 Model、Backend、ConversationContext，代表一次完整的推論會話，確保模型與後端的綁定在上下文中保持一致。
-  - ModelDefinition(Aggregates)：聚合 Model 與 Backend，確保模型在定義時即固定綁定其後端，避免執行階段的自動切換。
-  - ChatOrchestrationService(Domain Services)：定義與推論相關的業務規則與抽象。
-  - ModelRepository(Repository Interfaces)：提供模型的 CRUD 與查詢契約。
-  - BackendRepository(Repository Interfaces)：提供後端的 CRUD 與查詢契約。
-
-  
-
-      
-  - **領域服務 (Domain Services)**：定義Model類的推論抽象邏輯，例如：相容性託管與檢查、自動後端服務(如pytorch gpu availible就自動調用, 或onnx看有沒有vitis ep，也另外提供device='<使用者指定>'的管道。)。
-  - **儲存庫接口 (Repository Interface)**：使用者可以透過Python Class定義模型(如：Gemma3, 繼承ImageText2Text)，將從huggingface下載的native or amd collected模型定義成本專案可使用的模型實例。
+    - **Message：單一訊息項目**，結構為 `Message(role, content, timestamp)`，其中 role 可為 user/system/assistant，content 為文字或資源，timestamp 為 ISO8601 格式。
+    - **Context(Value Objects)**：會話上下文，結構為 `ConversationContext(messages, metadata)`，其中 messages 為 `List[Message]`，metadata 為附加描述（例如 session_id、language、client_info）。
 
 #### 應用層 (Application Layer)：
 
