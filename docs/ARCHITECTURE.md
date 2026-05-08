@@ -11,8 +11,9 @@
 
 ### 1. 技術架構
 
-#### 技術採用整潔架構 (Clean Architecture) 分層，建議程式庫將分為以下四層，並嚴格遵守相依性規則 (Dependency Rule)：相依性只能指向內圓（核心）。
-- 領域層 (Domain Layer)：這是程式庫的最中心，包含與技術無關的業務規則。
+技術採用整潔架構 (Clean Architecture) 分層，建議程式庫將分為以下四層，並嚴格遵守相依性規則 (Dependency Rule)：相依性只能指向內圓（核心）。
+
+#### 領域層 (Domain Layer)：這是程式庫的最中心，包含與技術無關的業務規則。
   - 領域模型 (Entities/Value Objects)：定義 ModelSpec（模型規格）、HardwareTarget（硬體目標：NPU 或 GPU）。
   - 領域服務 (Domain Services)：定義推論的抽象邏輯，例如 InferenceService 接口。
   - 儲存庫接口 (Repository Interface)：定義如何「取得」模型的接口（例如從 HF 或 AMD Collection 加載），但不涉及具體下載實作。
