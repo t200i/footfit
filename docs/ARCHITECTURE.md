@@ -4,7 +4,7 @@
 
 ### 1. 設計策略
 
-本專案的限界 (Bounded Context)為「AI 上下文推論服務」。開發者需按照與硬體專家（NPU/GPU）共同的詞彙來命名變數。
+本專案的限界(Bounded Context) 為「AI 上下文推論服務」。開發者需按照與硬體專家（NPU/GPU）共同的詞彙來命名變數。
 
   - **Model（模型）**：來是HuggingFace原生transformers 提供的PyTorch模型及amd npu collection提供的onnx模型 
   - **Backend（硬體供應者）**：Ryzen AI APU內搭載GPU及NPU，GPU需要通過PyTorch ROCm Conda虛擬環境 offload模型，NPU需要通過Ryzen AI 1.7.1 Conda虛擬環境 offload模型 (這兩整生態系對模型推論的方法沒有一致的標準，需給一個類似nn.Module這樣的繼承類來將不統一的過程變成統一的過程，以此最小化開發負擔、最大化相容性)
@@ -16,9 +16,7 @@
 
 #### 領域層 (Domain Layer)：
 
-Model 與 Backend 為領域層的兩個實體（Entities），當模型被宣告或建立時即固定綁定其 Backend，，也就是使用者在註冊或定義模型時，系統不會在執行時自動替換或選擇其他 backend。
-
-- **領域模型 (Entities/Value Objects)**：
+- **領域模型 (Entities/Value Objects)**：這是程式庫的最中心，包含與技術無關的業務規則。Model 與 Backend 為兩個領域實體（Entities），且模型在定義時即固定綁定其 Backend
   - Model（Entities）：代表可被呼叫的模型實體，直接包含描述性屬性與其固定綁定的 Backend 實體。
     - LLM — Text2Text（例如大型語言模型，用於純文字輸入/輸出）。
     - VLM — ImageText2Text（例如視覺語言模型，支援影像輸入並輸出文字）。
@@ -28,6 +26,7 @@ Model 與 Backend 為領域層的兩個實體（Entities），當模型被宣告
   - XXXX（Value Objects）：定義推論上下文與輸入輸出格式，
     - Message(role, content, timestamp)
     - ConversationContext(messages, metadata)
+      
   - **領域服務 (Domain Services)**：定義Model類的推論抽象邏輯，例如：相容性託管與檢查、自動後端服務(如pytorch gpu availible就自動調用, 或onnx看有沒有vitis ep，也另外提供device='<使用者指定>'的管道。)。
   - **儲存庫接口 (Repository Interface)**：使用者可以透過Python Class定義模型(如：Gemma3, 繼承ImageText2Text)，將從huggingface下載的native or amd collected模型定義成本專案可使用的模型實例。
 
