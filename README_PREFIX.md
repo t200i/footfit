@@ -13,6 +13,8 @@ response = ollama.chat(
 )
 print(response['message']['content'])
 ```
+```bash
+docker pull ryzen-ai-benchmark:latest
+docker run -d -p 8080:80 ryzen-ai-benchmark
 ```
-docker run -d -p 3000:8080
-```
+Then open `http://localhost:8080`.
