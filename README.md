@@ -91,7 +91,7 @@ pip install -r requirements-rocm.txt
 ### 快速開始
 
 
-#### 步驟一：根據模型的 Backend 啟動對應環境（擇一）
+#### Step 1. 根據模型的 Backend 啟動對應環境（擇一）
 
 依上方表格 **Backend** 欄位選擇環境：Model ID 結尾為 `-npu` 選 `ryzen-ai-1.7.1`，結尾為 `-gpu` 選 `rocm-pytorch`。
 
@@ -102,7 +102,7 @@ conda activate rocm-pytorch      # iGPU backend（ROCm）
 conda activate ryzen-ai-1.7.1    # NPU backend（VitisAI EP）
 ```
 
-#### 步驟二：執行推論
+#### Step 2. 執行推論
 
 ```powershell
 # 單次推論（加 --stream 啟用逐 token 輸出）
@@ -119,7 +119,7 @@ python cli.py --model <model-id>
 
 ### 進階用法：整合應用開發
 
-#### 1. 啟動 API Server
+#### 一、啟動 API Server
 
 `api.py` 提供相容 OpenAI 協議的本地 HTTP server，啟動後所有下方工具均可透過 `http://localhost:8000` 串接，無需修改任何程式碼。
 
@@ -127,7 +127,7 @@ python cli.py --model <model-id>
 python api.py --model <model-id>
 ```
 
-#### 2. 使用 OpenAI SDK 進行文字對話
+#### 二、使用 OpenAI SDK 進行文字對話
 
 建立 client 時只需將 `base_url` 指向本地 server，其餘用法與官方 OpenAI SDK 完全相同。
 
@@ -143,7 +143,7 @@ for chunk in client.chat.completions.create(
     print(chunk.choices[0].delta.content or "", end="", flush=True)
 ```
 
-#### 3. 使用 OpenAI SDK 進行圖文對話（Vision LM）
+#### 三、使用 OpenAI SDK 進行圖文對話（Vision LM）
 
 在 `content` 中混入 `image_url` 類型的項目即可傳入圖片，僅適用於表格中 Type 欄為 `Vision LM` 的模型。
 
@@ -162,18 +162,18 @@ for chunk in client.chat.completions.create(
     print(chunk.choices[0].delta.content or "", end="", flush=True)
 ```
 
-#### 4. 整合 Open WebUI
+#### 四、整合 Open WebUI
 
 以 Docker 啟動 [Open WebUI](https://github.com/open-webui/open-webui)，提供類似 ChatGPT 的聊天介面，原生支援圖片上傳，模型由本機 `api.py` 提供，容器本身不需存放任何模型權重。
 
-**步驟一：使用 Terminal 1 啟動 API Server**
+**Step 1. 使用 Terminal 1 啟動 API Server**
 
 ```powershell
 conda activate <environment>
 python api.py --model <model-id>
 ```
 
-**步驟二：使用 Terminal 2 啟動 Open WebUI**
+**Step 2. 使用 Terminal 2 啟動 Open WebUI**
 
 ```powershell
 # 第一次執行（建立容器）
