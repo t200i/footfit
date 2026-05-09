@@ -19,24 +19,28 @@
 - 部分Ryzen™ APUs 型號開始支援Windows及Linux使用ROCm7.2.1+PyTorch 2.9.1。[[3]](https://www.amd.com/zh-tw/newsroom/press-releases/2026-1-5-amd-expands-ai-leadership-across-client-graphics-.html)
     - [Use ROCm on Radeon and Ryzen](https://rocm.docs.amd.com/projects/radeon-ryzen/en/latest/index.html) 
     - [Windows support matrices by ROCm version](https://rocm.docs.amd.com/projects/radeon-ryzen/en/latest/docs/compatibility/compatibilityryz/windows/windows_compatibility.html)
-    
+
 
 ## 📥 安裝指南
 
-#### 1. 安裝 AMD Ryzen AI Software 1.7.1
-依照 [installation instructions](https://ryzenai.docs.amd.com/en/latest/inst.html)下載並安裝**NPU driver 32.0.203.280**+**ryzen-ai-lt 1.7.1**，此步驟會自動於Conda 建立 ONNX Runtime 環境 (`ryzen-ai-1.7.1`)。
+### 安裝 AMD Ryzen AI Software 1.7.1
+
+#### 1. 安裝 NPU 驅動軟體與 Ryzen AI 工具庫
+
+    依照 [installation instructions](https://ryzenai.docs.amd.com/en/latest/inst.html)下載並安裝**NPU driver 32.0.203.280**+**ryzen-ai-lt 1.7.1**，此步驟會自動於Conda 建立 ONNX Runtime 環境 (`ryzen-ai-1.7.1`)。
 
 #### 2. 設定系統環境變數
 
-將 `C:\Program Files\RyzenAI\1.7.1\deployment` 加入系統 PATH 環境變數（以匯入新版的 Vitis AI EP）。
+    將 `C:\Program Files\RyzenAI\1.7.1\deployment` 加入系統 PATH 環境變數（以匯入新版的 Vitis AI EP）。
 
-### GPU Only (限 AI Max 300, AI 465 及 AI 365 系列以上以上型號)
 
-#### 1. 安裝 AMD Software: Adrenalin Edition 26.2.2
+### 安裝 AMD Software: Adrenalin Edition 26.2.2 (限 AI Max 300, AI 465 及 AI 365 系列以上以上型號)
+
+#### 1. 安裝 GPU 驅動軟體
 
 依照 [Release Note](https://www.amd.com/en/resources/support-articles/release-notes/RN-RAD-WIN-26-2-2.html)下載並安裝**whql-amd-software-adrenalin-edition-26.2.2-win11-c** 。
 
-####  2. 建立Conda虛擬環境
+####  2. 建立專屬 Conda 虛擬環境
 
 建立Python 3.12執行環境，並按照 [PyTorch via PIP installation](https://rocm.docs.amd.com/projects/radeon-ryzen/en/latest/docs/install/installryz/windows/install-pytorch.html) 安裝ROCm+PyTorch及HuggingFace SDK。
 
