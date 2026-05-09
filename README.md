@@ -26,35 +26,40 @@
 ### 安裝 AMD Ryzen AI Software 1.7.1
 
 **Step 1. 安裝 NPU 驅動軟體並建立 Ryzen AI 1.7.1 虛擬環境**
-    
-依照 [installation instructions](https://ryzenai.docs.amd.com/en/latest/inst.html)下載並安裝**NPU driver 32.0.203.280**+**ryzen-ai-lt 1.7.1**，此步驟會自動建立 Conda 虛擬環境。
 
-**Step 2. 將新版的 Vitis AI EP 匯入系統環境變數**
-    
-將 `C:\Program Files\RyzenAI\1.7.1\deployment` 加入系統 PATH 環境變數。
+依照 [installation instructions](https://ryzenai.docs.amd.com/en/latest/inst.html) 下載並安裝 **NPU driver 32.0.203.280** + **ryzen-ai-lt 1.7.1**，安裝程式會自動建立 Conda 虛擬環境 `ryzen-ai-1.7.1`。完成後啟動環境並安裝本專案所需的套件：
+
+    ```bash
+    conda activate ryzen-ai-1.7.1
+    pip install -r requirements.txt
+    ```
+
+**Step 2. 將新版的 Vitis AI EP 加入系統 PATH**
+
+將 `C:\Program Files\RyzenAI\1.7.1\deployment` 加入系統 PATH 環境變數，以確保執行期能載入正確版本的 Vitis AI EP。
 
 
-### 安裝 AMD Software: Adrenalin Edition 26.2.2 
+### 安裝 AMD Software: Adrenalin Edition 26.2.2
 
-> 限 AI Max 300, AI 465 及 AI 365 系列以上以上型號
+> 限 AI Max 300、AI 465 及 AI 365 系列以上型號
 
 **Step 1. 安裝 GPU 驅動軟體**
-    
-依照 [Release Note](https://www.amd.com/en/resources/support-articles/release-notes/RN-RAD-WIN-26-2-2.html)下載並安裝**whql-amd-software-adrenalin-edition-26.2.2-win11-c** 。
+
+依照 [Release Note](https://www.amd.com/en/resources/support-articles/release-notes/RN-RAD-WIN-26-2-2.html) 下載並安裝 **whql-amd-software-adrenalin-edition-26.2.2-win11-c**。
 
 **Step 2. 建立 ROCm PyTorch 虛擬環境**
-    
-建立Python 3.12執行環境，並按照 [PyTorch via PIP installation](https://rocm.docs.amd.com/projects/radeon-ryzen/en/latest/docs/install/installryz/windows/install-pytorch.html) 安裝ROCm+PyTorch及HuggingFace SDK。
 
-```bash
-conda create -n rocm-pytorch python=3.12
-# pip install --no-cache-dir <rocm-dependencies>
-# pip install --no-cache-dir <pytorch-dependencies>
-```
-```bash
-# HuggingFace SDKs
-pip install -r requirements.txt
-```
+建立 Python 3.12 執行環境，並依照 [PyTorch via PIP installation](https://rocm.docs.amd.com/projects/radeon-ryzen/en/latest/docs/install/installryz/windows/install-pytorch.html) 安裝 ROCm + PyTorch，再安裝本專案所需的套件：
+
+    ```bash
+    conda create -n rocm-pytorch python=3.12
+    # pip install --no-cache-dir <rocm-dependencies>
+    # pip install --no-cache-dir <pytorch-dependencies>
+    ```
+    ```bash
+    conda activate rocm-pytorch
+    pip install -r requirements-rocm.txt
+    ```
 
 ---
 
