@@ -1,15 +1,2 @@
-/amd_Gemma-3-4b-it-mm-onnx-ryzenai-npu
-/Llama-3.2-1B-Instruct-onnx-ryzenai-npu
-/Gemma-3-4b-it-mm-onnx-ryzenai-npu
-/Meta-Llama-3.1-8B-Instruct-onnx-ryzenai-npu
-/Qwen2.5-3B-Instruct-onnx-ryzenai-npu
-/Qwen2.5-Coder-7B-Instruct-onnx-ryzenai-npu
-/Qwen2.5-7B-Instruct-onnx-ryzenai-npu
-/Mistral-7B-Instruct-v0.3-onnx-ryzenai-npu
-/SmolLM-135M-Instruct_rai_1.7.1_npu_4K
-/Mistral-7B-Instruct-v0.3-onnx-ryzenai-npu
-/SmolLM2-135M-Instruct_rai_1.7.1_npu_4K
-/LFM2-2.6B-ONNX_rai_1.7.1
-/Llama-3.2-3B-Instruct_rai_1.7.1_npu_16K
-/Phi-4-mini-instruct_rai_1.7.1_npu_16K
-/Phi-4-mini-instruct-onnx-ryzenai-npu
+/weights
+/blueprint

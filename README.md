@@ -44,7 +44,7 @@
 建立Python 3.12執行環境，並按照 [PyTorch via PIP installation](https://rocm.docs.amd.com/projects/radeon-ryzen/en/latest/docs/install/installryz/windows/install-pytorch.html) 安裝ROCm+PyTorch及HuggingFace SDK。
 
 ```bash
-conda create -name rocm-pytorch python=3.12
+conda create -n rocm-pytorch python=3.12
 # pip install --no-cache-dir <rocm-dependencies>
 # pip install --no-cache-dir <pytorch-dependencies>
 ```
@@ -86,18 +86,16 @@ AMD 官方在 HuggingFace 上釋出的多個 NPU 模型 Collections：
 
 ### 快速開始
 
-> 專案架構說明請參閱 [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)。
+> 專案架構說明請參閱 [blueprint/ARCHITECTURE.md](blueprint/ARCHITECTURE.md)。
 
 #### 步驟一：根據硬體啟動環境（擇一）
 
 ```powershell
 # Vivobook S 15/16 (iGPU / ROCm)
 conda activate rocm-pytorch
-$DEPLOY = "deployment/vivobook_s_15_16"
 
 # PN54 (NPU) — 需先 git clone 模型到本地
 conda activate ryzen-ai-1.7.1
-$DEPLOY = "deployment/PN54"
 ```
 
 設定後，以下所有指令對兩種硬體完全相同。
@@ -108,13 +106,13 @@ $DEPLOY = "deployment/PN54"
 
 ```powershell
 # CLI 互動
-python $DEPLOY/cli.py --model <model-id>
+python cli.py --model gemma3-npu
 
-# CLI 單次
-python $DEPLOY/cli.py --model <model-id> --prompt "解釋量子計算"
+# CLI 單次（加 --stream 啟用逐 token 輸出）
+python cli.py --model gemma3-npu --prompt "解釋量子計算" --stream
 
 # 啟動 API server
-python $DEPLOY/serve.py --model <model-id>
+python api.py --model gemma3-npu
 ```
 
 ```python
@@ -123,7 +121,7 @@ from openai import OpenAI
 client = OpenAI(base_url="http://localhost:8000/v1", api_key="local")
 
 for chunk in client.chat.completions.create(
-    model="<model-id>",
+    model="gemma3-npu",
     messages=[{"role": "user", "content": "解釋量子計算"}],
     stream=True,
 ):
@@ -136,10 +134,10 @@ for chunk in client.chat.completions.create(
 
 ```powershell
 # CLI
-python $DEPLOY/cli.py --model <model-id> --image cat.jpg --prompt "描述這張圖片"
+python cli.py --model gemma3-npu --image cat.jpg --prompt "描述這張圖片"
 
 # API server（同文字，無需額外參數）
-python $DEPLOY/serve.py --model <model-id>
+python api.py --model gemma3-npu
 ```
 
 ```python
@@ -148,7 +146,7 @@ import base64
 image_b64 = base64.b64encode(open("cat.jpg", "rb").read()).decode()
 
 for chunk in client.chat.completions.create(
-    model="<model-id>",
+    model="gemma3-npu",
     messages=[{"role": "user", "content": [
         {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{image_b64}"}},
         {"type": "text", "text": "描述這張圖片"},
