@@ -166,13 +166,14 @@ for chunk in client.chat.completions.create(
 
 以 Docker 啟動 [Open WebUI](https://github.com/open-webui/open-webui)，提供類似 ChatGPT 的聊天介面，原生支援圖片上傳，模型由本機 `api.py` 提供，容器本身不需存放任何模型權重。
 
-**步驟一：先啟動 API Server**
+**步驟一：使用 Terminal 1 啟動 API Server**
 
 ```powershell
+conda activate <environment>
 python api.py --model <model-id>
 ```
 
-**步驟二：啟動 Open WebUI**
+**步驟二：使用 Terminal 2 啟動 Open WebUI**
 
 ```powershell
 # 第一次執行（建立容器）
@@ -188,6 +189,10 @@ docker start -a open-webui
 ```
 
 > 當 terminal 出現 `INFO: Started server process [1]` 後，開啟 `http://localhost:3000` 即可進入 Open WebUI 頁面。首次進入需註冊帳號（第一位使用者自動成為 Admin），之後在對話框直接上傳圖片即可進行多模態推論。
+
+![Open WebUI 模型選單顯示 gemma3-4b-npu](assets/open_webui.png)
+
+
 
 
 
