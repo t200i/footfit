@@ -190,7 +190,7 @@ docker run --name open-webui -p 3000:8080 `
 docker start -a open-webui
 ```
 
-> 模型清單在 Open WebUI 啟動時從 `api.py` 的 `/v1/models` 端點動態拉取。若選單中看不到任何模型，代表 `api.py` 尚未啟動或連線配置有誤，請確認 `python api.py --model <model-id>` 已正常運行後再重新整理頁面。
+>  Open WebUI 會從 **API** 動態拉取模型清單。若選單中看不到任何模型，代表 `api.py` 尚未啟動或連線配置有誤，請確認 `python api.py --model <model-id>` 已正常運行後再重新整理頁面。
 >
 > ![Open WebUI 模型選單顯示 gemma3-4b-npu](assets/open_webui.png)
 
