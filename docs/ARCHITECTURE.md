@@ -38,92 +38,115 @@
 - 計算實體 (Compute Instance)：
   - **transformers**：透過 HuggingFace transformers 的 PyTorch ROCm GPU 支援實作 `generate()`。
   - **onnxruntime_genai**：透過 onnxruntime-genai 的 Vitis AI EP 或 DirectML EP 實作 `generate()`。
-    - 範例：
-      ```python
-      class CustomVLM(ImageText2Text):
-          def __init__(self):
-              super().__init__(OnnxVitisAIBackend())
-              # 於此初始化 onnxruntime_genai model 與 processor
+    ```python
+    # 以下為範例，實際實作依部署模型與所選 SDK 而定。
+    class CustomVLM(ImageText2Text):
+        def __init__(self):
+            super().__init__(OnnxVitisAIBackend())
+            # 於此初始化 onnxruntime_genai model 與 processor
 
-          def generate(self, context: ConversationContext) -> Generator[str, None, None]:
-              # 實作 onnxruntime_genai 推論邏輯，以 yield 逐步產出 token
-              ...
-      ```
+        def generate(self, context: ConversationContext) -> Generator[str, None, None]:
+            # 實作 onnxruntime_genai 推論邏輯，以 yield 逐步產出 token
+            ...
+    ```
 
 #### 應用層 (Application Layer)：
 
-負責協調任務，實現基本功能需求。
+負責協調推論任務的業務流程，管理 `ConversationContext` 的生命週期，並將 Infrastructure Layer 回傳的 token 串流傳遞至上層介面。
+
 - 推論案例 (Use Cases)：
-  - **OneShotInference（一次性回覆）**：一次性推論，適合測試或單次回覆。
-  - **InteractiveSession（互動式對話）**：互動式推論，維持上下文，適合 demo 或應用。
+  - **OneShotInference（一次性推論）**：接收單次 user input，建立僅含該訊息的 `ConversationContext`，呼叫 `model(context)` 後將 token 串流回傳，不保留任何會話狀態。
+  - **InteractiveSession（互動式對話）**：持有跨輪次的 `ConversationContext`，每輪推論前將 user message append 至 context，取得完整回覆後再將 assistant message append 回 context，以維護多輪對話歷史，並將每輪的 token 串流回傳。
   
 #### 表現層 (Presentation Layer)：
 
-定義 Input/Output 邊界所在地，負責與使用者或外部系統互動。
-- CLI 模組：提供一次性回覆與互動式推論的命令列工具。
+本層對外的互動邊界設計核心在於生態系整合：REST API 規格完全遵循 OpenAI `/v1/chat/completions` 端點規範，使 OpenAI Python SDK 與 Open WebUI 等現有生態工具無需任何修改即可直接對接，以最小的介面實作覆蓋所有消費路徑。
+
+所有介面均支援兩種回應模式：
+- `stream=false`：彙整所有 token 為完整回覆後一次性回傳。
+- `stream=true`：以 Server-Sent Events 逐步推送每個 token chunk。
+
+- 消費路徑 (Consumer Paths)：
+  - **CLI**：本專案唯一直接支援 `OneShotInference` 與 `InteractiveSession` 兩種推論模式的原生介面，適用於本地測試與開發驗證。以 `--task` 指定推論模式（預設 `oneshot`），以 `--stream` 控制輸出方式（預設 `false`）。
+    ```
+    cli.py --model gemma3                        # --task 預設為 oneshot，--stream 預設為 false
+    cli.py --task interactive --model gemma3     # --stream 預設為 false
+    cli.py --task interactive --model customvlm --stream true
+    ```
+    
+  - **REST API**：將互動式推論能力暴露為可部署於 Docker 容器的 HTTP 服務，作為 OpenAI Python SDK 與 Open WebUI 的統一後端。規格遵循 OpenAI `/v1/chat/completions` 端點，由呼叫方負責傳入並維護完整的 `messages` 上下文。以下為請求與回應的完整欄位規範——所有欄位均為 OpenAI Python SDK 解析所必要，實作時不可省略。
+  ```http
+  POST /v1/chat/completions
+  {
+    "model": "gemma3",        // 必填，對應本專案部署的模型識別名稱
+    "messages": [             // 必填，由呼叫方維護並傳入完整的多輪對話歷史
+      {"role": "user", "content": "解釋量子計算"}
+    ],
+    "stream": true            // 選填，預設 false；控制回應模式
+  }
   ```
-  cli.py --task oneshot --model gemma3
-  cli.py --task interactive --model customvlm
+  ```json
+  // stream=false：一次性回傳完整回覆
+  {
+    "id": "chatcmpl-123",           // 本次請求的唯一識別碼
+    "object": "chat.completion",    // 固定值，SDK 以此判斷物件型別
+    "created": 1700000000,          // Unix timestamp，SDK 會存取此欄位
+    "model": "gemma3",              // 回傳實際使用的模型名稱，SDK 會存取此欄位
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",      // 固定值
+          "content": "量子計算是一種基於量子力學的計算方式..."
+        },
+        "finish_reason": "stop"     // 正常結束為 "stop"，超出長度限制為 "length"
+      }
+    ]
+  }
   ```
-- API 服務：將推論功能暴露為 REST API，支援 JSON 請求與回應，且可部署於 Docker 容器。API 規格完全遵循 OpenAI API 規格，支援 /v1/chat/completions 端點，一律投入完整上下文，並透過 `stream=True` 或 `stream=False` 控制回應模式。
-```http
-POST /v1/chat/completions
-{
-  "model": "gemma3",
-  "messages": [
-    {"role": "user", "content": "解釋量子計算"}
-  ],
-  "stream": true
-}
-```
-```json
-#stream=False → 一次性回傳完整結果
-{
-  "id": "chatcmpl-123",
-  "object": "chat.completion",
-  "choices": [
-    {
-      "index": 0,
-      "message": {"role": "assistant", "content": "量子計算是一種基於量子力學的計算方式..."},
-      "finish_reason": "stop"
-    }
-  ]
-}
-```
-```json
-# stream=True → 逐步回傳事件流 (Server-Sent Events)，每個 chunk 包含 delta
-{
-  "id": "chatcmpl-123",
-  "object": "chat.completion.chunk",
-  "choices": [
-    {
-      "delta": {"content": "量子"},
-      "index": 0,
-      "finish_reason": null
-    }
-  ]
-}
-```
-- Python SDK 整合：提供 Python SDK，直接整合 OpenAI Python SDK 的呼叫方式。
-```python
-from openai import OpenAI
+  ```json
+  // stream=true：以 Server-Sent Events 逐步回傳
+  // 每個 chunk 結構相同；首個 chunk 的 delta 須包含 role，後續 chunk 僅含 content
+  // 最終 chunk 的 delta 為空物件，finish_reason 為 "stop"，標示串流結束
 
-client = OpenAI(base_url="http://localhost:8000/v1", api_key="local")
+  // 首個 chunk（含 role）
+  {
+    "id": "chatcmpl-123",
+    "object": "chat.completion.chunk",   // 固定值，與非串流的 object 不同，不可混用
+    "created": 1700000000,
+    "model": "gemma3",
+    "choices": [{"index": 0, "delta": {"role": "assistant", "content": ""}, "finish_reason": null}]
+  }
+  // 中間 chunk（僅含 content）
+  {
+    "id": "chatcmpl-123",
+    "object": "chat.completion.chunk",
+    "created": 1700000000,
+    "model": "gemma3",
+    "choices": [{"index": 0, "delta": {"content": "量子"}, "finish_reason": null}]
+  }
+  // 末尾 chunk（delta 為空，finish_reason 標示結束）
+  {
+    "id": "chatcmpl-123",
+    "object": "chat.completion.chunk",
+    "created": 1700000000,
+    "model": "gemma3",
+    "choices": [{"index": 0, "delta": {}, "finish_reason": "stop"}]
+  }
+  ```
 
-# 非串流模式
-response = client.chat.completions.create(
-    model="gemma3",
-    messages=[{"role": "user", "content": "解釋量子計算"}],
-    stream=False,
-)
-print(response.choices[0].message.content)
+  - **OpenAI Python SDK**：由於 REST API 完整遵循 OpenAI 規格，呼叫方僅需將 `base_url` 指向本專案服務即可使用 OpenAI Python SDK 的原生呼叫方式，無需本專案額外實作任何 SDK 層。
+  ```python
+  from openai import OpenAI
 
-# 串流模式
-for chunk in client.chat.completions.create(
-    model="gemma3",
-    messages=[{"role": "user", "content": "解釋量子計算"}],
-    stream=True,
-):
-    print(chunk.choices[0].delta.content or "", end="", flush=True)
-```
-- WebUI Demo：整合 Open WebUI 作為前端展示介面，提供指定Model+Backend推論的圖形化操作Demo，WebUI 會透過 `/v1/chat/completions` 呼叫 API。。
+  client = OpenAI(base_url="http://localhost:8000/v1", api_key="local")
+
+  response = client.chat.completions.create(
+      model="gemma3",
+      messages=[{"role": "user", "content": "解釋量子計算"}],
+      stream=False,
+  )
+  print(response.choices[0].message.content)
+  ```
+
+  - **Open WebUI**：透過 Open WebUI 現有的 OpenAI 相容設定直接對接本專案 REST API，提供圖形化互動展示介面，無需本專案額外開發任何前端元件。
