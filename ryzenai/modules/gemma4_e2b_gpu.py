@@ -19,8 +19,8 @@ from ryzenai.conversation import ConversationContext
 from ryzenai.model import ImageText2Text
 
 
-class Gemma4_E4B_GPU(ImageText2Text):
-    """Gemma4 E4B Vision — HuggingFace transformers + PyTorch ROCm（iGPU）"""
+class Gemma4_E2B_GPU(ImageText2Text):
+    """Gemma4 E2B Vision — HuggingFace transformers + PyTorch ROCm（iGPU）"""
 
     def __init__(self, model_id: str) -> None:
         super().__init__(PyTorchROCmBackend())

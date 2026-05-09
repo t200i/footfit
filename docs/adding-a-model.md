@@ -236,9 +236,13 @@ _REGISTRY: dict[str, tuple] = {
         "ryzenai.modules.gemma3_4b_npu", "Gemma3_4B_NPU",
         "weights/Gemma-3-4b-it-mm-onnx-ryzenai-npu",
     ),
-    "gemma4-gpu": (
+    "gemma4-4b-gpu": (
         "ryzenai.modules.gemma4_e4b_gpu", "Gemma4_E4B_GPU",
         "google/gemma-4-E4B-it",
+    ),
+    "gemma4-2b-gpu": (
+        "ryzenai.modules.gemma4_e2b_gpu", "Gemma4_E2B_GPU",
+        "google/gemma-4-E2B-it",
     ),
     # ↓ 新增這一行，格式：("模組路徑", "類別名稱", "傳給 __init__ 的引數")
     "your-model-npu": (
