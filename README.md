@@ -49,7 +49,7 @@ pip install -r requirements.txt
 
 **Step 2. 建立 ROCm PyTorch 虛擬環境**
 
-建立 Python 3.12 執行環境，並依照 [PyTorch via PIP installation](https://rocm.docs.amd.com/projects/radeon-ryzen/en/latest/docs/install/installryz/windows/install-pytorch.html) 安裝 ROCm + PyTorch，再安裝本專案所需的套件：
+建立 Python 3.12 執行環境，並依照 [PyTorch via PIP installation](https://rocm.docs.amd.com/projects/radeon-ryzen/en/latest/docs/install/installryz/windows/install-pytorch.html) 安裝 ROCm，再安裝本專案所需的套件：
 
 ```bash
 conda create -n rocm-pytorch python=3.12
@@ -65,10 +65,12 @@ pip install -r requirements-rocm.txt
 
 ## 📦 支援的模型列表
 
-本專案支援 HuggingFace 上開源的 PyTorch 模型，以及 AMD 官方針對 Ryzen AI 1.7.1 發布的 NPU 最佳化 ONNX 模型。PyTorch 模型的權重由 `transformers` 於首次執行時自動管理；NPU 最佳化模型則需依各模型頁面指示手動下載，並置於專案根目錄的 `weights/` 資料夾。
+本專案支援 HuggingFace 上開源的 PyTorch 模型，以及 AMD 官方針對 Ryzen AI 1.7.1 發布的 NPU 最佳化 ONNX 模型。
 
 * [HuggingFace Models](https://huggingface.co/models)
 * [AMD NPU 模型 Collections（Ryzen AI 1.7.1）](https://huggingface.co/collections/amd)
+
+> PyTorch 模型的權重由 `transformers` 於首次執行時自動管理；NPU 最佳化模型則需依各模型頁面指示手動下載，並置於專案根目錄的 `weights/` 資料夾。
 
 ### 經實測 適用於PN54 (Ryzen AI 350)的模型
 
