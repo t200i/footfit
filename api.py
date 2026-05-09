@@ -1,8 +1,12 @@
 import argparse
 import json
+import logging
 import time
 import uuid
 from typing import Generator, Optional, Union
+
+logging.basicConfig(format="[%(name)s] %(message)s")
+logging.getLogger("ryzenai").setLevel(logging.INFO)
 
 import uvicorn
 from fastapi import FastAPI

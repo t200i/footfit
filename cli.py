@@ -1,6 +1,10 @@
 import argparse
 import base64
+import logging
 from typing import Generator
+
+logging.basicConfig(format="[%(name)s] %(message)s")
+logging.getLogger("ryzenai").setLevel(logging.INFO)
 
 from ryzenai.model import Model
 from ryzenai.registry import build_model, available_models
