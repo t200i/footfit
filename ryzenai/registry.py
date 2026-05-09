@@ -18,7 +18,7 @@ from ryzenai.model import Model
 # ClassName  : 模組內的類別名稱
 # init_arg*  : 傳給 __init__ 的位置引數（通常是 weights 路徑或 HuggingFace model_id）
 _REGISTRY: dict[str, tuple] = {
-    "gemma3-npu": (
+    "gemma3-4b-npu": (
         "ryzenai.modules.gemma3_4b_npu", "Gemma3_4B_NPU",
         "weights/Gemma-3-4b-it-mm-onnx-ryzenai-npu",
     ),

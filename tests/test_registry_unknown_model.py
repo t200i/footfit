@@ -15,5 +15,5 @@ class TestRegistryUnknownModel:
 
     def test_error_lists_available(self):
         """Error message must include available model names."""
-        with pytest.raises(ValueError, match="gemma3-npu"):
+        with pytest.raises(ValueError, match="gemma3-4b-npu"):
             build_model("bad")

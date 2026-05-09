@@ -12,7 +12,7 @@
 
 這個框架採用「插件式」設計：框架本身負責管理對話歷史、SSE 串流格式、API 路由等「膠水工作」，而**每個模型模組只負責一件事——把一段對話輸入，變成逐字輸出的文字串流**。
 
-具體來說，當使用者執行 `python cli.py --model gemma3-npu --prompt "你好"` 時，框架內部的流程是這樣的：
+具體來說，當使用者執行 `python cli.py --model gemma3-4b-npu --prompt "你好"` 時，框架內部的流程是這樣的：
 
 ```
 使用者輸入
@@ -232,7 +232,7 @@ def _parse_context(context: ConversationContext) -> tuple[list[dict], list[Image
 # ryzenai/registry.py  ← 只改這一個檔案
 
 _REGISTRY: dict[str, tuple] = {
-    "gemma3-npu": (
+    "gemma3-4b-npu": (
         "ryzenai.modules.gemma3_4b_npu", "Gemma3_4B_NPU",
         "weights/Gemma-3-4b-it-mm-onnx-ryzenai-npu",
     ),
