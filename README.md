@@ -27,11 +27,11 @@
 
 #### 1. 安裝 NPU 驅動軟體與 Ryzen AI 工具庫
 
-    依照 [installation instructions](https://ryzenai.docs.amd.com/en/latest/inst.html)下載並安裝**NPU driver 32.0.203.280**+**ryzen-ai-lt 1.7.1**，此步驟會自動於Conda 建立 ONNX Runtime 環境 (`ryzen-ai-1.7.1`)。
+依照 [installation instructions](https://ryzenai.docs.amd.com/en/latest/inst.html)下載並安裝**NPU driver 32.0.203.280**+**ryzen-ai-lt 1.7.1**，此步驟會自動於Conda 建立 ONNX Runtime 環境 (`ryzen-ai-1.7.1`)。
 
 #### 2. 設定系統環境變數
 
-    將 `C:\Program Files\RyzenAI\1.7.1\deployment` 加入系統 PATH 環境變數（以匯入新版的 Vitis AI EP）。
+將 `C:\Program Files\RyzenAI\1.7.1\deployment` 加入系統 PATH 環境變數（以匯入新版的 Vitis AI EP）。
 
 
 ### 安裝 AMD Software: Adrenalin Edition 26.2.2 (限 AI Max 300, AI 465 及 AI 365 系列以上以上型號)
@@ -56,23 +56,18 @@ pip install -r requirements.txt
 
 ---
 
-## 📦 AMD Ryzen AI NPU 模型列表
+## 📦 支援的模型列表
 
-AMD 官方在 HuggingFace 上釋出的多個 NPU 模型 Collections：
+本專案支援 HuggingFace 上開源的 PyTorch 模型，以及 AMD 官方針對 Ryzen AI 1.7.1 發布的 NPU 最佳化 ONNX 模型。PyTorch 模型的權重由 `transformers` 於首次執行時自動管理；NPU 最佳化模型則需依各模型頁面指示手動下載，並置於專案根目錄的 `weights/` 資料夾。
 
-* [Ryzen AI 1.7.1 — NPU LFM2 Models](https://huggingface.co/collections/amd/ryzen-ai-171-npu-lfm2-models) (3+個)
-* [Ryzen AI 1.7.1 — NPU 16K](https://huggingface.co/collections/amd/ryzen-ai-171-npu-16k) (27+個)
-* [Ryzen AI 1.7.1 — NPU 4K](https://huggingface.co/collections/amd/ryzen-ai-171-npu-4k) (35+個)
-* [Ryzen-AI-1.7-NPU-LLM_V2](https://huggingface.co/collections/amd/ryzen-ai-17-npu-llm-v2) (4+個)
-* [Ryzen-AI-1.7-NPU-LLM](https://huggingface.co/collections/amd/ryzen-ai-17-npu-llm) (30+個)
-* [Ryzen AI 1.7 Whisper NPU Optimized ONNX models](https://huggingface.co/collections/amd/ryzen-ai-17-whisper-npu-optimized-onnx-models) (7+個)
-* [Ryzen-AI-1.7-NPU-creativity-models](https://huggingface.co/collections/amd/ryzen-ai-17-npu-creativity-models) (9+個)
+* [HuggingFace Models](https://huggingface.co/models)
+* [AMD NPU 模型 Collections（Ryzen AI 1.7.1）](https://huggingface.co/collections/amd)
 
 ### 經實測 適用於PN54 (Ryzen AI 350)的模型
 
 | HuggingFace Repository | Model ID | Size | Type | Offload |
 |------------------------|----------|------|------|--------|
-| `amd/Gemma-3-4b-it-mm-onnx-ryzenai-npu` | `gemma3-4b-npu` | 6.2 GB | Vision LM | NPU |
+| [`amd/Gemma-3-4b-it-mm-onnx-ryzenai-npu`](https://huggingface.co/amd/Gemma-3-4b-it-mm-onnx-ryzenai-npu) | `gemma3-4b-npu` | 6.2 GB | Vision LM | NPU |
 
 > NPU 模型多使用 **AWQ 量化技術**編譯。權重壓縮為 `UINT4` 格式，推論時使用 `BFP16` 處理激活值。
 > NPU 模型需先以 `huggingface-cli download` 下載至本地 `weights/` 目錄，無法直接以 HuggingFace ID 載入。
@@ -81,8 +76,8 @@ AMD 官方在 HuggingFace 上釋出的多個 NPU 模型 Collections：
 
 | HuggingFace Repository | Model ID | Size | Type | Offload |
 |------------------------|----------|------|------|--------|
-| `google/gemma-4-E2B-it` | `gemma4-2b-gpu` | 6.2 GB | Vision LM | iGPU |
-| `google/gemma-4-E4B-it` | `gemma4-4b-gpu` | 6.2 GB | Vision LM | iGPU |
+| [`google/gemma-4-E2B-it`](https://huggingface.co/google/gemma-4-E2B-it) | `gemma4-2b-gpu` | 6.2 GB | Vision LM | iGPU |
+| [`google/gemma-4-E4B-it`](https://huggingface.co/google/gemma-4-E4B-it) | `gemma4-4b-gpu` | 6.2 GB | Vision LM | iGPU |
 
 > ROCm在 iGPU 上執行某些 LLM 工作負載（例如 Llama 1B/3B）時，可能會出現效能低於預期的情況。
 
