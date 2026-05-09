@@ -1,4 +1,4 @@
-# Repository Architecture Design Pattern
+# AMD Ryzen AI Benchmark Repository Architecture
 
 本專案程式庫旨在設計一套符合領域驅動設計 (DDD) 原則、並整合 Ryzen AI APU 軟體堆疊（PyTorch-ROCm 與 ONNX Ryzen AI Software）的推論框架。核心設計策略為將指定的「Model」（模型權重）與「Backend」（運算後端）進行靜態綁定，形成獨立且不可替換的推論部署單元——每一個部署單元僅對應一組固定的模型與後端組合，不支援執行期間的動態替換。以下為本專案輸入與輸出邊界設計的 DDD 開發流程與架構規範。
 
