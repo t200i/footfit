@@ -179,7 +179,8 @@ docker run --name open-webui -p 3000:8080 `
 docker start -a open-webui
 ```
 
-啟動後開啟 `http://localhost:3000`，首次進入需註冊帳號（第一位使用者自動成為 Admin）。Open WebUI 會自動從 `/v1/models` 拉取模型清單，在對話框直接上傳圖片即可進行多模態推論。
+當出現`INFO:     Started server process [1]`後代表App已啟動，你可以透過 `http://localhost:3000`進入Open WebUI 頁面，
+> 首次進入需註冊帳號（第一位使用者自動成為 Admin）。Open WebUI 會自動從 `/v1/models` 拉取模型清單，在對話框直接上傳圖片即可進行多模態推論。
 
 
 
