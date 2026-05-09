@@ -1,5 +1,3 @@
-import onnxruntime as ort
-
 from ryzenai.backend.base import Backend, logger
 
 
@@ -12,6 +10,7 @@ class ONNXVitisAIBackend(Backend):
         self.validate()
 
     def validate(self) -> None:
+        import onnxruntime as ort
         available = ort.get_available_providers()
         if "VitisAIExecutionProvider" not in available:
             raise RuntimeError(
@@ -29,6 +28,7 @@ class ONNXDirectMLBackend(Backend):
         self.validate()
 
     def validate(self) -> None:
+        import onnxruntime as ort
         available = ort.get_available_providers()
         if "DmlExecutionProvider" not in available:
             raise RuntimeError(

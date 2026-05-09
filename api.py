@@ -12,6 +12,7 @@ from pydantic import BaseModel
 from ryzenai.conversation import ConversationContext, Message
 from ryzenai.conversation._utils import _now
 from ryzenai.model import Model
+from ryzenai.registry import build_model, available_models
 
 
 # ── Pydantic Schema ──────────────────────────────────────────────────────────
@@ -136,29 +137,6 @@ def build(model: Model, model_name: str) -> FastAPI:
 # ── Composition Root ─────────────────────────────────────────────────────────
 
 
-def _build_model(model_id: str) -> Model:
-    registry = {
-        "gemma3-npu": lambda: _import_and_build(
-            "ryzenai.modules.gemma3_4b_npu", "Gemma3_4B_NPU",
-            "weights/Gemma-3-4b-it-mm-onnx-ryzenai-npu",
-        ),
-        "gemma4-gpu": lambda: _import_and_build(
-            "ryzenai.modules.gemma4_e4b_gpu", "Gemma4_E4B_GPU",
-            "google/gemma-4-E4B-it",
-        ),
-    }
-    if model_id not in registry:
-        raise ValueError(f"Unknown model: '{model_id}'. Available: {list(registry)}")
-    return registry[model_id]()
-
-
-def _import_and_build(module_path: str, class_name: str, *args):
-    import importlib
-    mod = importlib.import_module(module_path)
-    cls = getattr(mod, class_name)
-    return cls(*args)
-
-
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(prog="api.py", description="Ryzen AI REST API Server")
     parser.add_argument("-m", "--model", required=True, help="模型識別名稱（見 registry）")
@@ -166,6 +144,6 @@ if __name__ == "__main__":
     parser.add_argument("--port", type=int, default=8000, help="監聽埠（預設 8000）")
     args = parser.parse_args()
 
-    model = _build_model(args.model)
+    model = build_model(args.model)
     app = build(model, model_name=args.model)
     uvicorn.run(app, host=args.host, port=args.port)

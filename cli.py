@@ -3,6 +3,7 @@ import base64
 from typing import Generator
 
 from ryzenai.model import Model
+from ryzenai.registry import build_model, available_models
 from ryzenai.session import SingleSession, InteractiveSession
 
 
@@ -55,29 +56,6 @@ def run_interactive(model: Model, stream: bool = True) -> None:
 # ── Composition Root ─────────────────────────────────────────────────────────
 
 
-def _build_model(model_id: str) -> Model:
-    registry = {
-        "gemma3-npu": lambda: _import_and_build(
-            "ryzenai.modules.gemma3_4b_npu", "Gemma3_4B_NPU",
-            "weights/Gemma-3-4b-it-mm-onnx-ryzenai-npu",
-        ),
-        "gemma4-gpu": lambda: _import_and_build(
-            "ryzenai.modules.gemma4_e4b_gpu", "Gemma4_E4B_GPU",
-            "google/gemma-4-E4B-it",
-        ),
-    }
-    if model_id not in registry:
-        raise ValueError(f"Unknown model: '{model_id}'. Available: {list(registry)}")
-    return registry[model_id]()
-
-
-def _import_and_build(module_path: str, class_name: str, *args):
-    import importlib
-    mod = importlib.import_module(module_path)
-    cls = getattr(mod, class_name)
-    return cls(*args)
-
-
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         prog="cli.py",
@@ -91,7 +69,7 @@ if __name__ == "__main__":
     parser.add_argument("--stream", action="store_true", help="啟用逐 token 串流輸出")
     args = parser.parse_args()
 
-    model = _build_model(args.model)
+    model = build_model(args.model)
 
     if args.prompt is not None:
         content: str | list = args.prompt
