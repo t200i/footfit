@@ -74,17 +74,15 @@ pip install -r requirements-rocm.txt
 
 ### 經實測 適用於PN54 (Ryzen AI 350)的模型
 
-| HuggingFace Repository | Model ID | Size | Type | Offload |
-|------------------------|----------|------|------|--------|
+| HuggingFace Repository | Model ID | Size | Type | Backend |
+|------------------------|----------|------|------|---------| 
 | [`amd/Gemma-3-4b-it-mm-onnx-ryzenai-npu`](https://huggingface.co/amd/Gemma-3-4b-it-mm-onnx-ryzenai-npu) | `gemma3-4b-npu` | 6.2 GB | Vision LM | NPU |
-
-> NPU 模型多使用 **AWQ 量化技術**編譯。權重壓縮為 `UINT4` 格式，推論時使用 `BFP16` 處理激活值。
-> NPU 模型需先以 `huggingface-cli download` 下載至本地 `weights/` 目錄，無法直接以 HuggingFace ID 載入。
 
 ### 經實測 適用於Vivobook S 15/16 (Ryzen AI 9 HX 370)的模型
 
-| HuggingFace Repository | Model ID | Size | Type | Offload |
-|------------------------|----------|------|------|--------|
+| HuggingFace Repository | Model ID | Size | Type | Backend |
+|------------------------|----------|------|------|---------|
+| [`amd/Gemma-3-4b-it-mm-onnx-ryzenai-npu`](https://huggingface.co/amd/Gemma-3-4b-it-mm-onnx-ryzenai-npu) | `gemma3-4b-npu` | 6.2 GB | Vision LM | NPU |
 | [`google/gemma-4-E2B-it`](https://huggingface.co/google/gemma-4-E2B-it) | `gemma4-2b-gpu` | 6.2 GB | Vision LM | iGPU |
 | [`google/gemma-4-E4B-it`](https://huggingface.co/google/gemma-4-E4B-it) | `gemma4-4b-gpu` | 6.2 GB | Vision LM | iGPU |
 
@@ -92,40 +90,49 @@ pip install -r requirements-rocm.txt
 
 ### 快速開始
 
-> 專案架構說明請參閱 [blueprint/ARCHITECTURE.md](blueprint/ARCHITECTURE.md)。
 
-#### 步驟一：根據硬體啟動環境（擇一）
+#### 步驟一：根據模型的 Backend 啟動對應環境（擇一）
+
+依上方表格 **Backend** 欄位選擇環境：Model ID 結尾為 `-npu` 選 `ryzen-ai-1.7.1`，結尾為 `-gpu` 選 `rocm-pytorch`。
 
 ```powershell
-# Vivobook S 15/16 (iGPU / ROCm)
-conda activate rocm-pytorch
-
-# PN54 (NPU) — 需先 git clone 模型到本地
-conda activate ryzen-ai-1.7.1
+conda activate rocm-pytorch      # iGPU backend（ROCm）
+```
+```powershell
+conda activate ryzen-ai-1.7.1    # NPU backend（VitisAI EP）
 ```
 
-設定後，將下方指令中的 `<model-id>` 替換為上方模型列表 **Model ID** 欄位的值（例如 `gemma3-4b-npu`、`gemma4-4b-gpu`）。
+#### 步驟二：執行推論
+
+```powershell
+# 單次推論（加 --stream 啟用逐 token 輸出）
+python cli.py --model <model-id> --prompt "解釋量子計算" --stream
+
+# 含圖片（Vision LM）
+python cli.py --model <model-id> --image cat.jpg --prompt "描述這張圖片" --stream
+
+# 互動模式
+python cli.py --model <model-id>
+```
 
 ---
 
-#### 文字對話
+### 進階用法：整合應用開發
+
+啟動相容 OpenAI 協議的 API server，供 OpenAI SDK、Open WebUI 及 ComfyUI 等工具直接串接。
 
 ```powershell
-# CLI 互動
-python cli.py --model <model-id>
-
-# CLI 單次（加 --stream 啟用逐 token 輸出）
-python cli.py --model <model-id> --prompt "解釋量子計算" --stream
-
-# 啟動 API server
 python api.py --model <model-id>
+# 預設監聽 http://localhost:8000
 ```
 
+#### OpenAI SDK
+
 ```python
-# Python OpenAI SDK
 from openai import OpenAI
 client = OpenAI(base_url="http://localhost:8000/v1", api_key="local")
 
+# 文字對話
 for chunk in client.chat.completions.create(
     model="<model-id>",
     messages=[{"role": "user", "content": "解釋量子計算"}],
@@ -133,21 +140,8 @@ for chunk in client.chat.completions.create(
 ):
     print(chunk.choices[0].delta.content or "", end="", flush=True)
 ```
-
----
-
-#### 圖文對話（Vision LM）
-
-```powershell
-# CLI
-python cli.py --model <model-id> --image cat.jpg --prompt "描述這張圖片"
-
-# API server（同文字，無需額外參數）
-python api.py --model <model-id>
-```
-
 ```python
-# Python OpenAI SDK — multimodal content
+# 圖文對話，僅適用於 Vision LM（表格中 Type 欄為 `Vision LM` 的模型）。
 import base64
 image_b64 = base64.b64encode(open("cat.jpg", "rb").read()).decode()
 
@@ -161,10 +155,6 @@ for chunk in client.chat.completions.create(
 ):
     print(chunk.choices[0].delta.content or "", end="", flush=True)
 ```
-
-> 圖片輸入僅適用於 Vision LM（表格中 Type 欄為 `Vision LM` 的模型）。
-
----
 
 #### ComfyUI
 
