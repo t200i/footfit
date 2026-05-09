@@ -183,14 +183,16 @@ docker run --name open-webui -p 3000:8080 `
   ghcr.io/open-webui/open-webui:main
 ```
 
+當 terminal 出現 `INFO: Started server process [1]` 後，開啟 `http://localhost:3000` 即可進入 Open WebUI 頁面。
+
 ```powershell
 # 之後每次重啟（或透過 Docker Desktop 按鍵重啟）
 docker start -a open-webui
 ```
 
-> 當 terminal 出現 `INFO: Started server process [1]` 後，開啟 `http://localhost:3000` 即可進入 Open WebUI 頁面。首次進入需註冊帳號（第一位使用者自動成為 Admin），之後在對話框直接上傳圖片即可進行多模態推論。
-
-![Open WebUI 模型選單顯示 gemma3-4b-npu](assets/open_webui.png)
+> 模型清單在 Open WebUI 啟動時從 `api.py` 的 `/v1/models` 端點動態拉取。若選單中看不到任何模型，代表 `api.py` 尚未啟動或連線配置有誤，請確認 `python api.py --model <model-id>` 已正常運行後再重新整理頁面。
+>
+> ![Open WebUI 模型選單顯示 gemma3-4b-npu](assets/open_webui.png)
 
 
 
