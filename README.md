@@ -34,7 +34,9 @@
 將 `C:\Program Files\RyzenAI\1.7.1\deployment` 加入系統 PATH 環境變數。
 
 
-### 安裝 AMD Software: Adrenalin Edition 26.2.2 (限 AI Max 300, AI 465 及 AI 365 系列以上以上型號)
+### 安裝 AMD Software: Adrenalin Edition 26.2.2 
+
+> 限 AI Max 300, AI 465 及 AI 365 系列以上以上型號
 
 **Step 1. 安裝 GPU 驅動軟體**
     
