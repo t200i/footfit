@@ -29,14 +29,14 @@
 
 依照 [installation instructions](https://ryzenai.docs.amd.com/en/latest/inst.html) 下載並安裝 **NPU driver 32.0.203.280** + **ryzen-ai-lt 1.7.1**，安裝程式會自動建立 Conda 虛擬環境 `ryzen-ai-1.7.1`。完成後啟動環境並安裝本專案所需的套件：
 
-    ```bash
-    conda activate ryzen-ai-1.7.1
-    pip install -r requirements.txt
-    ```
+```bash
+conda activate ryzen-ai-1.7.1
+pip install -r requirements.txt
+```
 
 **Step 2. 將新版的 Vitis AI EP 加入系統 PATH**
 
-將 `C:\Program Files\RyzenAI\1.7.1\deployment` 加入系統 PATH 環境變數，以確保執行期能載入正確版本的 Vitis AI EP。
+將 `C:\Program Files\RyzenAI\1.7.1\deployment` 加入環境變數，以確保執行時能載入正確版本的 Vitis AI EP。
 
 
 ### 安裝 AMD Software: Adrenalin Edition 26.2.2
@@ -51,15 +51,15 @@
 
 建立 Python 3.12 執行環境，並依照 [PyTorch via PIP installation](https://rocm.docs.amd.com/projects/radeon-ryzen/en/latest/docs/install/installryz/windows/install-pytorch.html) 安裝 ROCm + PyTorch，再安裝本專案所需的套件：
 
-    ```bash
-    conda create -n rocm-pytorch python=3.12
-    # pip install --no-cache-dir <rocm-dependencies>
-    # pip install --no-cache-dir <pytorch-dependencies>
-    ```
-    ```bash
-    conda activate rocm-pytorch
-    pip install -r requirements-rocm.txt
-    ```
+```bash
+conda create -n rocm-pytorch python=3.12
+# pip install --no-cache-dir <rocm-dependencies>
+# pip install --no-cache-dir <pytorch-dependencies>
+```
+```bash
+conda activate rocm-pytorch
+pip install -r requirements-rocm.txt
+```
 
 ---
 
