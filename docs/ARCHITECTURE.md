@@ -73,80 +73,80 @@
     cli.py --task interactive --model gemma3     # --stream 預設為 false
     cli.py --task interactive --model customvlm --stream true
     ```
-    
-  - **REST API**：將互動式推論能力暴露為可部署於 Docker 容器的 HTTP 服務，作為 OpenAI Python SDK 與 Open WebUI 的統一後端。規格遵循 OpenAI `/v1/chat/completions` 端點，由呼叫方負責傳入並維護完整的 `messages` 上下文。以下為請求與回應的完整欄位規範——所有欄位均為 OpenAI Python SDK 解析所必要，實作時不可省略。
-  ```http
-  POST /v1/chat/completions
-  {
-    "model": "gemma3",        // 必填，對應本專案部署的模型識別名稱
-    "messages": [             // 必填，由呼叫方維護並傳入完整的多輪對話歷史
-      {"role": "user", "content": "解釋量子計算"}
-    ],
-    "stream": true            // 選填，預設 false；控制回應模式
-  }
-  ```
-  ```json
-  // stream=false：一次性回傳完整回覆
-  {
-    "id": "chatcmpl-123",           // 本次請求的唯一識別碼
-    "object": "chat.completion",    // 固定值，SDK 以此判斷物件型別
-    "created": 1700000000,          // Unix timestamp，SDK 會存取此欄位
-    "model": "gemma3",              // 回傳實際使用的模型名稱，SDK 會存取此欄位
-    "choices": [
-      {
-        "index": 0,
-        "message": {
-          "role": "assistant",      // 固定值
-          "content": "量子計算是一種基於量子力學的計算方式..."
-        },
-        "finish_reason": "stop"     // 正常結束為 "stop"，超出長度限制為 "length"
-      }
-    ]
-  }
-  ```
-  ```json
-  // stream=true：以 Server-Sent Events 逐步回傳
-  // 每個 chunk 結構相同；首個 chunk 的 delta 須包含 role，後續 chunk 僅含 content
-  // 最終 chunk 的 delta 為空物件，finish_reason 為 "stop"，標示串流結束
 
-  // 首個 chunk（含 role）
-  {
-    "id": "chatcmpl-123",
-    "object": "chat.completion.chunk",   // 固定值，與非串流的 object 不同，不可混用
-    "created": 1700000000,
-    "model": "gemma3",
-    "choices": [{"index": 0, "delta": {"role": "assistant", "content": ""}, "finish_reason": null}]
-  }
-  // 中間 chunk（僅含 content）
-  {
-    "id": "chatcmpl-123",
-    "object": "chat.completion.chunk",
-    "created": 1700000000,
-    "model": "gemma3",
-    "choices": [{"index": 0, "delta": {"content": "量子"}, "finish_reason": null}]
-  }
-  // 末尾 chunk（delta 為空，finish_reason 標示結束）
-  {
-    "id": "chatcmpl-123",
-    "object": "chat.completion.chunk",
-    "created": 1700000000,
-    "model": "gemma3",
-    "choices": [{"index": 0, "delta": {}, "finish_reason": "stop"}]
-  }
-  ```
+  - **REST API**：將互動式推論能力暴露為可部署於 Docker 容器的 HTTP 服務，作為 OpenAI Python SDK 與 Open WebUI 的統一後端。規格遵循 OpenAI `/v1/chat/completions` 端點，由呼叫方負責傳入並維護完整的 `messages` 上下文。以下為請求與回應的完整欄位規範——所有欄位均為 OpenAI Python SDK 解析所必要，實作時不可省略。
+    ```http
+    POST /v1/chat/completions
+    {
+      "model": "gemma3",        // 必填，對應本專案部署的模型識別名稱
+      "messages": [             // 必填，由呼叫方維護並傳入完整的多輪對話歷史
+        {"role": "user", "content": "解釋量子計算"}
+      ],
+      "stream": true            // 選填，預設 false；控制回應模式
+    }
+    ```
+    ```json
+    // stream=false：一次性回傳完整回覆
+    {
+      "id": "chatcmpl-123",           // 本次請求的唯一識別碼
+      "object": "chat.completion",    // 固定值，SDK 以此判斷物件型別
+      "created": 1700000000,          // Unix timestamp，SDK 會存取此欄位
+      "model": "gemma3",              // 回傳實際使用的模型名稱，SDK 會存取此欄位
+      "choices": [
+        {
+          "index": 0,
+          "message": {
+            "role": "assistant",      // 固定值
+            "content": "量子計算是一種基於量子力學的計算方式..."
+          },
+          "finish_reason": "stop"     // 正常結束為 "stop"，超出長度限制為 "length"
+        }
+      ]
+    }
+    ```
+    ```json
+    // stream=true：以 Server-Sent Events 逐步回傳
+    // 每個 chunk 結構相同；首個 chunk 的 delta 須包含 role，後續 chunk 僅含 content
+    // 最終 chunk 的 delta 為空物件，finish_reason 為 "stop"，標示串流結束
+
+    // 首個 chunk（含 role）
+    {
+      "id": "chatcmpl-123",
+      "object": "chat.completion.chunk",   // 固定值，與非串流的 object 不同，不可混用
+      "created": 1700000000,
+      "model": "gemma3",
+      "choices": [{"index": 0, "delta": {"role": "assistant", "content": ""}, "finish_reason": null}]
+    }
+    // 中間 chunk（僅含 content）
+    {
+      "id": "chatcmpl-123",
+      "object": "chat.completion.chunk",
+      "created": 1700000000,
+      "model": "gemma3",
+      "choices": [{"index": 0, "delta": {"content": "量子"}, "finish_reason": null}]
+    }
+    // 末尾 chunk（delta 為空，finish_reason 標示結束）
+    {
+      "id": "chatcmpl-123",
+      "object": "chat.completion.chunk",
+      "created": 1700000000,
+      "model": "gemma3",
+      "choices": [{"index": 0, "delta": {}, "finish_reason": "stop"}]
+    }
+    ```
 
   - **OpenAI Python SDK**：由於 REST API 完整遵循 OpenAI 規格，呼叫方僅需將 `base_url` 指向本專案服務即可使用 OpenAI Python SDK 的原生呼叫方式，無需本專案額外實作任何 SDK 層。
-  ```python
-  from openai import OpenAI
+    ```python
+    from openai import OpenAI
 
-  client = OpenAI(base_url="http://localhost:8000/v1", api_key="local")
+    client = OpenAI(base_url="http://localhost:8000/v1", api_key="local")
 
-  response = client.chat.completions.create(
-      model="gemma3",
-      messages=[{"role": "user", "content": "解釋量子計算"}],
-      stream=False,
-  )
-  print(response.choices[0].message.content)
-  ```
+    response = client.chat.completions.create(
+        model="gemma3",
+        messages=[{"role": "user", "content": "解釋量子計算"}],
+        stream=False,
+    )
+    print(response.choices[0].message.content)
+    ```
 
   - **Open WebUI**：透過 Open WebUI 現有的 OpenAI 相容設定直接對接本專案 REST API，提供圖形化互動展示介面，無需本專案額外開發任何前端元件。
