@@ -1,12 +1,14 @@
 # Repository Architecture Design Pattern
 
-要設計一個符合領域驅動設計 (DDD) 且能整合 Ryzen AI APU 軟體堆疊（PyTorch-ROCm 與 ONNX-Ryzen AI Software）的專案程式庫，核心關鍵在於將特定「Model」（權重）與「Backend」（運算硬體）綁定，組成1 by 1的推論部署解決方案 （不支援替換模型或backend，隨插即用）。以下是針對本專案輸入與輸出邊界設計的 DDD 開發流程與架構規範：
+本專案程式庫旨在設計一套符合領域驅動設計 (DDD) 原則、並整合 Ryzen AI APU 軟體堆疊（PyTorch-ROCm 與 ONNX Ryzen AI Software）的推論框架。核心設計策略為將指定的「Model」（模型權重）與「Backend」（運算後端）進行靜態綁定，形成獨立且不可替換的推論部署單元——每一個部署單元僅對應一組固定的模型與後端組合，不支援執行期間的動態替換。以下為本專案輸入與輸出邊界設計的 DDD 開發流程與架構規範。
 
 ### 1. 設計目標及策略
 
-  - **Model（模型）**：來是HuggingFace原生transformers 提供的PyTorch模型及amd npu collection提供的onnx模型 
-  - **Backend（硬體供應者）**：Ryzen AI APU內搭載GPU及NPU，GPU需要通過PyTorch ROCm Conda虛擬環境 offload模型，NPU需要通過Ryzen AI 1.7.1 Conda虛擬環境 offload模型 (這兩整生態系對模型推論的方法沒有一致的標準，需給一個類似nn.Module這樣的繼承類來將不統一的過程變成統一的過程，以此最小化開發負擔、最大化相容性)
-  - **Task（推論任務）**：原則上提供一次性與互動式兩種推論的模式。前者主要用於測試，後者則是用於實際應用與demo。
+  - **Model（模型）**：模型來源為 HuggingFace 原生 transformers 提供的 PyTorch 模型，以及 AMD NPU Collection 提供的 ONNX 模型。
+  - **Backend（硬體後端）**：Ryzen AI APU 內建 GPU 與 NPU 兩種運算單元，分別對應不同的 Conda 執行環境。由於兩套生態系對模型推論的介面規範不一致，本專案透過定義統一的抽象繼承類別（類比於 PyTorch 的 `nn.Module`），將異質推論流程標準化為一致的呼叫介面，以降低開發耦合度並最大化跨後端相容性。
+    - **`ryzen-ai-1.7.1`**：NPU 推論環境，透過 ONNX Runtime 搭配 Ryzen AI Execution Provider 執行 NPU 模型推論；亦支援 DirectML Execution Provider 進行 GPU 推論。
+    - **`rocm-pytorch`**：GPU 推論環境，透過 PyTorch ROCm 原生 GPU 支援執行模型推論。
+  - **Task（推論任務）**：推論任務區分為兩種模式：**一次性推論（One-Shot）** 適用於測試與單次查詢；**互動式推論（Interactive）** 維持會話上下文，適用於應用整合與展示情境。
 
 ### 2. 技術架構
 
@@ -29,30 +31,32 @@
     - **Message**：單一訊息項目，結構為 `Message(role, content, timestamp)`，其中 role 可為 user/system/assistant，content 為文字或資源，timestamp 為 ISO8601 格式。
     - **Context**：會話上下文，結構為 `ConversationContext(messages, metadata)`，其中 messages 為 `List[Message]`，metadata 為附加描述（例如 session_id、language、client_info）。
 
+#### 基礎架構層 (Infrastructure Layer)：
+
+處理所有硬體與 SDK 的技術細節，將 PyTorch 與 ONNX Runtime 的差異封裝於各自的計算實體內，並透過統一的抽象介面向上層提供一致的推論呼叫方式。
+
+- 計算實體 (Compute Instance)：
+  - **transformers**：透過 HuggingFace transformers 的 PyTorch ROCm GPU 支援實作 `generate()`。
+  - **onnxruntime_genai**：透過 onnxruntime-genai 的 Vitis AI EP 或 DirectML EP 實作 `generate()`。
+    - 範例：
+      ```python
+      class CustomVLM(ImageText2Text):
+          def __init__(self):
+              super().__init__(OnnxVitisAIBackend())
+              # 於此初始化 onnxruntime_genai model 與 processor
+
+          def generate(self, context: ConversationContext) -> Generator[str, None, None]:
+              # 實作 onnxruntime_genai 推論邏輯，以 yield 逐步產出 token
+              ...
+      ```
+
 #### 應用層 (Application Layer)：
 
 負責協調任務，實現基本功能需求。
 - 推論案例 (Use Cases)：
   - **OneShotInference（一次性回覆）**：一次性推論，適合測試或單次回覆。
   - **InteractiveSession（互動式對話）**：互動式推論，維持上下文，適合 demo 或應用。
-
-#### 基礎架構層 (Infrastructure Layer)：
-
-處理所有硬體與 SDK 的技術細節，將 PyTorch 與 ONNX Runtime 的差異標準化，並提供統一的推論引擎介面。
-- 計算實體 (Compute Instance):
-  - 提供繼承Model必須配置backend屬性的抽象，並定義統一的 `run(*args, **kwargs)` 方法提供自訂運算流程。
-    - **transformers**：透過transformers （Pytorch）原生的GPU支援選項提供推論運算。
-    - **onnxruntime_genai**：透過onnxruntime_genai原生提供的Vitis AI EP/DirectML EP提供推論運算。
-    - 範例：
-      ```python
-      class Gemma3(Text2Text):
-        super.backend = PyTorchROCmBackend()
-      ```
-      ```python
-      class CustomVLM(ImageText2Text):
-        super.backend = OnnxVitisAIBackend()
-      ```
-
+  
 #### 表現層 (Presentation Layer)：
 
 定義 Input/Output 邊界所在地，負責與使用者或外部系統互動。
