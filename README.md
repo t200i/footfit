@@ -187,7 +187,7 @@ docker run --name open-webui -p 3000:8080 `
 docker start -a open-webui
 ```
 
-> 當 terminal 出現 `INFO:     Started server process [1]` 後，開啟 `http://localhost:3000` 即可進入 Open WebUI 頁面。首次進入需註冊帳號（第一位使用者自動成為 Admin），之後在對話框直接上傳圖片即可進行多模態推論。
+> 當 terminal 出現 `INFO: Started server process [1]` 後，開啟 `http://localhost:3000` 即可進入 Open WebUI 頁面。首次進入需註冊帳號（第一位使用者自動成為 Admin），之後在對話框直接上傳圖片即可進行多模態推論。
 
 
 
