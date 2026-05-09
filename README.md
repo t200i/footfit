@@ -117,22 +117,24 @@ python cli.py --model <model-id>
 
 ---
 
-### 進階用法：整合應用開發
+### 進階用法：API Server 整合
 
-啟動相容 OpenAI 協議的 API server，供 OpenAI SDK、Open WebUI 及 ComfyUI 等工具直接串接。
+#### 1. 啟動 API Server
+
+`api.py` 提供相容 OpenAI 協議的本地 HTTP server，啟動後所有下方工具均可透過 `http://localhost:8000` 串接，無需修改任何程式碼。
 
 ```powershell
 python api.py --model <model-id>
-# 預設監聽 http://localhost:8000
 ```
 
-#### OpenAI SDK
+#### 2. 使用 OpenAI SDK 進行文字對話
+
+建立 client 時只需將 `base_url` 指向本地 server，其餘用法與官方 OpenAI SDK 完全相同。
 
 ```python
 from openai import OpenAI
 client = OpenAI(base_url="http://localhost:8000/v1", api_key="local")
 
-# 文字對話
 for chunk in client.chat.completions.create(
     model="<model-id>",
     messages=[{"role": "user", "content": "解釋量子計算"}],
@@ -140,8 +142,12 @@ for chunk in client.chat.completions.create(
 ):
     print(chunk.choices[0].delta.content or "", end="", flush=True)
 ```
+
+#### 3. 使用 OpenAI SDK 進行圖文對話（Vision LM）
+
+在 `content` 中混入 `image_url` 類型的項目即可傳入圖片，僅適用於表格中 Type 欄為 `Vision LM` 的模型。
+
 ```python
-# 圖文對話，僅適用於 Vision LM（表格中 Type 欄為 `Vision LM` 的模型）。
 import base64
 image_b64 = base64.b64encode(open("cat.jpg", "rb").read()).decode()
 
@@ -156,7 +162,9 @@ for chunk in client.chat.completions.create(
     print(chunk.choices[0].delta.content or "", end="", flush=True)
 ```
 
-#### ComfyUI
+#### 4. 整合 ComfyUI
+
+將 node 腳本複製至 ComfyUI 的 `custom_nodes` 目錄，並設定指向本專案根目錄與使用的模型。
 
 ```powershell
 $env:RYZEN_AI_PROJECT_ROOT = "C:\path\to\amd-ryzen-ai-benchmark"
@@ -165,6 +173,7 @@ cp interfaces\comfyui.py C:\path\to\ComfyUI\custom_nodes\ryzen_ai_llm.py
 ```
 
 重啟 ComfyUI 後，在節點選單 **Ryzen AI / LLM** 分類下找到 **Ryzen AI LLM** 節點。支援 Vision LM 的模型會自動顯示圖片輸入端口。
+
 
 
 
