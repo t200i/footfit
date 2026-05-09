@@ -117,7 +117,7 @@ python cli.py --model <model-id>
 
 ---
 
-### 進階用法：API Server 整合
+### 進階用法：整合應用開發
 
 #### 1. 啟動 API Server
 
@@ -162,17 +162,24 @@ for chunk in client.chat.completions.create(
     print(chunk.choices[0].delta.content or "", end="", flush=True)
 ```
 
-#### 4. 整合 ComfyUI
+#### 4. 整合 Open WebUI
 
-將 node 腳本複製至 ComfyUI 的 `custom_nodes` 目錄，並設定指向本專案根目錄與使用的模型。
+以 Docker 啟動 [Open WebUI](https://github.com/open-webui/open-webui)，提供類似 ChatGPT 的聊天介面，原生支援圖片上傳，模型由本機 `api.py` 提供，容器本身不需存放任何模型權重。
 
 ```powershell
-$env:RYZEN_AI_PROJECT_ROOT = "C:\path\to\amd-ryzen-ai-benchmark"
-$env:MODEL_ID = "<model-id>"
-cp interfaces\comfyui.py C:\path\to\ComfyUI\custom_nodes\ryzen_ai_llm.py
+# 第一次執行（建立容器）
+docker run --name open-webui -p 3000:8080 `
+  -e OPENAI_API_BASE_URL=http://host.docker.internal:8000/v1 `
+  -e OPENAI_API_KEY=local `
+  ghcr.io/open-webui/open-webui:main
 ```
 
-重啟 ComfyUI 後，在節點選單 **Ryzen AI / LLM** 分類下找到 **Ryzen AI LLM** 節點。支援 Vision LM 的模型會自動顯示圖片輸入端口。
+```powershell
+# 之後每次重啟請使用此命令（或透過Docker Desktop按鍵重啟）
+docker start -a open-webui
+```
+
+啟動後開啟 `http://localhost:3000`，首次進入需註冊帳號（第一位使用者自動成為 Admin）。Open WebUI 會自動從 `/v1/models` 拉取模型清單，在對話框直接上傳圖片即可進行多模態推論。
 
 
 
