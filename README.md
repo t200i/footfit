@@ -27,7 +27,7 @@
 
 #### 1. 安裝 NPU 驅動軟體並建立 Ryzen AI 虛擬環境
 
-依照 [installation instructions](https://ryzenai.docs.amd.com/en/latest/inst.html)下載並安裝**NPU driver 32.0.203.280**+**ryzen-ai-lt 1.7.1**，此步驟會自動建立 (`ryzen-ai-1.7.1`)。
+依照 [installation instructions](https://ryzenai.docs.amd.com/en/latest/inst.html)下載並安裝**NPU driver 32.0.203.280**+**ryzen-ai-lt 1.7.1**，此步驟會自動建立 Conda 虛擬環境 `ryzen-ai-1.7.1`。
 
 #### 2. 將新版的 Vitis AI EP 匯入系統環境變數
 
