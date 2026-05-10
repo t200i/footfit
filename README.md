@@ -124,8 +124,11 @@ python cli.py --model <model-id>
 `api.py` 提供相容 OpenAI 協議的本地 HTTP server，啟動後所有下方工具均可透過 `http://localhost:8000` 串接，無需修改任何程式碼。
 
 ```powershell
+
+conda activate <environment>
 python api.py --model <model-id>
 ```
+> 「二、Open AI Python SDK」與「三、Open WebUI」皆須先啟動以此API Server，才能認到模型提供推論服務。
 
 #### 二、使用 OpenAI SDK 進行文字對話
 
@@ -165,15 +168,6 @@ for chunk in client.chat.completions.create(
 #### 四、整合 Open WebUI
 
 以 Docker 啟動 [Open WebUI](https://github.com/open-webui/open-webui)，提供類似 ChatGPT 的聊天介面，原生支援圖片上傳，模型由本機 `api.py` 提供，容器本身不需存放任何模型權重。
-
-**Step 1. 使用 Terminal 1 啟動 API Server**
-
-```powershell
-conda activate <environment>
-python api.py --model <model-id>
-```
-
-**Step 2. 使用 Terminal 2 啟動 Open WebUI**
 
 ```powershell
 # 第一次執行（建立容器）
