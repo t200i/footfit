@@ -128,7 +128,7 @@ python cli.py --model <model-id>
 conda activate <environment>
 python api.py --model <model-id>
 ```
-> 「二、Open AI Python SDK」與「三、Open WebUI」皆須先啟動以此API Server，才能認到模型提供推論服務。
+> 「Open AI Python SDK」與「Open WebUI」皆須通過額外獨立的Terminal預先啟動本API Server，才能認到模型以提供推論服務。
 
 #### 二、使用 OpenAI SDK 進行文字對話
 
