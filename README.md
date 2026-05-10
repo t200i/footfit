@@ -167,7 +167,7 @@ for chunk in client.chat.completions.create(
 
 #### 四、整合 Open WebUI
 
-以 Docker 啟動 [Open WebUI](https://github.com/open-webui/open-webui)，提供類似 ChatGPT 的聊天介面，原生支援圖片上傳，模型由本機 `api.py` 提供，容器本身不需存放任何模型權重。
+以 Docker 啟動 [Open WebUI](https://github.com/open-webui/open-webui)，提供 ChatGPT 聊天介面、支援圖片上傳功能。
 
 ```powershell
 # 第一次執行（建立容器）
