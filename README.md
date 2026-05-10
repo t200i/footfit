@@ -119,7 +119,7 @@ python cli.py --model <model-id>
 
 ### 進階用法：整合應用開發
 
-#### 一、啟動 API Server
+#### 一、使用 API Server
 
 `api.py` 提供相容 OpenAI 協議的本地 HTTP server，啟動後所有下方工具均可透過 `http://localhost:8000` 串接，無需修改任何程式碼。
 
