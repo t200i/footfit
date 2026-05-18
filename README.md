@@ -49,13 +49,14 @@ pip install -r requirements.txt
 
 **Step 2. 建立 ROCm PyTorch 虛擬環境**
 
-建立 Python 3.12 執行環境，並依照 [PyTorch via PIP installation](https://rocm.docs.amd.com/projects/radeon-ryzen/en/latest/docs/install/installryz/windows/install-pytorch.html) 安裝 ROCm，再安裝本專案所需的套件：
+建立 Python 3.12 執行環境，並依照 [PyTorch via PIP installation](https://rocm.docs.amd.com/projects/radeon-ryzen/en/latest/docs/install/installryz/windows/install-pytorch.html) 安裝 ROCm：
 
 ```bash
 conda create -n rocm-pytorch python=3.12
 # pip install --no-cache-dir <rocm-dependencies>
 # pip install --no-cache-dir <pytorch-dependencies>
 ```
+接著再安裝本專案所需的套件：
 ```bash
 conda activate rocm-pytorch
 pip install -r requirements-rocm.txt
