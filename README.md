@@ -45,7 +45,7 @@ pip install -r requirements.txt
 
 **Step 1. 安裝 GPU 驅動軟體**
 
-先更新Windows update至最新版，依照 [Release Note](https://www.amd.com/en/resources/support-articles/release-notes/RN-RAD-WIN-26-2-2.html) 下載並安裝 **whql-amd-software-adrenalin-edition-26.2.2-win11-c**。
+先更新Windows update至最新版，再依照 [Release Note](https://www.amd.com/en/resources/support-articles/release-notes/RN-RAD-WIN-26-2-2.html) 下載並安裝 **AMD Software: Adrenalin Edition 26.2.2 Driver**。
 
 **Step 2. 建立 ROCm PyTorch 虛擬環境**
 
