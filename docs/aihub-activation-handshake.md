@@ -15,10 +15,17 @@ Licensee 只需做兩件事：
 # 步驟一：設定 License Key（一次性，建議寫入 ~/.bashrc 或 ~/.zshrc）
 export AIHUB_LICENSE_KEY=lic-xxxxxxxxxxxxxxxx
 
-# 步驟二：拉取並執行（與 ollama 體驗相同）
+# 步驟二：拉取並執行
 docker pull model-cards-registry.azurecr.io/ryzenai/gemma4-4b-gpu:latest
-docker run --rm -p 8000:8000 -e AIHUB_LICENSE_KEY model-cards-registry.azurecr.io/ryzenai/gemma4-4b-gpu:latest
+docker run --rm -p 8000:8000 \
+  -e AIHUB_LICENSE_KEY \
+  -v aihub-telemetry:/app/logs \
+  model-cards-registry.azurecr.io/ryzenai/gemma4-4b-gpu:latest
 ```
+
+> **`-v aihub-telemetry:/app/logs` 是必要參數。**  
+> `aihub-telemetry` 是 Docker Named Volume，由 Docker daemon 管理，`--rm` 不會刪除它。  
+> 此 volume 用於在網路中斷期間暫存用量紀錄，容器重啟後自動補送。
 
 啟動後，服務即可接受 OpenAI 相容 API 請求：
 
@@ -36,9 +43,10 @@ curl http://localhost:8000/v1/chat/completions \
 
 | 目標 | 機制 |
 |------|------|
-| 簡單 UX | 只需一個環境變數 `AIHUB_LICENSE_KEY` |
+| 簡單 UX | 一個環境變數 `AIHUB_LICENSE_KEY` + 一個 Named Volume |
 | 一 Key 一設備 | License Key 於首次啟用時綁定設備指紋（CPU_ID + MAC + hostname），指紋不符一律拒絕 |
-| 離線容錯 | 寬限期（Grace Period）允許短暫離線 |
+| 離線容錯 | Docker Named Volume 暫存用量，`--rm` 不會刪除；重連後自動補送 |
+| 離線緩衝防竄改 | 每筆紀錄附 HMAC 簽章 + 單調遞增序列號；Hub 偵測序列缺口時停止服務 |
 | 用量追蹤 | Heartbeat 定期回報，供 Principal 核算貢獻獎酬 |
 
 ---
@@ -101,24 +109,53 @@ sequenceDiagram
     participant H as AI Hub
 
     loop 每 heartbeat_interval_seconds（預設 300s）
-        E->>H: POST /v1/heartbeat<br/>{ session_token, device_fingerprint,<br/>  usage: { input_tokens, output_tokens, request_count } }
-        Note over H: 驗證 session_token<br/>確認 device_fingerprint 未變動<br/>累計用量，更新配額餘量
-        H-->>E: { continue: true,<br/>  quota_tokens_remaining,<br/>  next_heartbeat_seconds }
+        E->>H: POST /v1/heartbeat<br/>{ session_token, device_fingerprint,<br/>  seq_no, usage: { input_tokens, output_tokens, request_count } }
+        Note over H: 驗證 session_token<br/>確認 device_fingerprint 未變動<br/>比對伺服器端帳本的 last_confirmed_seq_no<br/>累計用量，更新帳本與配額餘量
+        H-->>E: { continue: true,<br/>  quota_tokens_remaining,<br/>  last_confirmed_seq_no,<br/>  next_heartbeat_seconds }
     end
 ```
 
-**心跳中斷的處理：**
+**心跳中斷的處理（預授權離線額度機制）：**
+
+> **設計原則**：Hub 是唯一帳本。離線期間，容器只能消耗「已預先授權的離線額度」，不依賴本地記錄的用量準確性。
+
+每次心跳回應中，Hub 同時下發下一個心跳週期的**預授權離線額度（Offline Budget）**：
+
+```mermaid
+sequenceDiagram
+    participant E as 容器
+    participant H as AI Hub
+
+    E->>H: POST /v1/heartbeat<br/>{ session_token, seq_no,<br/>  usage_this_period: { input, output } }
+    Note over H: 扣除本期用量<br/>更新伺服器端帳本<br/>核算下一期離線額度
+    H-->>E: { continue: true,<br/>  quota_remaining,<br/>  offline_budget_tokens: 10000,<br/>  offline_budget_expires_in: 1800 }
+    Note over E: 將 offline_budget 存入記憶體
+```
 
 ```mermaid
 flowchart TD
-    A([Hub 不可達]) --> B{寬限期內?}
-    B -- 是 --> C[繼續服務推論請求\n本地暫存用量至\nlogs/telemetry_queue.jsonl]
-    B -- 否 --> D[停止接受新推論請求\nHTTP 503]
-    D --> E[每 60 秒重試連線]
-    E --> F{連線恢復?}
-    F -- 是 --> G[補送暫存用量\n恢復服務]
-    F -- 否 --> E
+    A([Hub 不可達]) --> B["使用記憶體中的 offline_budget_tokens"]
+    B --> C{offline_budget_tokens > 0\n且尚未到期?}
+    C -- 是 --> D[允許推論\n每次扣減消耗量]
+    C -- 否 --> E([停止服務 HTTP 503\n等待重連或預算補發])
+    D --> F{每 60 秒重試連線}
+    F -- 連線恢復 --> G["送出本期實際用量\nHub 扣帳 + 補發新 offline_budget\n恢復正常 Heartbeat 週期"]
+    F -- 仍離線 --> C
 ```
+
+**為什麼這樣設計是安全的：**
+
+| 攻擊情境 | 系統回應 |
+|---------|---------|
+| 使用者刪除 Named Volume | 記憶體中的 offline_budget 本就不在 Volume，不受影響；Hub 帳本不變 |
+| 使用者修改 Volume 中的暫存紀錄 | Hub 只看自己下發的 offline_budget 上界，不信任客戶端回報的數字是「節省」了多少 |
+| 使用者讓容器永遠離線不重連 | offline_budget 有到期時間（`offline_budget_expires_in`），到期後停服 |
+| 使用者重啟容器嘗試重置 offline_budget | 重啟後必須重走 Phase 1 Activation；Hub 帳本知道上次下發的 budget，不會重複授予 |
+
+**Named Volume 在此設計中的角色縮減為：**
+- 暫存「本期已消耗用量」，在重連後誠實回報給 Hub
+- 即使全部刪除，Hub 只會以「offline_budget 全數消耗完」來計帳（最保守估算）
+- 使用者無法靠刪除 Volume 來獲利
 
 ---
 
