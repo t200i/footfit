@@ -31,10 +31,10 @@
    └── Docker 容器封裝推論邏輯，Agent 只能透過 API 存取，無法直取底層權重或程式碼
 
 2. 漸進式移轉層（Progressive Transfer）
-   └── License File 控制存取範圍，平台決定哪些帳戶可用哪些模型
+   └── License Key 控制存取範圍，平台決定哪些帳戶可用哪些模型
 
 3. Principal-Agent 監測層（Usage Monitoring）
-   └── 每次推論的用量回報給平台，供 Principal 驗證各團隊承諾並設計對應獎酬
+   └── 授權購買時即結算設備月數，帳本同步更新 Deployer Budget 與 Model Owner Credit
 ```
 
 ---
@@ -66,13 +66,13 @@
 
 平台（model-cards.azurecr.io）
   ├── 儲存 Image 與 Model Card（ACR Manifest Labels）
-  ├── 核發 License File（控制哪些帳戶可用哪些模型）
-  └── 接收 Usage Telemetry → 供 Principal 驗證承諾與設計獎酬
+  ├── 核發 License Key（控制哪些帳戶可用哪些模型）
+  └── 授權購買時結算 Dual-Ledger（Deployer Budget / Model Owner Credit）
 
 使用方（Edge 裝置 / 下游 Agent）
-  ├── 持有 License File → 容器啟動時驗證（物理隔離閘門）
+  ├── 持有 License Key → 容器啟動時 Activation Handshake（物理隔離閘門）
   ├── 拉取 Image → 只能透過 API 存取推論能力（無法直取底層）
-  └── 每次推論後自動回報用量 → 平台即時記錄
+  └── 定期 Heartbeat 確認授權有效（不回報推論數據）
 ```
 
 ---
@@ -106,8 +106,8 @@
 | `ai.benchmark.framework-version` | 本 benchmark 框架版本 | `1.2.0` |
 | `ai.benchmark.input-types` | 支援的輸入類型（逗號分隔） | `text,image` |
 | `ai.benchmark.context-length` | 最大 context 長度（tokens） | `8192` |
-| `ai.benchmark.license-required` | 是否需要 License File 才能啟動 | `true` |
-| `ai.benchmark.telemetry-endpoint` | 計費遙測回報的平台 endpoint | `https://billing.ai-hub.example.com/v1/usage` |
+| `ai.benchmark.license-required` | 是否需要 License Key 才能啟動 | `true` |
+| `ai.benchmark.model-owner` | 模型擁有者帳號（鎖定，決定 Credit 歸屬） | `team-amd-ryzenai` |
 
 #### Dockerfile 範例（以 `gemma4-4b-gpu` 為例）
 
@@ -122,7 +122,7 @@ LABEL ai.benchmark.model-id="gemma4-4b-gpu" \
       ai.benchmark.input-types="text,image" \
       ai.benchmark.context-length="8192" \
       ai.benchmark.license-required="true" \
-      ai.benchmark.telemetry-endpoint="https://billing.ai-hub.example.com/v1/usage"
+      ai.benchmark.model-owner="team-amd-ryzenai"
 ```
 
 #### 從 ACR 讀取 Model Card（平台側）
@@ -195,16 +195,13 @@ COPY api.py cli.py ./
 COPY entrypoint.sh ./
 RUN chmod +x entrypoint.sh
 
-# weights 與 license 由外部掛載，不打包進 Image
-VOLUME ["/app/weights", "/app/license"]
+# weights 由外部掛載，不打包進 Image
+VOLUME ["/app/weights"]
 
 EXPOSE 8000
 
-ENV MODEL_ID=""
 ENV HOST="0.0.0.0"
 ENV PORT="8000"
-ENV LICENSE_PATH="/app/license/license.json"
-ENV TELEMETRY_ENDPOINT="https://billing.ai-hub.example.com/v1/usage"
 
 # ── Model Card ──────────────────────────────────────────────────────────────
 LABEL ai.benchmark.model-id="gemma4-4b-gpu" \
@@ -216,43 +213,20 @@ LABEL ai.benchmark.model-id="gemma4-4b-gpu" \
       ai.benchmark.input-types="text,image" \
       ai.benchmark.context-length="8192" \
       ai.benchmark.license-required="true" \
-      ai.benchmark.telemetry-endpoint="https://billing.ai-hub.example.com/v1/usage"
+      ai.benchmark.model-owner="team-amd-ryzenai"
 
 ENTRYPOINT ["./entrypoint.sh"]
 ```
 
 ---
 
-### 2.2 License File 授權機制
+### 2.2 License Key 授權機制
 
-每個 Edge 裝置在啟動容器前，**必須**持有平台核發的 License File。
+每個 Edge 裝置透過 `AIHUB_LICENSE_KEY` 環境變數取得授權，**不需要掛載任何本地授權檔案**。
 
-#### License File 格式（`license.json`）
+License Key 由 AI Hub Portal 核發，格式為不透明字串。容器啟動時自動向 Hub 完成 Activation Handshake，將 Key 綁定至設備指紋（CPU + MAC + hostname）。
 
-```json
-{
-  "license_id": "lic-abc123",
-  "issued_to": "customer-device-001",
-  "issued_at": "2026-06-15T00:00:00Z",
-  "expires_at": "2026-07-15T00:00:00Z",
-  "allowed_models": ["gemma4-4b-gpu", "gemma4-2b-gpu"],
-  "signature": "<platform-signed-hmac-sha256>"
-}
-```
-
-| 欄位 | 說明 |
-|------|------|
-| `license_id` | 平台核發的唯一授權 ID，用於計費關聯 |
-| `issued_to` | 綁定的裝置或客戶識別碼 |
-| `expires_at` | 授權到期時間，容器啟動時驗證，過期則拒絕啟動 |
-| `allowed_models` | 此授權允許執行的 model-id 清單 |
-| `signature` | 平台使用私鑰簽署的 HMAC-SHA256，防止偽造 |
-
-#### 授權驗證流程
-
-1. **容器啟動時**（`entrypoint.sh`）：讀取 `LICENSE_PATH` 並驗證簽章與到期日
-2. **驗證失敗**：輸出錯誤說明後以 exit code 1 終止，不啟動推論服務
-3. **到期預警**：距到期 7 天內，每次啟動輸出 WARNING 提示
+詳細交握流程見 [docs/aihub-activation-handshake.md](./aihub-activation-handshake.md)。
 
 ---
 
@@ -264,50 +238,32 @@ set -euo pipefail
 
 echo "[entrypoint] 啟動 AI Benchmark 服務..."
 
-# ── 1. License File 驗證 ────────────────────────────────────────────────────
-if [ ! -f "${LICENSE_PATH}" ]; then
-  echo "[entrypoint][ERROR] License File 不存在：${LICENSE_PATH}" >&2
-  echo "[entrypoint][ERROR] 請聯絡平台取得授權檔並掛載至 /app/license/" >&2
+# ── 1. License Key 必填檢查 ─────────────────────────────────────────────────
+if [ -z "${AIHUB_LICENSE_KEY:-}" ]; then
+  echo "[entrypoint][ERROR] 環境變數 AIHUB_LICENSE_KEY 未設定" >&2
+  echo "[entrypoint][ERROR] 請從 AI Hub Portal 取得授權金鑰，以 -e AIHUB_LICENSE_KEY=<key> 傳入" >&2
   exit 1
 fi
 
+# ── 2. Activation Handshake（由 Python 執行，取得 session_token）──────────
 python - <<'EOF'
-import json, sys, datetime, os
-
-license_path = os.environ["LICENSE_PATH"]
-model_id = os.environ["MODEL_ID"]
-
-with open(license_path) as f:
-    lic = json.load(f)
-
-expires = datetime.datetime.fromisoformat(lic["expires_at"].replace("Z", "+00:00"))
-now = datetime.datetime.now(datetime.timezone.utc)
-if now > expires:
-    print(f"[entrypoint][ERROR] 授權已於 {lic['expires_at']} 到期，請向平台申請續約", file=sys.stderr)
+import sys
+from ryzenai.license import activate
+result = activate()  # 向 Hub 驗證 Key、綁定指紋、取得 session_token
+if not result.ok:
+    print(f"[entrypoint][ERROR] {result.error}: {result.message}", file=sys.stderr)
     sys.exit(1)
-
-days_left = (expires - now).days
-if days_left <= 7:
-    print(f"[entrypoint][WARNING] 授權將於 {days_left} 天後到期（{lic['expires_at']}），請提前續約")
-
-if model_id not in lic.get("allowed_models", []):
-    print(f"[entrypoint][ERROR] 此授權不允許執行模型 '{model_id}'，許可清單：{lic['allowed_models']}", file=sys.stderr)
-    sys.exit(1)
-
-print(f"[entrypoint] License 驗證通過（授權 ID：{lic['license_id']}，剩餘 {days_left} 天）")
+print(f"[entrypoint] 授權驗證通過（到期日：{result.license_expires_at}）")
 EOF
 
-# ── 2. MODEL_ID 必填檢查 ────────────────────────────────────────────────────
-if [ -z "${MODEL_ID}" ]; then
-  echo "[entrypoint][ERROR] 環境變數 MODEL_ID 未設定" >&2
-  exit 1
-fi
-
 # ── 3. Weights 掛載確認（NPU ONNX 模型需要本地 weights）──────────────────
+MODEL_ID=$(python -c "from ryzenai.config import MODEL_ID; print(MODEL_ID)")
 if [[ "${MODEL_ID}" == *"-npu"* ]]; then
   if [ ! -d "/app/weights" ] || [ -z "$(ls -A /app/weights)" ]; then
     echo "[entrypoint][ERROR] NPU 模型 weights 目錄為空：/app/weights" >&2
     exit 1
+  fi
+fi
   fi
 fi
 
@@ -320,53 +276,18 @@ exec python api.py \
 
 ---
 
-### 2.4 使用量遙測（Principal-Agent 監測）
+### 2.4 授權驗證機制（Principal-Agent 監測）
 
-每次推論完成後，框架層**必須**非同步地向 `TELEMETRY_ENDPOINT` 回報使用量資料，供平台：
+帳本在**授權購買時**一次結算，不依賴執行期推論計量：
 
-1. **驗證承諾**：比對各貢獻團隊聲明的模型能力與實際被使用的情況
-2. **設計獎酬**：Principal 依據實際用量，核算對貢獻團隊符合承諾的回報
-3. **漸進開放決策**：用量低或回報異常的模型，可縮減其 License 存取範圍
+- **Deployer Budget**：購買 N 設備月授權 → 帳本 −N
+- **Model Owner Credit**：同一筆購買 → 模型擁有者帳本 +N（依 `ai.benchmark.model-owner` Label 決定歸屬）
 
-遙測邏輯在 API 層（`api.py`）統一注入，**不侵入**模型模組（`ryzenai/modules/`）。
+排行榜直接查詢帳本累計值，無需 runtime telemetry。
 
-#### 遙測 Payload（HTTP POST JSON）
+容器在執行期間僅傳送**定期心跳**（每小時一次），確認 License Key 尚未被撤銷，不回報任何推論數據。詳細交握流程見 [docs/aihub-activation-handshake.md](./aihub-activation-handshake.md)。
 
-```json
-{
-  "schema_version": "1.0",
-  "license_id": "lic-abc123",
-  "model_id": "gemma4-4b-gpu",
-  "contributor_team": "team-placeholder",
-  "request_id": "chatcmpl-a1b2c3d4",
-  "timestamp": "2026-06-15T14:30:00+08:00",
-  "backend": "igpu-rocm",
-  "hardware": "AMD Ryzen AI 9 HX 370",
-  "input_tokens": 42,
-  "output_tokens": 128,
-  "ttft_seconds": 1.87,
-  "throughput_tps": 137.2,
-  "error": null
-}
-```
-
-#### 欄位說明
-
-| 欄位 | 型別 | 監測用途 |
-|------|------|---------|
-| `license_id` | string | 關聯使用方帳戶，追蹤誰在用 |
-| `model_id` | string | 關聯貢獻團隊，追蹤哪個模型被用 |
-| `contributor_team` | string | 直接標記貢獻團隊（帳戶架構細化前暫以 placeholder 填入）|
-| `request_id` | string | 防重複計量 |
-| `input_tokens` / `output_tokens` | int | 用量計量基礎（可衍生獎酬或成本） |
-| `ttft_seconds` / `throughput_tps` | float | 驗證模型實際效能是否符合 Model Card 聲明 |
-| `error` | string \| null | 失敗請求不計入有效用量 |
-
-#### 設計原則
-
-- 遙測為**非同步**發送（`asyncio` background task），不阻塞推論回應
-- 若 endpoint 不可達，寫入本地備援佇列（`logs/telemetry_queue.jsonl`），待連線恢復後補送
-- `contributor_team` 欄位在帳戶架構確定後，由平台依 `model_id` 自動對應，無需上架方手動填寫
+> `ai.benchmark.model-owner` 欄位在 Model Card 發布時鎖定，不可事後修改。此欄位決定每筆授權購買的 Credit 歸屬。
 
 ---
 
@@ -568,7 +489,7 @@ echo "金鑰輪替完成：${KV_NAME}/${SECRET_NAME}"
 
 ### 2.11 Edge 裝置部署（`docker-compose.yml`）
 
-下游 Edge 裝置收到 License File 後，使用以下 `docker-compose.yml` 啟動服務：
+下游 Edge 裝置取得 License Key 後，使用以下 `docker-compose.yml` 啟動服務：
 
 ```yaml
 # docker-compose.yml（供 Edge 設備下游使用）
@@ -577,15 +498,11 @@ services:
     image: model-cards.azurecr.io/itri/rocm/ryzenai-benchmark:1.2.0
     restart: unless-stopped
     environment:
-      MODEL_ID: gemma4-4b-gpu
-      LICENSE_PATH: /app/license/license.json
-      TELEMETRY_ENDPOINT: https://billing.ai-hub.example.com/v1/usage
+      AIHUB_LICENSE_KEY: <你的授權金鑰>
     ports:
       - "8000:8000"
     volumes:
       - ./weights:/app/weights:ro       # 本地 weights（唯讀）
-      - ./license:/app/license:ro       # License File（唯讀）
-      - ./logs:/app/logs                # 本地遙測備援佇列
     devices:
       - /dev/kfd                        # AMD ROCm iGPU 直通
       - /dev/dri
@@ -608,15 +525,15 @@ AMD Ryzen AI NPU（VitisAI EP）因驅動僅支援 Windows，目前尚無成熟�
 | VitisAI EP DLL 依賴 | 需要 `C:\Program Files\RyzenAI\` 下的 DLL，容器化困難 |
 | Windows Container 成熟度 | GPU/NPU 直通支援遠不如 Linux + Docker |
 
-### 3.2 暫行方案（License File 等效控制）
+### 3.2 暫行方案（License Key 等效控制）
 
 在 Docker 容器化可行前，NPU 路線採用以下替代授權機制：
 
 | Layer 2 功能 | NPU 暫行替代方案 |
 |-------------|----------------|
 | ACR Image 存取控制 | Azure Blob Storage SAS Token（30 天有效期） |
-| License File 驗證 | 相同格式，由 `entrypoint.py` 在 Conda 環境中執行驗證 |
-| 計費遙測 | 相同 HTTP callback 規格，由 `api.py` 直接呼叫 |
+| License Key 驗證 | 相同機制，由 `entrypoint.py` 在 Conda 環境中執行 Activation Handshake |
+| Heartbeat | 相同 HTTP 規格，由背景 task 每小時呼叫 |
 | 金鑰輪替 | SAS Token 自動過期 + 通知客戶重新取得 |
 
 ---
@@ -629,15 +546,14 @@ AMD Ryzen AI NPU（VitisAI EP）因驅動僅支援 Windows，目前尚無成熟�
 - [ ] `CHANGELOG.md` 已更新本版本條目
 - [ ] Git tag 格式符合 `v<major>.<minor>.<patch>`
 - [ ] Dockerfile 已嵌入所有必要 Model Card Labels
-- [ ] `ai.benchmark.license-required` 與 `ai.benchmark.telemetry-endpoint` 已正確設定
+- [ ] `ai.benchmark.license-required` 與 `ai.benchmark.model-owner` 已正確設定
 
 ### Layer 2（Linux iGPU 容器化）
 - [ ] `Dockerfile` 採多階段建置
-- [ ] `entrypoint.sh` 在 License File 缺失或過期時正確終止（exit code 1）
-- [ ] License File 驗證涵蓋：簽章、到期日、model 許可清單
-- [ ] 計費遙測在測試環境中成功送達指定 endpoint，response 200
-- [ ] 計費遙測在 endpoint 不可達時正確寫入 `logs/telemetry_queue.jsonl`
-- [ ] ACR 映像標籤含版本號與 backend 標識（例：`itri/rocm/ryzenai-benchmark:1.2.0`）
+- [ ] `entrypoint.sh` 在 License Key 無效或過期時正確終止（exit code 1）
+- [ ] Activation Handshake 在測試環境中成功完成，取得 `session_token`
+- [ ] Heartbeat 每小時正確回報，Hub 回應 `continue: true`
+- [ ] ACR 映像路徑格式正確（例：`model-cards.azurecr.io/itri/rocm/ryzenai-benchmark:1.2.0`）
 - [ ] Service Principal `sp-model-cards-edge-pull` 僅持有 `acrpull` 權限
 - [ ] `release.yml` 成功在 CI 執行並推送至 `model-cards`
 - [ ] Edge 裝置以 `docker-compose.yml` 啟動並驗證 `http://localhost:8000/v1/models` 正常回應
@@ -654,8 +570,8 @@ AMD Ryzen AI NPU（VitisAI EP）因驅動僅支援 Windows，目前尚無成熟�
 
 | 需客製化的項目 | 本規章預設值 | 其他專案替換說明 |
 |--------------|------------|----------------|
-| ACR Image 命名前綴 | `ryzenai-benchmark` | 替換為對應專案名稱 |
-| `TELEMETRY_ENDPOINT` | `https://billing.ai-hub.example.com/v1/usage` | 替換為對應平台的計費 endpoint |
+| ACR Image 路徑 | `itri/rocm/ryzenai-benchmark` | 替換為 `<供應商>/<軟體堆疊>/<模型>` |
+| `ai.benchmark.model-owner` | `team-amd-ryzenai` | 替換為對應模型擁有者帳號 |
 | Dockerfile `LABEL` 區塊 | `gemma4-4b-gpu` 相關資訊 | 替換為對應模型的 Model Card 資訊 |
 | `entrypoint.sh` 的 weights 路徑邏輯 | `/app/weights` | 依各專案 weights 目錄結構調整 |
 | `docker-compose.yml` 的 `devices` 區塊 | AMD ROCm（`/dev/kfd`, `/dev/dri`） | 依硬體替換（見下表） |

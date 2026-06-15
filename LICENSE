@@ -62,8 +62,8 @@ ARTICLE 2 — GRANT OF LICENSE (FRAMEWORK CODE)
 
      (a) Pull Container Images from the AI Hub Platform using a valid
          License Key;
-     (b) Run Container Images on Authorized Devices within the device quota
-         associated with the Licensee's account;
+     (b) Run Container Images on Authorized Devices within the license
+         period and device binding associated with the License Key;
      (c) Access the inference API exposed by a running Container Image for
          internal research, development, and evaluation purposes.
 
@@ -73,10 +73,10 @@ ARTICLE 2 — GRANT OF LICENSE (FRAMEWORK CODE)
          contents to any third party;
      (b) Reverse-engineer, decompile, or extract the Framework Code or
          Model Weights from a Container Image;
-     (c) Modify the entrypoint, license validation, or telemetry components
+     (c) Modify the entrypoint, license validation, or heartbeat components
          of a Container Image;
-     (d) Run a Container Image on more Authorized Devices simultaneously
-         than permitted by the Licensee's account quota;
+     (d) Run a Container Image on a device whose fingerprint does not match
+         the device binding registered for the License Key;
      (e) Circumvent, disable, or interfere with the License Key validation,
          Device Fingerprint binding, or Heartbeat mechanisms described in
          docs/aihub-activation-handshake.md.
@@ -138,26 +138,36 @@ ARTICLE 4 — LICENSE KEY AND DEVICE AUTHORIZATION
 
 
 ───────────────────────────────────────────────────────────────────────────────
-ARTICLE 5 — USAGE TELEMETRY AND DATA CONTRACT
+ARTICLE 5 — LICENSE ACCOUNTING AND DATA CONTRACT
 ───────────────────────────────────────────────────────────────────────────────
 
-5.1  Container Images automatically transmit Usage Telemetry to the AI Hub
-     Platform upon each inference request. Telemetry includes:
-     input token count, output token count, model identifier, device
-     fingerprint hash, license key identifier, and timestamp. This data
-     is used to enforce usage quotas and to calculate contributor rewards
-     under the ITRI AI Hub Principal-Agent mechanism.
+5.1  The ITRI AI Hub Platform operates a Dual-Ledger accounting system based
+     on device-month units. Upon each license purchase, the Platform
+     simultaneously records:
 
-5.2  Licensee consents to the collection and processing of Usage Telemetry
-     as a condition of this license.
+     (a) Deployer Budget Ledger: the number of device-months purchased is
+         debited from the Licensee's account (1 device × 1 month = 1 unit).
+         This feeds the Deployer Activity Leaderboard.
+
+     (b) Model Owner Credit Ledger: the same number of device-months is
+         credited to the model_owner_account declared in the Model Card of
+         the deployed Container Image. This feeds the Model Contribution
+         Leaderboard. The model_owner_account field is locked at Model Card
+         publication and cannot be modified retroactively.
+
+5.2  Container Images transmit periodic Heartbeat signals to the AI Hub
+     Platform solely for license validity verification. Heartbeat payloads
+     contain only: session token and device fingerprint hash. No inference
+     usage data (token counts, request counts, or content) is collected
+     or transmitted.
 
 5.3  If the AI Hub Platform is temporarily unreachable, the Container Image
-     may continue serving requests for a grace period specified in the
-     activation response. Queued telemetry will be transmitted upon
-     reconnection.
+     continues serving requests until the license_expires_at timestamp
+     received during activation. No grace period extension is granted
+     beyond the purchased license period.
 
-5.4  Licensor will handle telemetry data in accordance with ITRI's Privacy
-     Policy and applicable Taiwan law (Personal Data Protection Act,
+5.4  Licensor will handle all collected data in accordance with ITRI's
+     Privacy Policy and applicable Taiwan law (Personal Data Protection Act,
      PDPA 個人資料保護法).
 
 

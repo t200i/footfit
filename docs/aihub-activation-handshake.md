@@ -1,7 +1,7 @@
-# ITRI AI Hub — 容器授權交握協定
+﻿# ITRI AI Hub — 容器授權交握協定
 
-本文件說明 ITRI AI Hub 與 Docker Model Image 之間的三段式交握機制（Three-Phase Handshake）。  
-此機制在保持 **`docker pull` + `docker run` 簡單 UX** 的前提下，將 License Key 綁定至唯一設備指紋，任何指紋不符的執行請求均被拒絕。
+本文件說明 ITRI AI Hub 與 Docker Model Image 之間的交握機制（Two-Phase Handshake）。  
+此機制在保持 **`docker run` 簡單 UX** 的前提下，將 License Key 綁定至唯一設備指紋，任何指紋不符的執行請求均被拒絕。
 
 完成首次啟用約需 **30 秒**（自動在背景執行，不影響推論服務啟動）。
 
@@ -36,7 +36,7 @@ curl http://localhost:8000/v1/chat/completions \
   -d '{"model":"gemma4-4b","messages":[{"role":"user","content":"你好"}]}'
 ```
 
-所有授權驗證、設備綁定、用量回報均在容器內部自動處理，**使用者不需要了解交握細節**。
+所有授權驗證與設備綁定均在容器內部自動處理，**使用者不需要了解交握細節**。
 
 ---
 
@@ -46,39 +46,45 @@ curl http://localhost:8000/v1/chat/completions \
 |------|------|
 | 簡單 UX | 單一 `docker run` 指令，Key 直接以 `-e AIHUB_LICENSE_KEY=<key>` 傳入 |
 | 一 Key 一設備 | License Key 於首次啟用時綁定設備指紋（CPU_ID + MAC + hostname），指紋不符一律拒絕 |
-| 離線容錯 | 預授權離線額度（Offline Budget）限制離線期間最大用量，到期自動停服 |
-| 防重建攻擊 | 重新 Activation 時 Hub 全額扣除上一份 offline_budget，重建越多扣越多 |
-| 雙邊帳本 | 使用者消耗 Budget（−tokens）；模型擁有者獲得 Credit（+tokens）；兩條獨立排行 |
+| 離線容錯 | 容器以啟用時取得的 `license_expires_at` 為依據，到期前即使暫時離線仍可繼續服務 |
+| 雙邊帳本 | 授權購買時即結算：Deployer Budget −N、Model Owner Credit +N（N = 設備月數） |
 | 授權週期 | License Key 以年／季／月為週期發行，到期前可申請續約 |
 
 ---
 
 ## 雙邊帳本機制（Dual-Ledger）
 
-每一筆推論請求在 Hub 端同時更新兩個帳本：
+計量單位為 **設備月（device-month）**，在授權購買時即一次結算，不需要執行期計量。
 
 ```
-一次推論請求（消耗 N tokens）
+購買授權（例：2 台設備 × 1 個月）
     │
-    ├─ 使用者帳本（Deployer Budget）
-    │       └─ quota_tokens_remaining −N
-    │            → 活躍度排行（誰用最多）
+    ├─ 部署者帳本（Deployer Budget）
+    │       └─ −2 device-months
+    │            → 活躍度排行（誰部署越多）
     │
     └─ 模型擁有者帳本（Model Owner Credit）
-            └─ credit_tokens_earned +N
+            └─ +2 device-months
                  → 貢獻度排行（誰的模型最受歡迎）
 ```
 
+| 授權情境 | 扣除 Budget | 增加 Credit |
+|---------|------------|------------|
+| 1 台設備 × 1 個月 | 1 | 1 |
+| 1 台設備 × 3 個月（季租） | 3 | 3 |
+| 2 台設備 × 1 個月（兩把 Key） | 2 | 2 |
+| 2 台設備 × 3 個月 | 6 | 6 |
+
 | 角色 | 帳本 | 排行指標 |
 |------|------|---------|
-| **部署者（Deployer）** | Budget：授權週期內可消耗的 token 總量 | 活躍度排行（消耗越多排越高） |
-| **模型擁有者（Model Owner）** | Credit：旗下模型被消耗的累計 token 數 | 貢獻度排行（被用越多排越高） |
+| **部署者（Deployer）** | Budget：已購買的設備月數累計 | 活躍度排行（部署越多排越高） |
+| **模型擁有者（Model Owner）** | Credit：旗下模型被部署的設備月數累計 | 貢獻度排行（被部署越多排越高） |
 
 > **Model Card 中的 `model_owner_account` 欄位**決定 Credit 歸屬。每張模型卡上線時即鎖定此欄位，不可事後修改。
 
 ---
 
-## 三段式交握流程
+## 兩段式交握流程
 
 ### Phase 0 — 環境準備（使用者側，一次性）
 
@@ -102,11 +108,10 @@ sequenceDiagram
 
     E->>H: 2. POST /v1/activate<br/>{ license_key, device_fingerprint,<br/>  model_id, container_image }
 
-    Note over H: 驗證 license_key 有效性<br/>比對綁定的 device_fingerprint<br/>（首次啟用則寫入綁定；<br/> 後續啟用需完全吻合）
+    Note over H: 驗證 license_key 有效性與到期日<br/>比對綁定的 device_fingerprint<br/>（首次啟用則寫入綁定；<br/> 後續啟用需完全吻合）
 
     alt 啟用成功（fingerprint 吻合或首次綁定）
-        Note over H: 若上次 offline_budget 尚未結算<br/>→ 全額扣除（防重建攻擊）<br/>再核發新 session_token
-        H-->>E: 3. 200 OK<br/>{ session_token (記憶體暫存),<br/>  quota_tokens_remaining,<br/>  heartbeat_interval_seconds: 300,<br/>  offline_budget_tokens: 10000,<br/>  offline_budget_expires_in: 1800,<br/>  license_period: "monthly"|"quarterly"|"annual",<br/>  license_expires_at: "2026-07-15T00:00:00Z" }
+        H-->>E: 3. 200 OK<br/>{ session_token,<br/>  license_expires_at,<br/>  heartbeat_interval_seconds: 3600 }
         Note over E: 4. 啟動推論服務（api.py）
     else 啟用失敗
         H-->>E: 4xx { error, message }
@@ -127,77 +132,35 @@ sequenceDiagram
 
 ### Phase 2 — 定期心跳（Heartbeat）
 
-> **觸發時機**：推論服務啟動後，每 `heartbeat_interval_seconds`（預設 5 分鐘）執行一次
+> **觸發時機**：推論服務啟動後，每 `heartbeat_interval_seconds`（預設 1 小時）執行一次
+
+心跳的唯一目的是確認 License Key 尚未被撤銷，不回報任何推論用量。
 
 ```mermaid
 sequenceDiagram
     participant E as 容器<br/>背景 async task
     participant H as AI Hub
 
-    loop 每 heartbeat_interval_seconds（預設 300s）
-        E->>H: POST /v1/heartbeat<br/>{ session_token, device_fingerprint,<br/>  seq_no, usage: { input_tokens, output_tokens, request_count } }
-        Note over H: 驗證 session_token<br/>確認 device_fingerprint 未變動<br/>比對伺服器端帳本的 last_confirmed_seq_no<br/>累計用量，更新帳本與配額餘量
-        H-->>E: { continue: true,<br/>  quota_tokens_remaining,<br/>  last_confirmed_seq_no,<br/>  next_heartbeat_seconds }
+    loop 每 heartbeat_interval_seconds（預設 3600s）
+        E->>H: POST /v1/heartbeat<br/>{ session_token, device_fingerprint }
+        Note over H: 驗證 session_token 有效<br/>確認 device_fingerprint 未變動<br/>確認 license 未被撤銷
+        H-->>E: { continue: true,<br/>  license_expires_at }
     end
 ```
 
-**心跳中斷的處理（預授權離線額度機制）：**
-
-> **設計原則**：Hub 是唯一帳本。離線期間，容器只能消耗「已預先授權的離線額度」，不依賴本地記錄的用量準確性。
-
-每次心跳回應中，Hub 同時下發下一個心跳週期的**預授權離線額度（Offline Budget）**：
-
-```mermaid
-sequenceDiagram
-    participant E as 容器
-    participant H as AI Hub
-
-    E->>H: POST /v1/heartbeat<br/>{ session_token, seq_no,<br/>  usage_this_period: { input, output } }
-    Note over H: 扣除本期用量<br/>更新伺服器端帳本<br/>核算下一期離線額度
-    H-->>E: { continue: true,<br/>  quota_remaining,<br/>  offline_budget_tokens: 10000,<br/>  offline_budget_expires_in: 1800 }
-    Note over E: 將 offline_budget 存入記憶體
-```
+**心跳中斷的處理：**
 
 ```mermaid
 flowchart TD
-    A([Hub 不可達]) --> B["使用記憶體中的 offline_budget_tokens"]
-    B --> C{offline_budget_tokens > 0\n且尚未到期?}
-    C -- 是 --> D[允許推論\n每次扣減消耗量]
-    C -- 否 --> E([停止服務 HTTP 503\n等待重連或預算補發])
-    D --> F{每 60 秒重試連線}
-    F -- 連線恢復 --> G["送出本期實際用量\nHub 扣帳 + 補發新 offline_budget\n恢復正常 Heartbeat 週期"]
-    F -- 仍離線 --> C
+    A([Hub 不可達]) --> B{license_expires_at 尚未到期?}
+    B -- 是 --> C[繼續服務推論請求\n每 60 秒重試連線]
+    B -- 否 --> D([停止服務 HTTP 503\n授權已到期，請至 Portal 續約])
+    C --> E{連線恢復?}
+    E -- 是 --> F[恢復正常 Heartbeat 週期]
+    E -- 否 --> B
 ```
 
-**為什麼這樣設計是安全的：**
-
-| 攻擊情境 | 系統回應 |
-|---------|---------|
-| 使用者刪除 Named Volume | offline_budget 在記憶體中，不受影響；Hub 帳本不變 |
-| 使用者修改 Volume 中的暫存紀錄 | Hub 全額扣除 offline_budget，不採信客戶端回報數字 |
-| 使用者讓容器永遠離線不重連 | offline_budget 有到期時間（`offline_budget_expires_in`），到期後停服 |
-| 使用者不斷 `docker run --rm` 重建 | 每次重新 Activation，Hub 全額扣除上一份 budget → **重建越多扣越多，無法獲利** |
-| 使用者竄改 Volume 少報用量 | Hub 不採信客戶端數字，統一以「offline_budget 全數消耗完」計帳 |
-
-**Named Volume 在此設計中的角色縮減為：**
-- 暫存「本期已消耗用量」，在重連後誠實回報給 Hub
-- 即使全部刪除，Hub 只會以「offline_budget 全數消耗完」來計帳（最保守估算）
-- 使用者無法靠刪除 Volume 來獲利
-
----
-
-### Phase 3 — 逐請求配額防護（Per-Request Guard）
-
-> **觸發時機**：每次推論請求進入 `api.py` 時，在模型推論前檢查
-
-```mermaid
-flowchart TD
-    A([推論請求進入]) --> B{quota_tokens_remaining > 0?}
-    B -- 是 --> C[執行模型推論]
-    C --> D[扣減消耗的 token 數]
-    D --> E([回傳推論結果])
-    B -- 否 --> F([HTTP 429\nerror: quota_exceeded\ncontact: ai-hub@itri.org.tw])
-```
+> **離線期間安全性**：帳本在購買授權時已結算完畢，離線期間不影響任何計費。容器僅依本地持有的 `license_expires_at` 判斷服務是否繼續，到期自動停服。
 
 ---
 
@@ -294,10 +257,8 @@ sequenceDiagram
 ```json
 {
   "session_token": "st-yyyyyyyyyy",
-  "quota_tokens_remaining": 500000,
-  "heartbeat_interval_seconds": 300,
-  "grace_period_seconds": 1800,
-  "expires_at": "2026-07-15T00:00:00Z"
+  "license_expires_at": "2026-07-15T00:00:00Z",
+  "heartbeat_interval_seconds": 3600
 }
 ```
 
@@ -317,12 +278,7 @@ sequenceDiagram
 ```json
 {
   "session_token": "st-yyyyyyyyyy",
-  "device_fingerprint": "sha256:abcdef...",
-  "usage_since_last_heartbeat": {
-    "input_tokens": 1240,
-    "output_tokens": 3871,
-    "request_count": 12
-  }
+  "device_fingerprint": "sha256:abcdef..."
 }
 ```
 
@@ -330,8 +286,7 @@ sequenceDiagram
 ```json
 {
   "continue": true,
-  "quota_tokens_remaining": 495000,
-  "next_heartbeat_seconds": 300
+  "license_expires_at": "2026-07-15T00:00:00Z"
 }
 ```
 
@@ -351,6 +306,5 @@ sequenceDiagram
 | 元件 | 負責的交握行為 |
 |------|--------------|
 | `entrypoint.sh` | Phase 1 啟動啟用、啟用失敗時 exit 1 |
-| `api.py`（背景 task） | Phase 2 定期 Heartbeat、離線暫存 |
-| `api.py`（請求攔截）| Phase 3 逐請求配額防護（429 回應） |
+| `api.py`（背景 task） | Phase 2 定期 Heartbeat、依 `license_expires_at` 判斷是否停服 |
 | `ryzenai/modules/` | **不涉及任何交握邏輯**（由框架層統一處理） |
