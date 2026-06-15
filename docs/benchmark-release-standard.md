@@ -72,7 +72,7 @@
 使用方（Edge 裝置 / 下游 Agent）
   ├── 持有 License Key → 容器啟動時 Activation Handshake（物理隔離閘門）
   ├── 拉取 Image → 只能透過 API 存取推論能力（無法直取底層）
-  └── 定期 Heartbeat 確認授權有效（不回報推論數據）
+  └── 到期由 `license_expires_at` + 時鐘校正自動處理，無需持續連線 AI Hub
 ```
 
 ---
@@ -533,7 +533,7 @@ AMD Ryzen AI NPU（VitisAI EP）因驅動僅支援 Windows，目前尚無成熟�
 |-------------|----------------|
 | ACR Image 存取控制 | Azure Blob Storage SAS Token（30 天有效期） |
 | License Key 驗證 | 相同機制，由 `entrypoint.py` 在 Conda 環境中執行 Activation Handshake |
-| Heartbeat | 相同 HTTP 規格，由背景 task 每小時呼叫 |
+| 時鐘校正 | 相同邏輯，記憶體持有 `clock_offset`，每次推論前檢查 |
 | 金鑰輪替 | SAS Token 自動過期 + 通知客戶重新取得 |
 
 ---
@@ -551,8 +551,8 @@ AMD Ryzen AI NPU（VitisAI EP）因驅動僅支援 Windows，目前尚無成熟�
 ### Layer 2（Linux iGPU 容器化）
 - [ ] `Dockerfile` 採多階段建置
 - [ ] `entrypoint.sh` 在 License Key 無效或過期時正確終止（exit code 1）
-- [ ] Activation Handshake 在測試環境中成功完成，取得 `session_token`
-- [ ] Heartbeat 每小時正確回報，Hub 回應 `continue: true`
+- [ ] Activation Handshake 在測試環境中成功完成，取得 `session_token` 與 `server_time`
+- [ ] 時鐘校正 `clock_offset` 正確計算，調慢系統時鐘時觸發 `CLOCK_TAMPER` 終止
 - [ ] ACR 映像路徑格式正確（例：`model-cards.azurecr.io/itri/rocm/ryzenai-benchmark:1.2.0`）
 - [ ] Service Principal `sp-model-cards-edge-pull` 僅持有 `acrpull` 權限
 - [ ] `release.yml` 成功在 CI 執行並推送至 `model-cards`

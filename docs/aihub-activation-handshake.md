@@ -1,6 +1,6 @@
 ﻿# ITRI AI Hub — 容器授權交握協定
 
-本文件說明 ITRI AI Hub 與 Docker Model Image 之間的交握機制（Two-Phase Handshake）。  
+本文件說明 ITRI AI Hub 與 Docker Model Image 之間的交握機制（Single-Phase Activation）。  
 此機制在保持 **`docker run` 簡單 UX** 的前提下，將 License Key 綁定至唯一設備指紋，任何指紋不符的執行請求均被拒絕。
 
 完成首次啟用約需 **30 秒**（自動在背景執行，不影響推論服務啟動）。
@@ -84,7 +84,7 @@ curl http://localhost:8000/v1/chat/completions \
 
 ---
 
-## 兩段式交握流程
+## 單段啟用流程
 
 ### Phase 0 — 環境準備（使用者側，一次性）
 
@@ -111,8 +111,9 @@ sequenceDiagram
     Note over H: 驗證 license_key 有效性與到期日<br/>比對綁定的 device_fingerprint<br/>（首次啟用則寫入綁定；<br/> 後續啟用需完全吻合）
 
     alt 啟用成功（fingerprint 吻合或首次綁定）
-        H-->>E: 3. 200 OK<br/>{ session_token,<br/>  license_expires_at,<br/>  heartbeat_interval_seconds: 3600 }
-        Note over E: 4. 啟動推論服務（api.py）
+        H-->>E: 3. 200 OK<br/>{ session_token,<br/>  license_expires_at,<br/>  server_time }
+        Note over E: 4. 計算時鐘偏移量<br/>clock_offset = server_time − local_time<br/>記錄 activation_local_time = local_time
+        Note over E: 5. 啟動推論服務（api.py）
     else 啟用失敗
         H-->>E: 4xx { error, message }
         Note over E: 印出錯誤訊息，exit 1
@@ -130,37 +131,50 @@ sequenceDiagram
 
 ---
 
-### Phase 2 — 定期心跳（Heartbeat）
+### 時鐘校正（Clock Correction）
 
-> **觸發時機**：推論服務啟動後，每 `heartbeat_interval_seconds`（預設 1 小時）執行一次
+> 防止使用者透過調整系統時間繞過授權到期判斷。
 
-心跳的唯一目的是確認 License Key 尚未被撤銷，不回報任何推論用量。
+啟用成功後，容器在記憶體中持有三個值（不寫入磁碟）：
 
-```mermaid
-sequenceDiagram
-    participant E as 容器<br/>背景 async task
-    participant H as AI Hub
+| 變數 | 來源 | 說明 |
+|------|------|------|
+| `license_expires_at` | 啟用回應 | 授權到期的 UTC 時間（伺服器權威時間） |
+| `clock_offset` | 計算得出 | `server_time − local_time_at_activation` |
+| `activation_local_time` | 本地記錄 | 啟用當下的本地時鐘 |
 
-    loop 每 heartbeat_interval_seconds（預設 3600s）
-        E->>H: POST /v1/heartbeat<br/>{ session_token, device_fingerprint }
-        Note over H: 驗證 session_token 有效<br/>確認 device_fingerprint 未變動<br/>確認 license 未被撤銷
-        H-->>E: { continue: true,<br/>  license_expires_at }
-    end
+**到期判斷邏輯（每次推論前檢查）：**
+
+```python
+import time
+
+def check_license_expiry():
+    now_local = time.time()
+
+    # 防止啟用後調慢系統時鐘
+    if now_local < activation_local_time:
+        raise RuntimeError("CLOCK_TAMPER: 系統時鐘已被調回，授權無效。")
+
+    # 以伺服器時間為基準計算當前真實時間
+    adjusted_now = now_local + clock_offset
+
+    if adjusted_now >= license_expires_at:
+        raise RuntimeError("LICENSE_EXPIRED: 授權已到期，請至 Portal 續約。")
 ```
 
-**心跳中斷的處理：**
+**防護效果：**
 
-```mermaid
-flowchart TD
-    A([Hub 不可達]) --> B{license_expires_at 尚未到期?}
-    B -- 是 --> C[繼續服務推論請求\n每 60 秒重試連線]
-    B -- 否 --> D([停止服務 HTTP 503\n授權已到期，請至 Portal 續約])
-    C --> E{連線恢復?}
-    E -- 是 --> F[恢復正常 Heartbeat 週期]
-    E -- 否 --> B
-```
+| 攻擊手法 | 結果 |
+|---------|------|
+| 啟用前調慢本地時鐘 | `clock_offset` 自動補償，`adjusted_now` 仍對齊伺服器時間 |
+| 啟用後調慢本地時鐘 | `now_local < activation_local_time` → `CLOCK_TAMPER` exit |
+| 啟用後調快本地時鐘 | 加速到期，對使用者不利，無需處理 |
 
-> **離線期間安全性**：帳本在購買授權時已結算完畢，離線期間不影響任何計費。容器僅依本地持有的 `license_expires_at` 判斷服務是否繼續，到期自動停服。
+---
+
+### Phase 2 — 定期心跳（已移除）
+
+> MVP 不需要心跳。授權到期由 `license_expires_at` + 時鐘校正機制處理，無需持續連線 AI Hub。
 
 ---
 
@@ -217,9 +231,6 @@ sequenceDiagram
 
     Note over A,H: License Key 已於設備 A 首次啟用時綁定其指紋
 
-    A->>H: Heartbeat（正常運作中）
-    H-->>A: continue: true
-
     B->>H: POST /v1/activate<br/>{ license_key: 同一個 Key,<br/>  device_fingerprint: 不同 }
 
     Note over H: 比對 fingerprint<br/>與綁定紀錄不吻合
@@ -258,7 +269,7 @@ sequenceDiagram
 {
   "session_token": "st-yyyyyyyyyy",
   "license_expires_at": "2026-07-15T00:00:00Z",
-  "heartbeat_interval_seconds": 3600
+  "server_time": "2026-06-15T09:24:58Z"
 }
 ```
 
@@ -272,39 +283,10 @@ sequenceDiagram
 
 ---
 
-### `POST /v1/heartbeat`
-
-**Request:**
-```json
-{
-  "session_token": "st-yyyyyyyyyy",
-  "device_fingerprint": "sha256:abcdef..."
-}
-```
-
-**Response 200:**
-```json
-{
-  "continue": true,
-  "license_expires_at": "2026-07-15T00:00:00Z"
-}
-```
-
-**Response 401（session 被撤銷時）:**
-```json
-{
-  "continue": false,
-  "error": "SESSION_REVOKED",
-  "message": "License Key 已被撤銷或設備授權已解除，請重新啟用或聯絡 AI Hub。"
-}
-```
-
----
-
 ## 附錄：容器側實作責任分工
 
 | 元件 | 負責的交握行為 |
 |------|--------------|
-| `entrypoint.sh` | Phase 1 啟動啟用、啟用失敗時 exit 1 |
-| `api.py`（背景 task） | Phase 2 定期 Heartbeat、依 `license_expires_at` 判斷是否停服 |
+| `entrypoint.sh` | 啟動啟用（`/v1/activate`）、失敗時 exit 1、計算並儲存 `clock_offset` |
+| `api.py` | 每次推論前呼叫 `check_license_expiry()`；到期或時鐘篡改時回傳 HTTP 503 |
 | `ryzenai/modules/` | **不涉及任何交握邏輯**（由框架層統一處理） |
