@@ -1,7 +1,7 @@
 # ITRI AI Hub — 容器授權交握協定
 
 本文件說明 ITRI AI Hub 與 Docker Model Image 之間的三段式交握機制（Three-Phase Handshake）。  
-此機制在保持 **`docker pull` + `docker run` 簡單 UX** 的前提下，防止 License Key 被複製到未授權設備上超量使用。
+此機制在保持 **`docker pull` + `docker run` 簡單 UX** 的前提下，將 License Key 綁定至唯一設備指紋，任何指紋不符的執行請求均被拒絕。
 
 完成首次啟用約需 **30 秒**（自動在背景執行，不影響推論服務啟動）。
 
@@ -37,8 +37,7 @@ curl http://localhost:8000/v1/chat/completions \
 | 目標 | 機制 |
 |------|------|
 | 簡單 UX | 只需一個環境變數 `AIHUB_LICENSE_KEY` |
-| 防止跨設備複製 | 設備指紋（Device Fingerprint）綁定 |
-| 防止超量使用 | Hub 維護每個 License Key 的活躍設備登錄表 |
+| 一 Key 一設備 | License Key 於首次啟用時綁定設備指紋（CPU_ID + MAC + hostname），指紋不符一律拒絕 |
 | 離線容錯 | 寬限期（Grace Period）允許短暫離線 |
 | 用量追蹤 | Heartbeat 定期回報，供 Principal 核算貢獻獎酬 |
 
@@ -70,10 +69,10 @@ sequenceDiagram
 
     E->>H: 2. POST /v1/activate<br/>{ license_key, device_fingerprint,<br/>  model_id, container_image }
 
-    Note over H: 驗證 license_key 有效性<br/>查詢授權設備數上限<br/>比對 fingerprint 是否已登錄<br/>若新設備，檢查是否超過上限
+    Note over H: 驗證 license_key 有效性<br/>比對綁定的 device_fingerprint<br/>（首次啟用則寫入綁定；<br/> 後續啟用需完全吻合）
 
-    alt 啟用成功
-        H-->>E: 3. 200 OK<br/>{ session_token (記憶體暫存),<br/>  quota_tokens_remaining: 500000,<br/>  heartbeat_interval_seconds: 300,<br/>  grace_period_seconds: 1800,<br/>  device_slot: 1,<br/>  expires_at }
+    alt 啟用成功（fingerprint 吻合或首次綁定）
+        H-->>E: 3. 200 OK<br/>{ session_token (記憶體暫存),<br/>  quota_tokens_remaining,<br/>  heartbeat_interval_seconds: 300,<br/>  grace_period_seconds: 1800,<br/>  expires_at }
         Note over E: 4. 啟動推論服務（api.py）
     else 啟用失敗
         H-->>E: 4xx { error, message }
@@ -87,7 +86,7 @@ sequenceDiagram
 |--------|------|---------|
 | `LICENSE_INVALID` | Key 不存在或已撤銷 | 印出錯誤訊息，exit 1 |
 | `LICENSE_EXPIRED` | Key 已過期 | 印出到期日，exit 1 |
-| `DEVICE_LIMIT_EXCEEDED` | 已達授權設備數上限 | 列出已登錄設備，提示聯絡 AI Hub |
+| `DEVICE_MISMATCH` | 設備指紋與綁定紀錄不符（Key 已綁定至另一台設備） | 印出錯誤訊息，提示聯絡 AI Hub 解綁，exit 1 |
 | `MODEL_NOT_PERMITTED` | 此 Key 不允許執行此模型 | 列出許可的模型清單，exit 1 |
 
 ---
@@ -185,29 +184,29 @@ def compute_device_fingerprint() -> str:
 
 ```mermaid
 sequenceDiagram
-    participant A as 設備 A（已啟用）
+    participant A as 設備 A（已綁定）
     participant H as AI Hub
     participant B as 設備 B（嘗試啟用）
 
-    Note over A,H: 情境：License Key 允許 1 台設備
+    Note over A,H: License Key 已於設備 A 首次啟用時綁定其指紋
 
     A->>H: Heartbeat（正常運作中）
     H-->>A: continue: true
 
     B->>H: POST /v1/activate<br/>{ license_key: 同一個 Key,<br/>  device_fingerprint: 不同 }
 
-    Note over H: 查詢活躍設備數 = 1<br/>已達上限（max_devices = 1）
+    Note over H: 比對 fingerprint<br/>與綁定紀錄不吻合
 
-    H-->>B: 403 DEVICE_LIMIT_EXCEEDED<br/>{ active_devices: 1, max_devices: 1 }
+    H-->>B: 403 DEVICE_MISMATCH<br/>{ message: "此 Key 已綁定至另一台設備" }
 
-    Note over B: 容器 exit 1<br/>印出：此 License Key 已綁定至其他設備。<br/>請登入 AI Hub 管理頁面解除原設備綁定。
+    Note over B: 容器 exit 1<br/>此 License Key 已綁定至另一台設備。<br/>如需更換設備，請聯絡 AI Hub 解除綁定。
 ```
 
 **若使用者需要合法更換設備：**
 
-1. 登入 AI Hub 管理頁面（URL 於 License Key 核發信中提供）
-2. 找到對應的 License Key → 選取 **Deactivate Device**
-3. 在新設備重新執行 `docker run`，自動完成啟用
+1. 聯絡 AI Hub（ai-hub@itri.org.tw）申請解除原設備綁定
+2. 平台確認後清除該 License Key 的 fingerprint 紀錄
+3. 在新設備重新執行 `docker run`，首次啟用自動完成新設備綁定
 
 ---
 
@@ -234,7 +233,6 @@ sequenceDiagram
   "quota_tokens_remaining": 500000,
   "heartbeat_interval_seconds": 300,
   "grace_period_seconds": 1800,
-  "device_slot": 1,
   "expires_at": "2026-07-15T00:00:00Z"
 }
 ```
@@ -242,10 +240,8 @@ sequenceDiagram
 **Response 4xx:**
 ```json
 {
-  "error": "DEVICE_LIMIT_EXCEEDED",
-  "message": "此 License Key 已達授權設備數上限（1 台）。請登入 AI Hub 管理頁面解除原設備綁定。",
-  "active_devices": 1,
-  "max_devices": 1
+  "error": "DEVICE_MISMATCH",
+  "message": "此 License Key 已綁定至另一台設備。如需更換設備，請聯絡 AI Hub 解除綁定。"
 }
 ```
 

@@ -108,13 +108,16 @@ ARTICLE 3 — MODEL WEIGHTS ARE NOT INCLUDED
 ARTICLE 4 — LICENSE KEY AND DEVICE AUTHORIZATION
 ───────────────────────────────────────────────────────────────────────────────
 
-4.1  Each License Key is issued to a single named account and is bound to a
-     maximum number of Authorized Devices as specified at the time of issuance.
+4.1  Each License Key is issued to a single named account and is permanently
+     bound to a single device upon first successful activation. The binding
+     is determined by the Device Fingerprint (SHA256 of CPU serial, MAC
+     address, and hostname) computed at first run.
 
-4.2  A device becomes an Authorized Device only after completing the
-     AI Hub Activation Handshake (see docs/aihub-activation-handshake.md).
-     The handshake binds the License Key to a Device Fingerprint derived from
-     hardware identifiers of the device.
+4.2  A device becomes bound to a License Key upon completing its first
+     successful AI Hub Activation Handshake (see the companion document
+     docs/aihub-activation-handshake.md). Subsequent activations must
+     present an identical Device Fingerprint; any mismatch is rejected
+     with error DEVICE_MISMATCH and the container will not start.
 
 4.3  License Keys must be set as the environment variable AIHUB_LICENSE_KEY
      at container runtime. Keys must not be:
@@ -127,10 +130,11 @@ ARTICLE 4 — LICENSE KEY AND DEVICE AUTHORIZATION
      activation. Licensor reserves the right to revoke a License Key if
      the terms of this Agreement are violated.
 
-4.5  If Licensor detects that a License Key is being used on more devices
-     than the authorized quota, or that the Device Fingerprint binding has
-     been circumvented, Licensor may immediately suspend the License Key
-     without prior notice.
+4.5  If Licensor detects that a License Key is being used on a device whose
+     Device Fingerprint does not match the registered binding, Licensor may
+     immediately suspend the License Key without prior notice. To transfer
+     a License Key to a new device, Licensee must contact ITRI AI Hub to
+     request fingerprint reset.
 
 
 ───────────────────────────────────────────────────────────────────────────────
