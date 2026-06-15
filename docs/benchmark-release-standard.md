@@ -1,118 +1,118 @@
-# AI Benchmark ?��??��?規�?
+# AI Benchmark 數據合約規章
 
-?��?件�?義以?�數?��?約�?Data Contract）」為?��??�模?��?源管?��??��? 
-?��??��??��? Agent ?��?中�?**?��??��?禮物**?�—在 Agent ?�出工具?��?之�?，�?以�?構�??��??�露平台?�能?��??��?存�?規�?，透�??��??�離?�漸?��?移�?策略，使 Agent ?�逆�??��??�自?�傾?�使?�平?��?源而�?繞�??�部工具??
+本文件定義以「數據合約（Data Contract）」為核心的模型資源管理機制。  
+數據合約是多 Agent 協作中的**早期知識禮物**——在 Agent 做出工具選擇之前，先以結構化方式揭露平台的能力邊界與存取規則，透過物理隔離與漸進式移轉策略，使 Agent 在逆向選擇時自然傾向使用平台資源而非繞道內部工具。
 
-完�??�次 ACR 設�??�第一次發布�??�?**30 ?��?**??
+完成初次 ACR 設定與第一次發布約需 **30 分鐘**。
 
 ---
 
-## 設�??�念
+## 設計理念
 
-### ?��?：�? Agent ?�逆�??��?
+### 問題：多 Agent 的逆向選擇
 
-?��???Agent ?��??��?Agent ?�臨工具?��??��?訊�?對稱�? 
-平台?��?資�??��?不透�? ??Agent ?��?使用?�己?��??�內建工????平台資�??�置?�難以�??��??��?貢獻??
+當多個 Agent 協作時，Agent 面臨工具選擇的資訊不對稱：  
+平台方的資源能力不透明 → Agent 傾向使用自己熟悉的內建工具 → 平台資源閒置、難以計量各團隊貢獻。
 
-### �??：數?��?約�??�早?�知識禮??
+### 解法：數據合約作為早期知識禮物
 
-??Agent 決�?之�?，主?�給?��?份可機�??��?約�??�露�?
+在 Agent 決策之前，主動給出一份可機讀的合約，揭露：
 
-- **?��??��?**：這個模?�能?��?麼、支?��?麼輸?�格�?
-- **存�?規�?**：�?何�?得�?權、�?權�??��??��???
-- **使用?��??�義??*：�?次推論�??��??�責�?
+- **能力聲明**：這個模型能做什麼、支援什麼輸入格式
+- **存取規則**：如何取得授權、授權的時效與範圍
+- **使用量回報義務**：每次推論後的計量責任
 
-?��??��??��??�是**讓平?�選?��??�部工具?�容?�被 Agent 讀?��??��?**??
+這不是限制，而是**讓平台選項比內部工具更容易被 Agent 讀懂與選擇**。
 
 ### 三層機制
 
 ```
-1. ?��??�離層�?Physical Isolation�?
-   ?��??�?Docker 容器封�??��??�輯，Agent ?�能?��? API 存�?，無法直?��?層�??��?程�?�?
+1. 物理隔離層（Physical Isolation）
+   └── Docker 容器封裝推論邏輯，Agent 只能透過 API 存取，無法直取底層權重或程式碼
 
-2. 漸進�?移�?層�?Progressive Transfer�?
-   ?��??�?License File ?�制存�?範�?，平?�決定哪些帳?�可?�哪些模??
+2. 漸進式移轉層（Progressive Transfer）
+   └── License File 控制存取範圍，平台決定哪些帳戶可用哪些模型
 
-3. Principal-Agent ??��層�?Usage Monitoring�?
-   ?��??�?每次?��??�用?��??�給平台，�? Principal 驗�??��??�承諾並設�?對�??�酬
+3. Principal-Agent 監測層（Usage Monitoring）
+   └── 每次推論的用量回報給平台，供 Principal 驗證各團隊承諾並設計對應獎酬
 ```
 
 ---
 
-## 事�?準�?
+## 事前準備
 
-?��?之�?，�?確�?�?
+開始之前，請確認：
 
-- ?��???Azure 訂閱 **`eosl-r3-aihub`** ?��??��?，�?角色??**Owner** ??**Contributor**
-- ?��???GitHub ?��?庫�? **Admin** 權�?（用?�設�?Repository Secrets�?
-- ?�地端已安�? **Docker Engine** ??**Azure CLI 2.0.80+**
+- 您擁有 Azure 訂閱 **`eosl-r3-aihub`** 的存取權，且角色為 **Owner** 或 **Contributor**
+- 您擁有 GitHub 儲存庫的 **Admin** 權限（用於設定 Repository Secrets）
+- 本地端已安裝 **Docker Engine** 與 **Azure CLI 2.0.80+**
 
-> **?��?章�?使用??Azure 資�??�固定�?下�?* ?�您套用?�其他�?案�?請在對�?欄�?以自己�?資�??�稱?�代??
+> **本規章所使用的 Azure 資源均固定如下。** 若您套用至其他專案，請在對應欄位以自己的資源名稱取代。
 
-| Azure 資�? | ?��??�稱 |
+| Azure 資源 | 固定名稱 |
 |---|---|
 | 訂閱 | `eosl-r3-aihub` |
-| 資�?群�? | `ai-hub-webui` |
+| 資源群組 | `ai-hub-webui` |
 | Container Registry | `model-cards` |
-| ACR 完整網�? | `model-cards.azurecr.io` |
+| ACR 完整網域 | `model-cards.azurecr.io` |
 
 ---
 
 ## 概覽
 
 ```
-上架?��?模�?貢獻?��?�?
-  ?��??�?建置 Docker Image（含 Model Card ?��?）�? ?�送至 model-cards
+上架方（模型貢獻團隊）
+  └── 建置 Docker Image（含 Model Card 合約）→ 推送至 model-cards
 
-平台（model-cards-registry.azurecr.io�?
-  ?��??�??��? Image ??Model Card（ACR Manifest Labels�?
-  ?��??�??�發 License File（控?�哪些帳?�可?�哪些模?��?
-  ?��??�??�收 Usage Telemetry ??�?Principal 驗�??�諾?�設計�???
+平台（model-cards.azurecr.io）
+  ├── 儲存 Image 與 Model Card（ACR Manifest Labels）
+  ├── 核發 License File（控制哪些帳戶可用哪些模型）
+  └── 接收 Usage Telemetry → 供 Principal 驗證承諾與設計獎酬
 
-使用?��?Edge 裝置 / 下游 Agent�?
-  ?��??�??��? License File ??容器?��??��?證�??��??�離?��?�?
-  ?��??�??��? Image ???�能?��? API 存�??��??��?（無法直?��?層�?
-  ?��??�?每次?��?後自?��??�用????平台?��?記�?
+使用方（Edge 裝置 / 下游 Agent）
+  ├── 持有 License File → 容器啟動時驗證（物理隔離閘門）
+  ├── 拉取 Image → 只能透過 API 存取推論能力（無法直取底層）
+  └── 每次推論後自動回報用量 → 平台即時記錄
 ```
 
 ---
 
 ## 總覽
 
-| 層�? | ?�稱 | ?�用?��? | 強制??|
+| 層級 | 名稱 | 適用情境 | 強制性 |
 |------|------|---------|--------|
-| Layer 1 | Model Card ?��??�管??| **?�??* benchmark 專�? | ??必�? |
-| Layer 2 | 容器?�、�?權�?使用?�監�?| Linux iGPU（ROCm）路線�?**�???�援**�?| ??必�? |
-| Layer 3 | Windows NPU ?��?路�? | Windows-native NPU（XDNA）路�?| ?�� ?��?待�?�?|
+| Layer 1 | Model Card 與版本管理 | **所有** benchmark 專案 | ✅ 必須 |
+| Layer 2 | 容器化、授權與使用量監測 | Linux iGPU（ROCm）路線（**正式支援**） | ✅ 必須 |
+| Layer 3 | Windows NPU 特殊路徑 | Windows-native NPU（XDNA）路線 | 🟡 進階待評估 |
 
 ---
 
-## Layer 1 ??Model Card ?��??�管?��??�?��?案�??��?
+## Layer 1 — Model Card 與版本管理（所有專案必須）
 
-### 1.1 Model Card（ACR Image Manifest Labels�?
+### 1.1 Model Card（ACR Image Manifest Labels）
 
-每個發布�? Docker Image **必�?**??`Dockerfile` 中透�? `LABEL` ?�令嵌入 Model Card�? 
-供平?��? `model-cards` ??Manifest ?�接讀?��??��??��?額�?檔�???
+每個發布的 Docker Image **必須**在 `Dockerfile` 中透過 `LABEL` 指令嵌入 Model Card，  
+供平台從 `model-cards` 的 Manifest 直接讀取，無需掛載額外檔案。
 
-#### 必�? Labels
+#### 必要 Labels
 
-| Label ??| 說�? | 範�???|
+| Label 鍵 | 說明 | 範例值 |
 |----------|------|--------|
-| `ai.benchmark.model-id` | 模�?識別?�稱（�? registry.py 一?��? | `gemma4-4b-gpu` |
-| `ai.benchmark.model-name` | 人�??��??�模?�全??| `Google Gemma 4 4B` |
-| `ai.benchmark.model-version` | 模�??�本（�?源�??��?�?| `4.0` |
-| `ai.benchmark.backend` | ?��?後端 | `igpu-rocm` / `npu-vitisai` |
-| `ai.benchmark.hardware` | 建議?��?硬�? | `AMD Ryzen AI 9 HX 370` |
-| `ai.benchmark.framework-version` | ??benchmark 框架?�本 | `1.2.0` |
-| `ai.benchmark.input-types` | ?�援?�輸?��??��??��??��?�?| `text,image` |
-| `ai.benchmark.context-length` | ?��?context ?�度（tokens�?| `8192` |
-| `ai.benchmark.license-required` | ?�否?��?License File ?�能?��? | `true` |
-| `ai.benchmark.telemetry-endpoint` | 計費?�測?�報?�平??endpoint | `https://billing.ai-hub.example.com/v1/usage` |
+| `ai.benchmark.model-id` | 模型識別名稱（與 registry.py 一致） | `gemma4-4b-gpu` |
+| `ai.benchmark.model-name` | 人類可讀的模型全名 | `Google Gemma 4 4B` |
+| `ai.benchmark.model-version` | 模型版本（來源版本號） | `4.0` |
+| `ai.benchmark.backend` | 推論後端 | `igpu-rocm` / `npu-vitisai` |
+| `ai.benchmark.hardware` | 建議執行硬體 | `AMD Ryzen AI 9 HX 370` |
+| `ai.benchmark.framework-version` | 本 benchmark 框架版本 | `1.2.0` |
+| `ai.benchmark.input-types` | 支援的輸入類型（逗號分隔） | `text,image` |
+| `ai.benchmark.context-length` | 最大 context 長度（tokens） | `8192` |
+| `ai.benchmark.license-required` | 是否需要 License File 才能啟動 | `true` |
+| `ai.benchmark.telemetry-endpoint` | 計費遙測回報的平台 endpoint | `https://billing.ai-hub.example.com/v1/usage` |
 
-#### Dockerfile 範�?（以 `gemma4-4b-gpu` ?��?�?
+#### Dockerfile 範例（以 `gemma4-4b-gpu` 為例）
 
 ```dockerfile
-# ?�?�?Model Card（�???ACR Image Manifest）�??�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?
+# ── Model Card（嵌入 ACR Image Manifest）────────────────────────────────────
 LABEL ai.benchmark.model-id="gemma4-4b-gpu" \
       ai.benchmark.model-name="Google Gemma 4 4B" \
       ai.benchmark.model-version="4.0" \
@@ -125,67 +125,67 @@ LABEL ai.benchmark.model-id="gemma4-4b-gpu" \
       ai.benchmark.telemetry-endpoint="https://billing.ai-hub.example.com/v1/usage"
 ```
 
-#### �?ACR 讀??Model Card（平?�側�?
+#### 從 ACR 讀取 Model Card（平台側）
 
 ```bash
-# ?��??��? Image ??Manifest Labels（無?�?pull ?��?Image�?
+# 拉取指定 Image 的 Manifest Labels（無需 pull 整個 Image）
 az acr manifest show \
   --registry model-cards \
-  --name ryzenai-benchmark:1.2.0-rocm \
+  --name itri/rocm/ryzenai-benchmark:1.2.0 \
   --query "config.Labels"
 ```
 
 ---
 
-### 1.2 ?�本管�???CHANGELOG
+### 1.2 版本管理與 CHANGELOG
 
-- Docker Image tag ?��?：`<framework-version>-<backend>`，�?�?`1.2.0-rocm`
-- 框架?�本?�遵�?[SemVer 2.0](https://semver.org/)，以 Git tag 標�?（�?�?`v1.2.0`�?
-- ?�目??*必�?**存在 `CHANGELOG.md`，�??��??��??�至少�??��?
-  - ?��??�更?��?模�?
+- Docker Image tag 格式：`<framework-version>-<backend>`，例如 `1.2.0-rocm`
+- 框架版本號遵循 [SemVer 2.0](https://semver.org/)，以 Git tag 標記（例如 `v1.2.0`）
+- 根目錄**必須**存在 `CHANGELOG.md`，每個版本條目至少包含：
+  - 新增或更新的模型
   - Model Card Labels 變更
-  - ?�測欄�??��?（�?影響下游平台?�監測�??�酬計�?�?
+  - 遙測欄位異動（會影響下游平台的監測與獎酬計算）
 
 ---
 
-## Layer 2 ??容器?�、�?權�?使用?�監測�?Linux iGPU �???�援�?
+## Layer 2 — 容器化、授權與使用量監測（Linux iGPU 正式支援）
 
-### 2.1 Dockerfile 規�?
+### 2.1 Dockerfile 規範
 
-Dockerfile **必�?**?�用多�?段建置�?並於第�??�段嵌入 Model Card Labels?? 
-Image ?��?規�?�?
+Dockerfile **必須**採用多階段建置，並於第二階段嵌入 Model Card Labels。  
+Image 命名規則：
 
 ```
-model-cards.azurecr.io/<供�???/<軟�??��?>/<模�?>:<tag>
+model-cards.azurecr.io/<供應商>/<軟體堆疊>/<模型>:<tag>
 ```
 
-| 欄�? | 說�? | 範�? |
+| 欄位 | 說明 | 範例 |
 |------|------|------|
-| `<供�???` | 模�??��??��??��?供�???| `amd`, `google`, `itri` |
-| `<軟�??��?>` | ?��?後端 / 硬�?路�? | `rocm`, `npu`, `cpu`, `cuda` |
-| `<模�?>` | 模�??�稱（�?寫、�???��??��? | `gemma4-4b`, `llama3-8b`, `ryzenai-benchmark` |
-| `<tag>` | 語�??��??��? | `latest`, `1.2.0` |
+| `<供應商>` | 模型或框架的原始供應商 | `amd`, `google`, `itri` |
+| `<軟體堆疊>` | 推論後端 / 硬體路徑 | `rocm`, `npu`, `cpu`, `cuda` |
+| `<模型>` | 模型名稱（小寫、連字號分隔） | `gemma4-4b`, `llama3-8b`, `ryzenai-benchmark` |
+| `<tag>` | 語意化版本號 | `latest`, `1.2.0` |
 
-範�?�?
+範例：
 
 ```
-# AMD ROCm 路�???Gemma 4 模�?
+# AMD ROCm 路徑的 Gemma 4 模型
 model-cards.azurecr.io/amd/rocm/gemma4-4b:latest
 
-# ITRI ?��? benchmark 工具（ROCm 後端�?
+# ITRI 自有 benchmark 工具（ROCm 後端）
 model-cards.azurecr.io/itri/rocm/ryzenai-benchmark:1.2.0
 ```
 
-完整 Dockerfile 範�?�?
+完整 Dockerfile 範例：
 
 ```dockerfile
-# ?�?�?Stage 1: 依賴安�? ?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?
+# ── Stage 1: 依賴安裝 ──────────────────────────────────────────────────────
 FROM python:3.12-slim AS builder
 WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir --prefix=/install -r requirements.txt
 
-# ?�?�?Stage 2: ?��??��? ?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?
+# ── Stage 2: 執行映像 ──────────────────────────────────────────────────────
 FROM python:3.12-slim AS runtime
 WORKDIR /app
 
@@ -195,7 +195,7 @@ COPY api.py cli.py ./
 COPY entrypoint.sh ./
 RUN chmod +x entrypoint.sh
 
-# weights ??license ?��??��?載�?不�??��?Image
+# weights 與 license 由外部掛載，不打包進 Image
 VOLUME ["/app/weights", "/app/license"]
 
 EXPOSE 8000
@@ -206,7 +206,7 @@ ENV PORT="8000"
 ENV LICENSE_PATH="/app/license/license.json"
 ENV TELEMETRY_ENDPOINT="https://billing.ai-hub.example.com/v1/usage"
 
-# ?�?�?Model Card ?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?
+# ── Model Card ──────────────────────────────────────────────────────────────
 LABEL ai.benchmark.model-id="gemma4-4b-gpu" \
       ai.benchmark.model-name="Google Gemma 4 4B" \
       ai.benchmark.model-version="4.0" \
@@ -223,11 +223,11 @@ ENTRYPOINT ["./entrypoint.sh"]
 
 ---
 
-### 2.2 License File ?��?機制
+### 2.2 License File 授權機制
 
-每�?Edge 裝置?��??�容?��?�?*必�?**?��?平台?�發??License File??
+每個 Edge 裝置在啟動容器前，**必須**持有平台核發的 License File。
 
-#### License File ?��?（`license.json`�?
+#### License File 格式（`license.json`）
 
 ```json
 {
@@ -240,34 +240,34 @@ ENTRYPOINT ["./entrypoint.sh"]
 }
 ```
 
-| 欄�? | 說�? |
+| 欄位 | 說明 |
 |------|------|
-| `license_id` | 平台?�發?�唯一?��? ID，用?��?費�???|
-| `issued_to` | 綁�??��?置�?客戶識別�?|
-| `expires_at` | ?��??��??��?，容?��??��?驗�?，�??��??��??��? |
-| `allowed_models` | 此�?權�?許執行�? model-id 清單 |
-| `signature` | 平台使用私鑰簽署??HMAC-SHA256，防止偽??|
+| `license_id` | 平台核發的唯一授權 ID，用於計費關聯 |
+| `issued_to` | 綁定的裝置或客戶識別碼 |
+| `expires_at` | 授權到期時間，容器啟動時驗證，過期則拒絕啟動 |
+| `allowed_models` | 此授權允許執行的 model-id 清單 |
+| `signature` | 平台使用私鑰簽署的 HMAC-SHA256，防止偽造 |
 
-#### ?��?驗�?流�?
+#### 授權驗證流程
 
-1. **容器?��???*（`entrypoint.sh`）�?讀??`LICENSE_PATH` 並�?證簽章�??��???
-2. **驗�?失�?**：輸?�錯誤說?��?�?exit code 1 終止，�??��??��??��?
-3. **?��??�警**：�??��? 7 天內，�?次�??�輸??WARNING ?�示
+1. **容器啟動時**（`entrypoint.sh`）：讀取 `LICENSE_PATH` 並驗證簽章與到期日
+2. **驗證失敗**：輸出錯誤說明後以 exit code 1 終止，不啟動推論服務
+3. **到期預警**：距到期 7 天內，每次啟動輸出 WARNING 提示
 
 ---
 
-### 2.3 `entrypoint.sh` ??License 驗�?守�?
+### 2.3 `entrypoint.sh` — License 驗證守門
 
 ```bash
 #!/bin/bash
 set -euo pipefail
 
-echo "[entrypoint] ?��? AI Benchmark ?��?..."
+echo "[entrypoint] 啟動 AI Benchmark 服務..."
 
-# ?�?�?1. License File 驗�? ?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?
+# ── 1. License File 驗證 ────────────────────────────────────────────────────
 if [ ! -f "${LICENSE_PATH}" ]; then
-  echo "[entrypoint][ERROR] License File 不�??��?${LICENSE_PATH}" >&2
-  echo "[entrypoint][ERROR] 請聯絡平?��?得�?權�?並�?載至 /app/license/" >&2
+  echo "[entrypoint][ERROR] License File 不存在：${LICENSE_PATH}" >&2
+  echo "[entrypoint][ERROR] 請聯絡平台取得授權檔並掛載至 /app/license/" >&2
   exit 1
 fi
 
@@ -283,35 +283,35 @@ with open(license_path) as f:
 expires = datetime.datetime.fromisoformat(lic["expires_at"].replace("Z", "+00:00"))
 now = datetime.datetime.now(datetime.timezone.utc)
 if now > expires:
-    print(f"[entrypoint][ERROR] ?��?已於 {lic['expires_at']} ?��?，�??�平?�申請�?�?, file=sys.stderr)
+    print(f"[entrypoint][ERROR] 授權已於 {lic['expires_at']} 到期，請向平台申請續約", file=sys.stderr)
     sys.exit(1)
 
 days_left = (expires - now).days
 if days_left <= 7:
-    print(f"[entrypoint][WARNING] ?��?將於 {days_left} 天�??��?（{lic['expires_at']}）�?請�??��?�?)
+    print(f"[entrypoint][WARNING] 授權將於 {days_left} 天後到期（{lic['expires_at']}），請提前續約")
 
 if model_id not in lic.get("allowed_models", []):
-    print(f"[entrypoint][ERROR] 此�?權�??�許?��?模�? '{model_id}'，許?��??��?{lic['allowed_models']}", file=sys.stderr)
+    print(f"[entrypoint][ERROR] 此授權不允許執行模型 '{model_id}'，許可清單：{lic['allowed_models']}", file=sys.stderr)
     sys.exit(1)
 
-print(f"[entrypoint] License 驗�??��?（�?�?ID：{lic['license_id']}，剩�?{days_left} 天�?")
+print(f"[entrypoint] License 驗證通過（授權 ID：{lic['license_id']}，剩餘 {days_left} 天）")
 EOF
 
-# ?�?�?2. MODEL_ID 必填檢查 ?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?
+# ── 2. MODEL_ID 必填檢查 ────────────────────────────────────────────────────
 if [ -z "${MODEL_ID}" ]; then
-  echo "[entrypoint][ERROR] ?��?變數 MODEL_ID ?�設�? >&2
+  echo "[entrypoint][ERROR] 環境變數 MODEL_ID 未設定" >&2
   exit 1
 fi
 
-# ?�?�?3. Weights ?��?確�?（NPU ONNX 模�??��????weights）�??�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?
+# ── 3. Weights 掛載確認（NPU ONNX 模型需要本地 weights）──────────────────
 if [[ "${MODEL_ID}" == *"-npu"* ]]; then
   if [ ! -d "/app/weights" ] || [ -z "$(ls -A /app/weights)" ]; then
-    echo "[entrypoint][ERROR] NPU 模�? weights ?��??�空�?app/weights" >&2
+    echo "[entrypoint][ERROR] NPU 模型 weights 目錄為空：/app/weights" >&2
     exit 1
   fi
 fi
 
-echo "[entrypoint] ?��??��??��?，模?��?${MODEL_ID}"
+echo "[entrypoint] 啟動推論服務，模型：${MODEL_ID}"
 exec python api.py \
   --model "${MODEL_ID}" \
   --host "${HOST}" \
@@ -320,17 +320,17 @@ exec python api.py \
 
 ---
 
-### 2.4 使用?��?測�?Principal-Agent ??���?
+### 2.4 使用量遙測（Principal-Agent 監測）
 
-每次?��?完�?後�?框架�?*必�?**?��?步地??`TELEMETRY_ENDPOINT` ?�報使用?��??��?供平?��?
+每次推論完成後，框架層**必須**非同步地向 `TELEMETRY_ENDPOINT` 回報使用量資料，供平台：
 
-1. **驗�??�諾**：�?對�?貢獻?��??��??�模?�能?��?實�?被使?��??��?
-2. **設�??�酬**：Principal 依�?實�??��?，核算�?貢獻?��?符�??�諾?��???
-3. **漸進�??�決�?*：用?��??��??�異常�?模�?，可縮�???License 存�?範�?
+1. **驗證承諾**：比對各貢獻團隊聲明的模型能力與實際被使用的情況
+2. **設計獎酬**：Principal 依據實際用量，核算對貢獻團隊符合承諾的回報
+3. **漸進開放決策**：用量低或回報異常的模型，可縮減其 License 存取範圍
 
-?�測?�輯??API 層�?`api.py`）統一注入�?*不侵??*模�?模�?（`ryzenai/modules/`）�?
+遙測邏輯在 API 層（`api.py`）統一注入，**不侵入**模型模組（`ryzenai/modules/`）。
 
-#### ?�測 Payload（HTTP POST JSON�?
+#### 遙測 Payload（HTTP POST JSON）
 
 ```json
 {
@@ -350,33 +350,33 @@ exec python api.py \
 }
 ```
 
-#### 欄�?說�?
+#### 欄位說明
 
-| 欄�? | ?�別 | ??��?��?|
+| 欄位 | 型別 | 監測用途 |
 |------|------|---------|
-| `license_id` | string | ?�聯使用?�帳?��?追蹤誰在??|
-| `model_id` | string | ?�聯貢獻?��?，追蹤哪?�模?�被??|
-| `contributor_team` | string | ?�接標�?貢獻?��?（帳?�架構細?��??�以 placeholder 填入）|
-| `request_id` | string | ?��?複�???|
-| `input_tokens` / `output_tokens` | int | ?��?計�??��?（可衍�??�酬?��??��? |
-| `ttft_seconds` / `throughput_tps` | float | 驗�?模�?實�??�能?�否符�? Model Card ?��? |
-| `error` | string \| null | 失�?請�?不�??��??�用??|
+| `license_id` | string | 關聯使用方帳戶，追蹤誰在用 |
+| `model_id` | string | 關聯貢獻團隊，追蹤哪個模型被用 |
+| `contributor_team` | string | 直接標記貢獻團隊（帳戶架構細化前暫以 placeholder 填入）|
+| `request_id` | string | 防重複計量 |
+| `input_tokens` / `output_tokens` | int | 用量計量基礎（可衍生獎酬或成本） |
+| `ttft_seconds` / `throughput_tps` | float | 驗證模型實際效能是否符合 Model Card 聲明 |
+| `error` | string \| null | 失敗請求不計入有效用量 |
 
-#### 設�??��?
+#### 設計原則
 
-- ?�測??*?��?�?*?�送�?`asyncio` background task）�?不阻塞推論�???
-- ??endpoint 不可?��?寫入?�地?�援佇�?（`logs/telemetry_queue.jsonl`）�?待�???�復後�???
-- `contributor_team` 欄�??�帳?�架構確定�?，由平台�?`model_id` ?��?對�?，無?��???��??�填�?
+- 遙測為**非同步**發送（`asyncio` background task），不阻塞推論回應
+- 若 endpoint 不可達，寫入本地備援佇列（`logs/telemetry_queue.jsonl`），待連線恢復後補送
+- `contributor_team` 欄位在帳戶架構確定後，由平台依 `model_id` 自動對應，無需上架方手動填寫
 
 ---
 
-### 2.5 建�? Azure Container Registry（�?次設定�?
+### 2.5 建立 Azure Container Registry（初次設定）
 
-?��??��??��??��?一次。`model-cards` 已�??�於資�?群�? `ai-hub-webui` ?�可跳�???
+本節操作只需執行一次。`model-cards` 已存在於資源群組 `ai-hub-webui` 時可跳過。
 
-1. ??Azure Portal ?�部?��??�輸??**Container registries**，確�?**`model-cards`** ?�否已�??�於訂閱 **`eosl-r3-aihub`** 下�?
+1. 在 Azure Portal 頂部搜尋列輸入 **Container registries**，確認 **`model-cards`** 是否已存在於訂閱 **`eosl-r3-aihub`** 下。
 
-2. ?��??�建立�??��?端�??��?�?
+2. 若尚未建立，在終端機執行：
 
    ```bash
    az login
@@ -393,9 +393,9 @@ exec python api.py \
      --admin-enabled false
    ```
 
-   > **?��?�?`--admin-enabled false`�?* Admin 帳�?使用?��?密碼，無法輪?�。本規�??�用 Service Principal，能夠�??��?證並精確?�制權�???
+   > **為什麼 `--admin-enabled false`？** Admin 帳號使用靜態密碼，無法輪替。本規章改用 Service Principal，能夠定期換證並精確限制權限。
 
-3. 建�?完�?後�?記�?以�?資�?（�?續步驟使?��?�?
+3. 建立完成後，記錄以下資訊（後續步驟使用）：
 
    ```bash
    az acr show \
@@ -406,11 +406,11 @@ exec python api.py \
 
 ---
 
-### 2.6 建�? Edge 裝置?��???Service Principal（�?次設定�?
+### 2.6 建立 Edge 裝置拉取用 Service Principal（初次設定）
 
-Edge 裝置?��? Image 使用?��? Service Principal，賦予�?小�??��???`acrpull`）�?
+Edge 裝置拉取 Image 使用獨立 Service Principal，賦予最小權限（僅 `acrpull`）。
 
-1. ?��? ACR ??Resource ID�?
+1. 取得 ACR 的 Resource ID：
 
    ```bash
    ACR_ID=$(az acr show \
@@ -419,7 +419,7 @@ Edge 裝置?��? Image 使用?��? Service Principal，賦予�?小�??�
      --output tsv)
    ```
 
-2. 建�? Service Principal，賦�?`acrpull` 角色�?
+2. 建立 Service Principal，賦予 `acrpull` 角色：
 
    ```bash
    az ad sp create-for-rbac \
@@ -429,7 +429,7 @@ Edge 裝置?��? Image 使用?��? Service Principal，賦予�?小�??�
      --years 1
    ```
 
-   ?�令?��?後�?輸出類似以�??�容，�?**妥�?保�?** `appId` ??`password`�?
+   指令執行後會輸出類似以下內容，請**妥善保存** `appId` 與 `password`：
 
    ```json
    {
@@ -439,72 +439,72 @@ Edge 裝置?��? Image 使用?��? Service Principal，賦予�?小�??�
    }
    ```
 
-   > **?��?**：`password` ?��?此�??��??��??�次?�閱，�?立即存入 Key Vault ?��??��?碼管?�工?��?
+   > **重要**：`password` 離開此頁面後無法再次查閱，請立即存入 Key Vault 或安全密碼管理工具。
 
 ---
 
-### 2.7 設�? GitHub Repository Secrets
+### 2.7 設定 GitHub Repository Secrets
 
-CI/CD ?�?�?��?證統一存放??GitHub Repository Secrets，�?寫入?��?碼�?
+CI/CD 所需的憑證統一存放於 GitHub Repository Secrets，不寫入原始碼。
 
-1. ?��? GitHub ?��?庫�??��? **Settings**??
+1. 前往 GitHub 儲存庫，選取 **Settings**。
 
-2. ?�左?�選??**Secrets and variables** ??**Actions**??
+2. 在左側選取 **Secrets and variables** → **Actions**。
 
-3. ?��? **Secrets** ?��?，�?序選??**New repository secret**，新增以下兩??secret�?
+3. 選取 **Secrets** 分頁，依序選取 **New repository secret**，新增以下兩個 secret：
 
-   | Secret ?�稱 | ??|
+   | Secret 名稱 | 值 |
    |---|---|
-   | **AZURE_CREDENTIALS** | `az ad sp create-for-rbac --sdk-auth` 輸出?��???JSON（�??�建一??Contributor SP ?�於 CI�?|
+   | **AZURE_CREDENTIALS** | `az ad sp create-for-rbac --sdk-auth` 輸出的完整 JSON（需另建一個 Contributor SP 用於 CI） |
    | **ACR_NAME** | `model-cards` |
 
 ---
 
-### 2.8 建置並推??Image（�?次發布�?
+### 2.8 建置並推送 Image（每次發布）
 
-每次?��?Git tag（格�?`v*.*.*`）�?，GitHub Actions ?��??��?建置?�推?��? 
-?��??��??��?步�?如�?�?
+每次推送 Git tag（格式 `v*.*.*`）時，GitHub Actions 自動執行建置與推送。  
+手動執行時，步驟如下：
 
-1. ?�入 ACR�?
+1. 登入 ACR：
 
    ```bash
    az login
    az acr login --name model-cards
    ```
 
-2. 建置並�?�?Image�?
+2. 建置並標記 Image：
 
    ```bash
-   VERSION="1.2.0"   # 對�? Git tag v1.2.0
+   VERSION="1.2.0"   # 對應 Git tag v1.2.0
 
    docker build \
      -t model-cards.azurecr.io/itri/rocm/ryzenai-benchmark:${VERSION} \
      .
    ```
 
-3. ?�送至 ACR�?
+3. 推送至 ACR：
 
    ```bash
    docker push model-cards.azurecr.io/itri/rocm/ryzenai-benchmark:${VERSION}
    ```
 
-4. 確�? Image ??Model Card Labels 已�??��?
+4. 確認 Image 與 Model Card Labels 已上傳：
 
    ```bash
    az acr manifest show \
      --registry model-cards \
-     --name ryzenai-benchmark:${VERSION}-rocm \
+     --name itri/rocm/ryzenai-benchmark:${VERSION} \
      --query "config.Labels" \
      --output table
    ```
 
 ---
 
-### 2.9 GitHub Actions ??Release Pipeline
+### 2.9 GitHub Actions — Release Pipeline
 
 ```yaml
 # .github/workflows/release.yml
-name: Release ??Build & Push to ACR
+name: Release — Build & Push to ACR
 
 on:
   push:
@@ -537,16 +537,16 @@ jobs:
 
 ---
 
-### 2.10 每�??�鑰輪替（`scripts/rotate_sp_key.sh`�?
+### 2.10 每月金鑰輪替（`scripts/rotate_sp_key.sh`）
 
-Edge 裝置??Service Principal ?��?碼�?每�?輪替，建議透�??��?任�??��??��???
+Edge 裝置用 Service Principal 的密碼需每月輪替，建議透過排程任務自動執行。
 
 ```bash
 #!/bin/bash
-# 建議?��? Azure Automation ??cron 每�??��?一�?
+# 建議搭配 Azure Automation 或 cron 每月執行一次
 
-SP_APP_ID="<步�? 2.6 ?��???appId>"
-KV_NAME="<存放密碼??Key Vault ?�稱>"
+SP_APP_ID="<步驟 2.6 取得的 appId>"
+KV_NAME="<存放密碼的 Key Vault 名稱>"
 SECRET_NAME="model-cards-pull-password"
 
 NEW_PASSWORD=$(az ad sp credential reset \
@@ -559,19 +559,19 @@ az keyvault secret set \
   --name ${SECRET_NAME} \
   --value "${NEW_PASSWORD}"
 
-echo "?�鑰輪替完�?�?{KV_NAME}/${SECRET_NAME}"
+echo "金鑰輪替完成：${KV_NAME}/${SECRET_NAME}"
 ```
 
-> Edge 裝置?��? Key Vault ?��?讀??ACR 密碼，而�??�本?�硬式編碼�?
+> Edge 裝置應從 Key Vault 動態讀取 ACR 密碼，而非在本地硬式編碼。
 
 ---
 
-### 2.11 Edge 裝置?�署（`docker-compose.yml`�?
+### 2.11 Edge 裝置部署（`docker-compose.yml`）
 
-下游 Edge 裝置?�到 License File 後�?使用以�? `docker-compose.yml` ?��??��?�?
+下游 Edge 裝置收到 License File 後，使用以下 `docker-compose.yml` 啟動服務：
 
 ```yaml
-# docker-compose.yml（�? Edge 設�?下游使用�?
+# docker-compose.yml（供 Edge 設備下游使用）
 services:
   ryzenai-benchmark:
     image: model-cards.azurecr.io/itri/rocm/ryzenai-benchmark:1.2.0
@@ -583,91 +583,91 @@ services:
     ports:
       - "8000:8000"
     volumes:
-      - ./weights:/app/weights:ro       # ?�地 weights（唯讀�?
-      - ./license:/app/license:ro       # License File（唯讀�?
-      - ./logs:/app/logs                # ?�地?�測?�援佇�?
+      - ./weights:/app/weights:ro       # 本地 weights（唯讀）
+      - ./license:/app/license:ro       # License File（唯讀）
+      - ./logs:/app/logs                # 本地遙測備援佇列
     devices:
-      - /dev/kfd                        # AMD ROCm iGPU ?��?
+      - /dev/kfd                        # AMD ROCm iGPU 直通
       - /dev/dri
 ```
 
-?��?後�??��?對�??�露??`http://localhost:8000`，相�?OpenAI Chat Completions API??
+啟動後，服務對外暴露於 `http://localhost:8000`，相容 OpenAI Chat Completions API。
 
 ---
 
-## Layer 3 ??Windows NPU ?��?路�?（進�?待�?估�?
+## Layer 3 — Windows NPU 特殊路徑（進階待評估）
 
-AMD Ryzen AI NPU（VitisAI EP）�?驅�??�支??Windows，目?��??��??��? Linux 容器?�方案�? 
-**此路線�?納入�???�援，�? PoC 評估後決定是?��?級為�??規格??*
+AMD Ryzen AI NPU（VitisAI EP）因驅動僅支援 Windows，目前尚無成熟的 Linux 容器化方案。  
+**此路線不納入正式支援，待 PoC 評估後決定是否升級為正式規格。**
 
-### 3.1 ?��?�???
+### 3.1 技術限制
 
-| ?�制?�目 | 說�? |
+| 限制項目 | 說明 |
 |---------|------|
-| 驅�??�支??Windows | NPU Driver 32.x ??Linux ?�本，Linux Docker ?��??��?|
-| VitisAI EP DLL 依賴 | ?��?`C:\Program Files\RyzenAI\` 下�? DLL，容?��??�難 |
-| Windows Container ?��?�?| GPU/NPU ?�通支?��?不�? Linux + Docker |
+| 驅動僅支援 Windows | NPU Driver 32.x 無 Linux 版本，Linux Docker 無法直通 |
+| VitisAI EP DLL 依賴 | 需要 `C:\Program Files\RyzenAI\` 下的 DLL，容器化困難 |
+| Windows Container 成熟度 | GPU/NPU 直通支援遠不如 Linux + Docker |
 
-### 3.2 ?��??��?（License File 等�??�制�?
+### 3.2 暫行方案（License File 等效控制）
 
-??Docker 容器?�可行�?，NPU 路�??�用以�??�代?��?機制�?
+在 Docker 容器化可行前，NPU 路線採用以下替代授權機制：
 
-| Layer 2 ?�能 | NPU ?��??�代?��? |
+| Layer 2 功能 | NPU 暫行替代方案 |
 |-------------|----------------|
-| ACR Image 存�??�制 | Azure Blob Storage SAS Token�?0 天�??��?�?|
-| License File 驗�? | ?��??��?，由 `entrypoint.py` ??Conda ?��?中執行�?�?|
-| 計費?�測 | ?��? HTTP callback 規格，由 `api.py` ?�接?�叫 |
-| ?�鑰輪替 | SAS Token ?��??��? + ?�知客戶?�新?��? |
+| ACR Image 存取控制 | Azure Blob Storage SAS Token（30 天有效期） |
+| License File 驗證 | 相同格式，由 `entrypoint.py` 在 Conda 環境中執行驗證 |
+| 計費遙測 | 相同 HTTP callback 規格，由 `api.py` 直接呼叫 |
+| 金鑰輪替 | SAS Token 自動過期 + 通知客戶重新取得 |
 
 ---
 
-## ?��? A：�??��??��?Acceptance Checklist�?
+## 附錄 A：驗收清單（Acceptance Checklist）
 
-每次?��??��??��?責人對照以�?清單確�?�?
+每次發布前，由負責人對照以下清單確認：
 
-### Layer 1（�??��?案�??��?
-- [ ] `CHANGELOG.md` 已更?�本?�本條目
-- [ ] Git tag ?��?符�? `v<major>.<minor>.<patch>`
-- [ ] Dockerfile 已�??��??��?�?Model Card Labels
-- [ ] `ai.benchmark.license-required` ??`ai.benchmark.telemetry-endpoint` 已正確設�?
+### Layer 1（所有專案必查）
+- [ ] `CHANGELOG.md` 已更新本版本條目
+- [ ] Git tag 格式符合 `v<major>.<minor>.<patch>`
+- [ ] Dockerfile 已嵌入所有必要 Model Card Labels
+- [ ] `ai.benchmark.license-required` 與 `ai.benchmark.telemetry-endpoint` 已正確設定
 
-### Layer 2（Linux iGPU 容器?��?
-- [ ] `Dockerfile` ?��??�段建置
-- [ ] `entrypoint.sh` ??License File 缺失?��??��?�?��終止（exit code 1�?
-- [ ] License File 驗�?涵�?：簽章、到?�日?�model 許可清單
-- [ ] 計費?�測?�測試環境中?��??��??��? endpoint，response 200
-- [ ] 計費?�測??endpoint 不可?��?�?��寫入 `logs/telemetry_queue.jsonl`
-- [ ] ACR ?��?標籤?��??��???backend 標�?（�?：`1.2.0-rocm`�?
-- [ ] Service Principal `sp-model-cards-edge-pull` ?��???`acrpull` 權�?
-- [ ] `release.yml` ?��???CI ?��?並推?�至 `model-cards`
-- [ ] Edge 裝置�?`docker-compose.yml` ?��?並�?�?`http://localhost:8000/v1/models` �?��?��?
+### Layer 2（Linux iGPU 容器化）
+- [ ] `Dockerfile` 採多階段建置
+- [ ] `entrypoint.sh` 在 License File 缺失或過期時正確終止（exit code 1）
+- [ ] License File 驗證涵蓋：簽章、到期日、model 許可清單
+- [ ] 計費遙測在測試環境中成功送達指定 endpoint，response 200
+- [ ] 計費遙測在 endpoint 不可達時正確寫入 `logs/telemetry_queue.jsonl`
+- [ ] ACR 映像標籤含版本號與 backend 標識（例：`itri/rocm/ryzenai-benchmark:1.2.0`）
+- [ ] Service Principal `sp-model-cards-edge-pull` 僅持有 `acrpull` 權限
+- [ ] `release.yml` 成功在 CI 執行並推送至 `model-cards`
+- [ ] Edge 裝置以 `docker-compose.yml` 啟動並驗證 `http://localhost:8000/v1/models` 正常回應
 
-### Layer 3（Windows NPU�?
-- [ ] 已�???PoC 評估?��?並�???`docs/`
-- [ ] ?��??��?（Conda + SAS Token）已?�目標�?置�?�?
+### Layer 3（Windows NPU）
+- [ ] 已完成 PoC 評估報告並存入 `docs/`
+- [ ] 暫行方案（Conda + SAS Token）已在目標裝置驗證
 
 ---
 
-## ?��? B：�??�至?��? Benchmark 專�??�客製�??��?
+## 附錄 B：套用至其他 Benchmark 專案的客製化指引
 
-?��?章設計為**框架?��?（Framework-agnostic�?*?��??�至?��?專�??��?調整�?
+本規章設計為**框架無關（Framework-agnostic）**。套用至其他專案時需調整：
 
-| ?�客�?��??�目 | ?��?章�?設�?| ?��?專�??��?說�? |
+| 需客製化的項目 | 本規章預設值 | 其他專案替換說明 |
 |--------------|------------|----------------|
-| ACR Image ?��??�綴 | `ryzenai-benchmark` | ?��??��??��?案�?�?|
-| `TELEMETRY_ENDPOINT` | `https://billing.ai-hub.example.com/v1/usage` | ?��??��??�平?��?計費 endpoint |
-| Dockerfile `LABEL` ?��?| `gemma4-4b-gpu` ?��?資�? | ?��??��??�模?��? Model Card 資�? |
-| `entrypoint.sh` ??weights 路�??�輯 | `/app/weights` | 依�?專�? weights ?��?結�?調整 |
-| `docker-compose.yml` ??`devices` ?��?| AMD ROCm（`/dev/kfd`, `/dev/dri`�?| 依硬體替?��?見�?表�? |
+| ACR Image 命名前綴 | `ryzenai-benchmark` | 替換為對應專案名稱 |
+| `TELEMETRY_ENDPOINT` | `https://billing.ai-hub.example.com/v1/usage` | 替換為對應平台的計費 endpoint |
+| Dockerfile `LABEL` 區塊 | `gemma4-4b-gpu` 相關資訊 | 替換為對應模型的 Model Card 資訊 |
+| `entrypoint.sh` 的 weights 路徑邏輯 | `/app/weights` | 依各專案 weights 目錄結構調整 |
+| `docker-compose.yml` 的 `devices` 區塊 | AMD ROCm（`/dev/kfd`, `/dev/dri`） | 依硬體替換（見下表） |
 
-> 訂閱 `eosl-r3-aihub`?��?源群�?`ai-hub-webui`?�ACR `model-cards` ?�本平台?��?資�?�?*?�??benchmark 專�??�用**，�??�?��???
+> 訂閱 `eosl-r3-aihub`、資源群組 `ai-hub-webui`、ACR `model-cards` 為本平台固定資源，**所有 benchmark 專案共用**，不需替換。
 
-### ?��??�器 Docker device ?�通�???
+### 各加速器 Docker device 直通參數
 
-| ?�速器 | Vendor | `docker-compose.yml` 設�? |
+| 加速器 | Vendor | `docker-compose.yml` 設定 |
 |--------|--------|--------------------------|
 | NVIDIA GPU | NVIDIA | `runtime: nvidia` + `NVIDIA_VISIBLE_DEVICES=all` |
 | AMD iGPU (ROCm) | AMD | `devices: [/dev/kfd, /dev/dri]` |
-| AMD NPU (XDNA) | AMD | 尚在評估（�???Layer 3�?|
+| AMD NPU (XDNA) | AMD | 尚在評估（參閱 Layer 3） |
 | Intel GPU (OpenVINO) | Intel | `devices: [/dev/dri]` |
-| Qualcomm QNN | Qualcomm | 依�? SDK ?�件?��?裝置節�?|
+| Qualcomm QNN | Qualcomm | 依各 SDK 文件指定裝置節點 |
