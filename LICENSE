@@ -1,0 +1,329 @@
+ITRI AI Hub Model Container License Agreement
+Version 1.0 — Effective Date: 2026-06-15
+
+Copyright (c) 2026 Industrial Technology Research Institute (ITRI)
+AI Program Office — AI Hub Initiative
+
+════════════════════════════════════════════════════════════════════════════════
+IMPORTANT — READ CAREFULLY BEFORE PULLING, RUNNING, OR DISTRIBUTING
+ANY CONTAINER IMAGE FROM model-cards-registry.azurecr.io
+════════════════════════════════════════════════════════════════════════════════
+
+By pulling or running any container image from the ITRI AI Hub Container
+Registry (model-cards-registry.azurecr.io), you ("Licensee") agree to be
+bound by the terms of this Agreement. If you do not agree, do not pull,
+run, or use any such image.
+
+
+───────────────────────────────────────────────────────────────────────────────
+ARTICLE 1 — DEFINITIONS
+───────────────────────────────────────────────────────────────────────────────
+
+1.1  "Licensor" means the Industrial Technology Research Institute (ITRI),
+     acting through its AI Program Office.
+
+1.2  "AI Hub Platform" means the ITRI-operated service at
+     model-cards-registry.azurecr.io and its associated API endpoints,
+     including the License Activation Service and Usage Telemetry endpoint.
+
+1.3  "Container Image" means any Docker image distributed through the
+     AI Hub Platform, containing the Framework Code and runtime configuration
+     but NOT the model weights (see Article 3).
+
+1.4  "Framework Code" means the source code in this repository
+     (R300-AI/amd-ryzen-ai-benchmark), including ryzenai/, api.py, cli.py,
+     entrypoint.sh, and all associated files authored by ITRI or its
+     contributors.
+
+1.5  "Model Weights" means the neural network parameter files required for
+     inference, which are NOT included in the Container Image and are subject
+     to their respective upstream license terms (see Article 6).
+
+1.6  "License Key" means the alphanumeric credential issued by ITRI AI Hub
+     to a specific Licensee account, used to activate and authenticate
+     Container Image usage.
+
+1.7  "Authorized Device" means a physical or virtual computing device that
+     has been successfully registered against a License Key through the
+     AI Hub Activation Handshake (see the companion document
+     docs/aihub-activation-handshake.md).
+
+1.8  "Contributor Team" means a team or organization that has uploaded a
+     Container Image to the AI Hub Platform under an active contributor
+     account agreement.
+
+
+───────────────────────────────────────────────────────────────────────────────
+ARTICLE 2 — GRANT OF LICENSE (FRAMEWORK CODE)
+───────────────────────────────────────────────────────────────────────────────
+
+2.1  Subject to the terms herein, Licensor grants Licensee a non-exclusive,
+     non-transferable, revocable license to:
+
+     (a) Pull Container Images from the AI Hub Platform using a valid
+         License Key;
+     (b) Run Container Images on Authorized Devices within the device quota
+         associated with the Licensee's account;
+     (c) Access the inference API exposed by a running Container Image for
+         internal research, development, and evaluation purposes.
+
+2.2  This license does NOT grant Licensee the right to:
+
+     (a) Redistribute, sublicense, or resell Container Images or their
+         contents to any third party;
+     (b) Reverse-engineer, decompile, or extract the Framework Code or
+         Model Weights from a Container Image;
+     (c) Modify the entrypoint, license validation, or telemetry components
+         of a Container Image;
+     (d) Run a Container Image on more Authorized Devices simultaneously
+         than permitted by the Licensee's account quota;
+     (e) Circumvent, disable, or interfere with the License Key validation,
+         Device Fingerprint binding, or Heartbeat mechanisms described in
+         docs/aihub-activation-handshake.md.
+
+2.3  Contributor Teams who upload Container Images to the AI Hub Platform
+     are separately governed by the ITRI AI Hub Contributor Agreement and
+     retain copyright over their own module code, subject to the upstream
+     licenses set forth in Article 6.
+
+
+───────────────────────────────────────────────────────────────────────────────
+ARTICLE 3 — MODEL WEIGHTS ARE NOT INCLUDED
+───────────────────────────────────────────────────────────────────────────────
+
+3.1  Container Images distributed through the AI Hub Platform do NOT contain
+     model weights. Weights are mounted at runtime by the Licensee from a
+     separately obtained source.
+
+3.2  Licensee is solely responsible for complying with the terms of the
+     upstream model license applicable to the weights they mount. Relevant
+     upstream model licenses include, but are not limited to, those listed
+     in Article 6.3.
+
+3.3  ITRI makes no representation that any particular set of model weights
+     is compatible with this Agreement or the Licensee's intended use.
+
+
+───────────────────────────────────────────────────────────────────────────────
+ARTICLE 4 — LICENSE KEY AND DEVICE AUTHORIZATION
+───────────────────────────────────────────────────────────────────────────────
+
+4.1  Each License Key is issued to a single named account and is bound to a
+     maximum number of Authorized Devices as specified at the time of issuance.
+
+4.2  A device becomes an Authorized Device only after completing the
+     AI Hub Activation Handshake (see docs/aihub-activation-handshake.md).
+     The handshake binds the License Key to a Device Fingerprint derived from
+     hardware identifiers of the device.
+
+4.3  License Keys must be set as the environment variable AIHUB_LICENSE_KEY
+     at container runtime. Keys must not be:
+
+     (a) Committed to source code repositories;
+     (b) Included in derived container images;
+     (c) Shared between accounts or transferred to third parties.
+
+4.4  License Keys expire as specified in the key metadata returned during
+     activation. Licensor reserves the right to revoke a License Key if
+     the terms of this Agreement are violated.
+
+4.5  If Licensor detects that a License Key is being used on more devices
+     than the authorized quota, or that the Device Fingerprint binding has
+     been circumvented, Licensor may immediately suspend the License Key
+     without prior notice.
+
+
+───────────────────────────────────────────────────────────────────────────────
+ARTICLE 5 — USAGE TELEMETRY AND DATA CONTRACT
+───────────────────────────────────────────────────────────────────────────────
+
+5.1  Container Images automatically transmit Usage Telemetry to the AI Hub
+     Platform upon each inference request. Telemetry includes:
+     input token count, output token count, model identifier, device
+     fingerprint hash, license key identifier, and timestamp. This data
+     is used to enforce usage quotas and to calculate contributor rewards
+     under the ITRI AI Hub Principal-Agent mechanism.
+
+5.2  Licensee consents to the collection and processing of Usage Telemetry
+     as a condition of this license.
+
+5.3  If the AI Hub Platform is temporarily unreachable, the Container Image
+     may continue serving requests for a grace period specified in the
+     activation response. Queued telemetry will be transmitted upon
+     reconnection.
+
+5.4  Licensor will handle telemetry data in accordance with ITRI's Privacy
+     Policy and applicable Taiwan law (Personal Data Protection Act,
+     PDPA 個人資料保護法).
+
+
+───────────────────────────────────────────────────────────────────────────────
+ARTICLE 6 — UPSTREAM LICENSE ACKNOWLEDGEMENTS
+───────────────────────────────────────────────────────────────────────────────
+
+This software incorporates components under the following licenses.
+Licensee must comply with each applicable upstream license.
+
+6.1  PERMISSIVE OPEN SOURCE COMPONENTS
+
+     The following components are included under permissive licenses and may
+     be used, modified, and redistributed in accordance with their respective
+     terms. Copies of these licenses are available in the /licenses/ directory
+     of the Container Image.
+
+     ┌───────────────────────────────┬───────────────────────────┐
+     │ Component                     │ License                   │
+     ├───────────────────────────────┼───────────────────────────┤
+     │ FastAPI                       │ MIT License               │
+     │ Uvicorn                       │ BSD 3-Clause              │
+     │ Pydantic                      │ MIT License               │
+     │ Pillow                        │ HPND (MIT-style)          │
+     │ HuggingFace Transformers      │ Apache License 2.0        │
+     │ HuggingFace Accelerate        │ Apache License 2.0        │
+     │ ONNX Runtime                  │ MIT License               │
+     │ ONNX Runtime GenAI            │ MIT License               │
+     │ PyTorch (ROCm build)          │ BSD 3-Clause (modified)   │
+     │ Python                        │ PSF License               │
+     └───────────────────────────────┴───────────────────────────┘
+
+6.2  AMD PROPRIETARY COMPONENTS
+
+     The following AMD components are proprietary and are NOT redistributed
+     within Container Images. Licensee must obtain them separately by
+     accepting AMD's applicable End User License Agreement (EULA).
+
+     ┌─────────────────────────────────────────┬───────────────────────────────────────┐
+     │ Component                               │ Where to Obtain                       │
+     ├─────────────────────────────────────────┼───────────────────────────────────────┤
+     │ AMD Ryzen AI Software 1.7.1             │ ryzenai.docs.amd.com/en/latest/inst   │
+     │ AMD NPU Driver 32.0.203.280             │ (included in above)                   │
+     │ AMD Vitis AI Execution Provider         │ (included in above, conda env)        │
+     │ AMD Software: Adrenalin Edition 26.2.2  │ amd.com/en/resources/support-articles │
+     │ AMD ROCm 7.2.1                          │ rocm.docs.amd.com                     │
+     └─────────────────────────────────────────┴───────────────────────────────────────┘
+
+     AMD components are subject to AMD's EULA, which Licensee must separately
+     accept. ITRI is not a party to AMD's EULA and makes no warranties
+     regarding AMD software.
+
+6.3  MODEL WEIGHTS — UPSTREAM TERMS OF USE
+
+     The following model weights are supported by this framework but are NOT
+     distributed by ITRI. Licensee must accept the applicable terms before
+     mounting weights to a Container Image.
+
+     ┌───────────────────────────────────────────────────────┬───────────────────────────────────────────────┐
+     │ Model                                                 │ Terms                                         │
+     ├───────────────────────────────────────────────────────┼───────────────────────────────────────────────┤
+     │ Google Gemma 3 (all sizes)                            │ Google Gemma Terms of Use                     │
+     │                                                       │ ai.google.dev/gemma/terms                     │
+     ├───────────────────────────────────────────────────────┼───────────────────────────────────────────────┤
+     │ Google Gemma 4 (all sizes)                            │ Google Gemma Terms of Use                     │
+     │                                                       │ ai.google.dev/gemma/terms                     │
+     ├───────────────────────────────────────────────────────┼───────────────────────────────────────────────┤
+     │ AMD Gemma 3 4B ONNX NPU                               │ Apache License 2.0 (ONNX conversion by AMD)  │
+     │ (amd/Gemma-3-4b-it-mm-onnx-ryzenai-npu)              │ + Google Gemma Terms of Use (base weights)    │
+     │                                                       │ huggingface.co/amd (model page)               │
+     └───────────────────────────────────────────────────────┴───────────────────────────────────────────────┘
+
+     IMPORTANT: Google Gemma Terms of Use prohibit certain uses including,
+     but not limited to: use in weapons development, generation of harmful
+     content, and use in violation of applicable law. These prohibitions
+     flow through to any use via this framework. Licensee agrees not to use
+     Gemma-family models for any prohibited purpose.
+
+6.4  THIRD-PARTY SERVICES
+
+     Use of Azure Container Registry (Microsoft Azure) is subject to the
+     Microsoft Azure Terms of Service. ITRI AI Hub operates
+     model-cards-registry.azurecr.io as a registered Azure subscriber.
+     Licensee's pull access to this registry is subject to both Microsoft's
+     terms and this Agreement.
+
+
+───────────────────────────────────────────────────────────────────────────────
+ARTICLE 7 — INTELLECTUAL PROPERTY
+───────────────────────────────────────────────────────────────────────────────
+
+7.1  The Framework Code authored by ITRI and its contributors is the
+     intellectual property of the Industrial Technology Research Institute.
+     All rights not expressly granted herein are reserved.
+
+7.2  The Model Card schema (ai.benchmark.* Docker LABEL namespace) and the
+     Data Contract specification (docs/benchmark-release-standard.md) are
+     proprietary specifications of ITRI AI Hub. Third parties may implement
+     compatible tooling but may not claim authorship of the specification.
+
+7.3  Nothing in this Agreement transfers ownership of any intellectual
+     property from Licensor to Licensee.
+
+
+───────────────────────────────────────────────────────────────────────────────
+ARTICLE 8 — DISCLAIMER OF WARRANTIES
+───────────────────────────────────────────────────────────────────────────────
+
+8.1  THE SOFTWARE, CONTAINER IMAGES, AND FRAMEWORK CODE ARE PROVIDED
+     "AS IS" WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING
+     BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+     PARTICULAR PURPOSE, AND NON-INFRINGEMENT.
+
+8.2  ITRI DOES NOT WARRANT THAT:
+     (a) Container Images will be compatible with Licensee's hardware;
+     (b) Inference results will meet any particular accuracy standard;
+     (c) The AI Hub Platform will be available without interruption.
+
+
+───────────────────────────────────────────────────────────────────────────────
+ARTICLE 9 — LIMITATION OF LIABILITY
+───────────────────────────────────────────────────────────────────────────────
+
+9.1  TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, ITRI SHALL NOT BE
+     LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR
+     PUNITIVE DAMAGES ARISING OUT OF OR IN CONNECTION WITH THIS AGREEMENT
+     OR THE USE OF THE SOFTWARE, EVEN IF ITRI HAS BEEN ADVISED OF THE
+     POSSIBILITY OF SUCH DAMAGES.
+
+9.2  ITRI's total cumulative liability under this Agreement shall not exceed
+     the amount paid by Licensee to ITRI in the twelve (12) months preceding
+     the claim.
+
+
+───────────────────────────────────────────────────────────────────────────────
+ARTICLE 10 — GOVERNING LAW AND JURISDICTION
+───────────────────────────────────────────────────────────────────────────────
+
+10.1 This Agreement shall be governed by and construed in accordance with
+     the laws of the Republic of China (Taiwan), without regard to its
+     conflict of law provisions.
+
+10.2 Any dispute arising out of or in connection with this Agreement shall
+     be submitted to the exclusive jurisdiction of the Taiwan Intellectual
+     Property Court (智慧財產及商業法院) or, for matters outside that
+     court's jurisdiction, the Taipei District Court (臺北地方法院).
+
+
+───────────────────────────────────────────────────────────────────────────────
+ARTICLE 11 — GENERAL PROVISIONS
+───────────────────────────────────────────────────────────────────────────────
+
+11.1 ENTIRE AGREEMENT. This Agreement, together with the Data Contract
+     specification (docs/benchmark-release-standard.md) and the ITRI AI Hub
+     Contributor Agreement (where applicable), constitutes the entire
+     agreement between the parties regarding the subject matter hereof.
+
+11.2 SEVERABILITY. If any provision of this Agreement is held invalid or
+     unenforceable, the remaining provisions shall continue in full force.
+
+11.3 AMENDMENTS. ITRI reserves the right to update this Agreement. Continued
+     use of Container Images after publication of an updated Agreement
+     constitutes acceptance of the new terms. The current version is always
+     available at:
+     github.com/R300-AI/amd-ryzen-ai-benchmark/blob/main/LICENSE
+
+11.4 CONTACT. For licensing inquiries, contributor agreements, or
+     compliance questions, contact the ITRI AI Hub team at:
+     ai-hub@itri.org.tw
+
+════════════════════════════════════════════════════════════════════════════════
+END OF LICENSE AGREEMENT
+════════════════════════════════════════════════════════════════════════════════

@@ -1,0 +1,157 @@
+name: Deploy to Azure App Service
+
+# 所有部署參數來自 GitHub Repository Variables，設定步驟見 docs/github_cicd_workflow.md
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write   # OIDC 登入 Azure 必要
+
+concurrency:
+  group: deploy
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Azure 登入（OIDC，無 secret）
+        uses: azure/login@v2
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+
+      - name: 佈建 Azure 資源（冪等，已存在則略過）
+        uses: azure/CLI@v2
+        with:
+          azcliversion: latest
+          inlineScript: |
+            RG="${{ vars.AZURE_RESOURCE_GROUP }}"
+            WEBAPP="${{ vars.AZURE_WEBAPP_NAME }}"
+            KV="${{ vars.KEY_VAULT_NAME }}"
+            REGION="${{ vars.AZURE_REGION }}"
+            PLAN="${WEBAPP}-plan"
+
+            # Resource Group
+            echo "▶ [1/6] Resource Group: $RG"
+            if az group show --name "$RG" --output none 2>/dev/null; then
+              echo "  ✔ 已存在，略過建立"
+            else
+              az group create --name "$RG" --location "$REGION" --output none
+              echo "  ✔ 已建立"
+            fi
+
+            # App Service Plan
+            echo "▶ [2/6] App Service Plan: $PLAN (B2 Linux)"
+            if az appservice plan show --name "$PLAN" --resource-group "$RG" --output none 2>/dev/null; then
+              echo "  ✔ 已存在，略過建立"
+            else
+              az appservice plan create \
+                --name "$PLAN" --resource-group "$RG" \
+                --sku B2 --is-linux --location "$REGION" \
+                --output none
+              echo "  ✔ 已建立"
+            fi
+
+            # App Service
+            echo "▶ [3/6] App Service: $WEBAPP"
+            if az webapp show --name "$WEBAPP" --resource-group "$RG" --output none 2>/dev/null; then
+              echo "  ✔ 已存在，將於後續步驟更新程式碼與設定"
+            else
+              az webapp create \
+                --name "$WEBAPP" --resource-group "$RG" \
+                --plan "$PLAN" --runtime "PYTHON:3.12" \
+                --output none
+              echo "  ✔ 已建立"
+            fi
+
+            # Managed Identity
+            echo "▶ [4/6] Managed Identity: $WEBAPP"
+            az webapp identity assign \
+              --name "$WEBAPP" --resource-group "$RG" \
+              --output none
+            echo "  ✔ 已確認啟用"
+
+            # Key Vault
+            echo "▶ [5/6] Key Vault: $KV"
+            if az keyvault show --name "$KV" --output none 2>/dev/null; then
+              echo "  ✔ 已存在，略過建立"
+            else
+              az keyvault create \
+                --name "$KV" --resource-group "$RG" \
+                --location "$REGION" --sku standard \
+                --enable-rbac-authorization true \
+                --output none
+              echo "  ✔ 已建立"
+            fi
+
+            # Key Vault Role Assignment
+            echo "▶ [6/6] Key Vault 角色授權：Key Vault Secrets User → $WEBAPP Managed Identity"
+            PRINCIPAL_ID=$(az webapp identity show \
+              --name "$WEBAPP" --resource-group "$RG" \
+              --query principalId -o tsv)
+            KV_ID=$(az keyvault show --name "$KV" --query id -o tsv)
+            az role assignment create \
+              --role "Key Vault Secrets User" \
+              --assignee-object-id "$PRINCIPAL_ID" \
+              --assignee-principal-type ServicePrincipal \
+              --scope "$KV_ID" \
+              --output none 2>/dev/null || true
+            echo "  ✔ 已確認授權"
+            echo ""
+            echo "✅ 所有 Azure 資源佈建完成"
+
+      - name: 建置前端（Vite → demo/dist/）
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: npm ci + build
+        working-directory: demo
+        run: |
+          npm ci
+          npm run build
+
+      - name: 打包部署包（只含必要檔案，排除 node_modules 等）
+        run: |
+          zip -r deploy.zip \
+            agentic_sdk/ \
+            demo/dist/ \
+            examples/ \
+            requirements.txt \
+            -x "*.pyc" -x "*/__pycache__/*"
+
+      - name: 設定 App Service 啟動指令與基礎參數
+        # 敏感資料（Foundry key/endpoint）由 App Service Managed Identity
+        # 從 Key Vault 在 runtime 讀取，不經過 CI/CD。
+        # 必須在部署前設定，確保 Oryx 在收到 zip 時已知要執行 pip install。
+        uses: azure/CLI@v2
+        with:
+          azcliversion: latest
+          inlineScript: |
+            az webapp config set \
+              --name ${{ vars.AZURE_WEBAPP_NAME }} \
+              --resource-group ${{ vars.AZURE_RESOURCE_GROUP }} \
+              --startup-file "python -m agentic_sdk.gateway"
+
+            az webapp config appsettings set \
+              --name ${{ vars.AZURE_WEBAPP_NAME }} \
+              --resource-group ${{ vars.AZURE_RESOURCE_GROUP }} \
+              --settings \
+                PORT=8000 \
+                WORKFLOW_ACTION_BACKEND=foundry \
+                SCM_DO_BUILD_DURING_DEPLOYMENT=true \
+                KEY_VAULT_NAME=${{ vars.KEY_VAULT_NAME }}
+
+      - name: 部署至 Azure App Service（後端 + 前端靜態檔案）
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: ${{ vars.AZURE_WEBAPP_NAME }}
+          package: deploy.zip

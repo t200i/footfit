@@ -1,0 +1,57 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.eggs/
+build/
+dist/
+.venv/
+venv/
+env/
+
+# uv(PoC 階段不固定 lock,讓 uv sync 依 pyproject 即時解析)
+uv.lock
+
+# Test / coverage
+.pytest_cache/
+.coverage
+htmlcov/
+
+# IDE
+.vscode/
+.idea/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Streamlit
+.streamlit/secrets.toml
+
+# Chroma 本機向量庫
+.chroma/
+chroma_db/
+
+# M6-1 Memory Stream 本機 SQLite
+.memory/
+
+# 本機暫存
+pytest_*.log
+pytest_*.txt
+fail.txt
+out.txt
+build_out.txt
+vitest_out.txt
+scripts/timing_out.txt
+
+# TypeScript build cache
+*.tsbuildinfo
+
+# Node modules
+node_modules/
