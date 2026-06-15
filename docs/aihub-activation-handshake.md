@@ -9,18 +9,24 @@
 
 ## 使用者體驗（User-Facing UX）
 
-Licensee 只需做兩件事：
+**步驟一：從 AI Hub Portal 取得授權金鑰**
+
+1. 登入 [ITRI AI Hub Portal](https://ai-hub.itri.org.tw)
+2. 前往 **Model Cards**，瀏覽可用模型
+3. 選取目標模型卡，點擊 **部署**
+4. 選取授權類型（月租／季租／年租）
+5. 系統自動將此模型記錄至 **我的模型資產**，並產生專屬授權金鑰
+6. 複製金鑰
+
+**步驟二：執行模型**
 
 ```bash
-# 步驟一：設定 License Key（一次性，建議寫入 ~/.bashrc 或 ~/.zshrc）
-export AIHUB_LICENSE_KEY=lic-xxxxxxxxxxxxxxxx
-
-# 步驟二：拉取並執行
-docker pull model-cards.azurecr.io/amd/rocm/gemma4-4b:latest
 docker run --rm -p 8000:8000 \
-  -e AIHUB_LICENSE_KEY \
+  -e AIHUB_LICENSE_KEY=<你的授權金鑰> \
   model-cards.azurecr.io/amd/rocm/gemma4-4b:latest
 ```
+
+> 首次執行時 Docker 會自動拉取 Image，無需另行 `docker pull`。
 
 啟動後，服務即可接受 OpenAI 相容 API 請求：
 
@@ -38,7 +44,7 @@ curl http://localhost:8000/v1/chat/completions \
 
 | 目標 | 機制 |
 |------|------|
-| 簡單 UX | 一個環境變數 `AIHUB_LICENSE_KEY`，無需掛載 Volume |
+| 簡單 UX | 單一 `docker run` 指令，Key 直接以 `-e AIHUB_LICENSE_KEY=<key>` 傳入 |
 | 一 Key 一設備 | License Key 於首次啟用時綁定設備指紋（CPU_ID + MAC + hostname），指紋不符一律拒絕 |
 | 離線容錯 | 預授權離線額度（Offline Budget）限制離線期間最大用量，到期自動停服 |
 | 防重建攻擊 | 重新 Activation 時 Hub 全額扣除上一份 offline_budget，重建越多扣越多 |
@@ -77,10 +83,8 @@ curl http://localhost:8000/v1/chat/completions \
 ### Phase 0 — 環境準備（使用者側，一次性）
 
 ```
-使用者設定環境變數
-    └── export AIHUB_LICENSE_KEY=lic-xxxxxxxxxxxxxxxx
-         └── docker run -e AIHUB_LICENSE_KEY ...
-              └── 容器從環境變數讀取 Key，進入 Phase 1
+docker run -e AIHUB_LICENSE_KEY=<你的授權金鑰> ...
+    └── 容器從環境變數讀取 Key，進入 Phase 1
 ```
 
 ---
@@ -279,7 +283,7 @@ sequenceDiagram
 **Request:**
 ```json
 {
-  "license_key": "lic-xxxxxxxxxxxxxxxx",
+  "license_key": "<你的授權金鑰>",
   "device_fingerprint": "sha256:abcdef...",
   "model_id": "amd/rocm/gemma4-4b",
   "container_image": "model-cards.azurecr.io/amd/rocm/gemma4-4b@sha256:def456"
