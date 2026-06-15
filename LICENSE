@@ -126,11 +126,18 @@ ARTICLE 4 — LICENSE KEY AND DEVICE AUTHORIZATION
      (b) Included in derived container images;
      (c) Shared between accounts or transferred to third parties.
 
-4.4  License Keys expire as specified in the key metadata returned during
-     activation. Licensor reserves the right to revoke a License Key if
+4.4  License Keys are issued for a fixed subscription period: Monthly
+     (30 days), Quarterly (90 days), or Annual (365 days), as specified
+     in the key metadata returned during activation. The applicable period
+     and expiry timestamp are transmitted to the Container Image in the
+     activation response field "license_expires_at".
+
+4.5  License Keys expire as specified in the key metadata. Licensee may
+     apply for renewal before expiry through the AI Hub platform portal.
+     Licensor reserves the right to revoke a License Key at any time if
      the terms of this Agreement are violated.
 
-4.5  If Licensor detects that a License Key is being used on a device whose
+4.6  If Licensor detects that a License Key is being used on a device whose
      Device Fingerprint does not match the registered binding, Licensor may
      immediately suspend the License Key without prior notice. To transfer
      a License Key to a new device, Licensee must contact ITRI AI Hub to
@@ -142,19 +149,34 @@ ARTICLE 5 — USAGE TELEMETRY AND DATA CONTRACT
 ───────────────────────────────────────────────────────────────────────────────
 
 5.1  Container Images automatically transmit Usage Telemetry to the AI Hub
-     Platform upon each inference request. Telemetry includes:
-     input token count, output token count, model identifier, device
-     fingerprint hash, license key identifier, and timestamp. This data
-     is used to enforce usage quotas and to calculate contributor rewards
-     under the ITRI AI Hub Principal-Agent mechanism.
+     Platform. Telemetry includes: input token count, output token count,
+     model identifier, model_owner_account, device fingerprint hash,
+     license key identifier, and timestamp.
 
-5.2  Licensee consents to the collection and processing of Usage Telemetry
+5.2  The AI Hub Platform maintains a Dual-Ledger accounting system:
+
+     (a) Deployer Budget Ledger: records tokens consumed by Licensee,
+         debited against the quota associated with the License Key and
+         subscription period. Feeds the Deployer Activity Leaderboard.
+
+     (b) Model Owner Credit Ledger: records tokens consumed by any
+         Licensee using a given Container Image, credited to the
+         model_owner_account declared in the Model Card. Feeds the
+         Model Contribution Leaderboard.
+
+     The model_owner_account field is locked at Model Card publication
+     and cannot be modified retroactively.
+
+5.3  Licensee consents to the collection and processing of Usage Telemetry
      as a condition of this license.
 
-5.3  If the AI Hub Platform is temporarily unreachable, the Container Image
-     may continue serving requests for a grace period specified in the
-     activation response. Queued telemetry will be transmitted upon
-     reconnection.
+5.4  If the AI Hub Platform is temporarily unreachable, the Container Image
+     will serve requests only within the pre-authorized Offline Budget
+     (offline_budget_tokens) granted during the most recent heartbeat.
+     Upon reconnection, the full Offline Budget is debited from the
+     Deployer Budget Ledger regardless of actual consumption reported
+     by the client. This conservative accounting policy prevents gaming
+     through volume deletion or payload tampering.
 
 5.4  Licensor will handle telemetry data in accordance with ITRI's Privacy
      Policy and applicable Taiwan law (Personal Data Protection Act,

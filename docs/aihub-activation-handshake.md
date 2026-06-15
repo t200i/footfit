@@ -45,9 +45,35 @@ curl http://localhost:8000/v1/chat/completions \
 |------|------|
 | 簡單 UX | 一個環境變數 `AIHUB_LICENSE_KEY` + 一個 Named Volume |
 | 一 Key 一設備 | License Key 於首次啟用時綁定設備指紋（CPU_ID + MAC + hostname），指紋不符一律拒絕 |
-| 離線容錯 | Docker Named Volume 暫存用量，`--rm` 不會刪除；重連後自動補送 |
-| 離線緩衝防竄改 | 每筆紀錄附 HMAC 簽章 + 單調遞增序列號；Hub 偵測序列缺口時停止服務 |
-| 用量追蹤 | Heartbeat 定期回報，供 Principal 核算貢獻獎酬 |
+| 離線容錯 | 預授權離線額度（Offline Budget）限制離線期間最大用量，到期自動停服 |
+| 防重建攻擊 | 重新 Activation 時 Hub 全額扣除上一份 offline_budget，重建越多扣越多 |
+| 雙邊帳本 | 使用者消耗 Budget（−tokens）；模型擁有者獲得 Credit（+tokens）；兩條獨立排行 |
+| 授權週期 | License Key 以年／季／月為週期發行，到期前可申請續約 |
+
+---
+
+## 雙邊帳本機制（Dual-Ledger）
+
+每一筆推論請求在 Hub 端同時更新兩個帳本：
+
+```
+一次推論請求（消耗 N tokens）
+    │
+    ├─ 使用者帳本（Deployer Budget）
+    │       └─ quota_tokens_remaining −N
+    │            → 活躍度排行（誰用最多）
+    │
+    └─ 模型擁有者帳本（Model Owner Credit）
+            └─ credit_tokens_earned +N
+                 → 貢獻度排行（誰的模型最受歡迎）
+```
+
+| 角色 | 帳本 | 排行指標 |
+|------|------|---------|
+| **部署者（Deployer）** | Budget：授權週期內可消耗的 token 總量 | 活躍度排行（消耗越多排越高） |
+| **模型擁有者（Model Owner）** | Credit：旗下模型被消耗的累計 token 數 | 貢獻度排行（被用越多排越高） |
+
+> **Model Card 中的 `model_owner_account` 欄位**決定 Credit 歸屬。每張模型卡上線時即鎖定此欄位，不可事後修改。
 
 ---
 
@@ -80,7 +106,8 @@ sequenceDiagram
     Note over H: 驗證 license_key 有效性<br/>比對綁定的 device_fingerprint<br/>（首次啟用則寫入綁定；<br/> 後續啟用需完全吻合）
 
     alt 啟用成功（fingerprint 吻合或首次綁定）
-        H-->>E: 3. 200 OK<br/>{ session_token (記憶體暫存),<br/>  quota_tokens_remaining,<br/>  heartbeat_interval_seconds: 300,<br/>  grace_period_seconds: 1800,<br/>  expires_at }
+        Note over H: 若上次 offline_budget 尚未結算<br/>→ 全額扣除（防重建攻擊）<br/>再核發新 session_token
+        H-->>E: 3. 200 OK<br/>{ session_token (記憶體暫存),<br/>  quota_tokens_remaining,<br/>  heartbeat_interval_seconds: 300,<br/>  offline_budget_tokens: 10000,<br/>  offline_budget_expires_in: 1800,<br/>  license_period: "monthly"|"quarterly"|"annual",<br/>  license_expires_at: "2026-07-15T00:00:00Z" }
         Note over E: 4. 啟動推論服務（api.py）
     else 啟用失敗
         H-->>E: 4xx { error, message }
@@ -147,10 +174,11 @@ flowchart TD
 
 | 攻擊情境 | 系統回應 |
 |---------|---------|
-| 使用者刪除 Named Volume | 記憶體中的 offline_budget 本就不在 Volume，不受影響；Hub 帳本不變 |
-| 使用者修改 Volume 中的暫存紀錄 | Hub 只看自己下發的 offline_budget 上界，不信任客戶端回報的數字是「節省」了多少 |
+| 使用者刪除 Named Volume | offline_budget 在記憶體中，不受影響；Hub 帳本不變 |
+| 使用者修改 Volume 中的暫存紀錄 | Hub 全額扣除 offline_budget，不採信客戶端回報數字 |
 | 使用者讓容器永遠離線不重連 | offline_budget 有到期時間（`offline_budget_expires_in`），到期後停服 |
-| 使用者重啟容器嘗試重置 offline_budget | 重啟後必須重走 Phase 1 Activation；Hub 帳本知道上次下發的 budget，不會重複授予 |
+| 使用者不斷 `docker run --rm` 重建 | 每次重新 Activation，Hub 全額扣除上一份 budget → **重建越多扣越多，無法獲利** |
+| 使用者竄改 Volume 少報用量 | Hub 不採信客戶端數字，統一以「offline_budget 全數消耗完」計帳 |
 
 **Named Volume 在此設計中的角色縮減為：**
 - 暫存「本期已消耗用量」，在重連後誠實回報給 Hub
