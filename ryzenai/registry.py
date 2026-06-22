@@ -10,6 +10,7 @@ cli.py、api.py 與 ryzenai/modules/__init__.py 皆自動從此處派生，
 import importlib
 
 from ryzenai.model import Model
+from ryzenai.model import SegmentationModel
 
 # ── 在此登錄所有可用模型 ────────────────────────────────────────────────────
 # 格式：  "model-id": ("module.path", "ClassName", "init_arg1", ...)
@@ -33,10 +34,22 @@ _REGISTRY: dict[str, tuple] = {
 }
 # ────────────────────────────────────────────────────────────────────────────
 
+_VISION_REGISTRY: dict[str, tuple] = {
+    "sam3-igpu": (
+        "ryzenai.modules.sam3_segmentator", "SAM3SegmentatorModel",
+        "weights/sam3.pt",
+    ),
+}
+
 
 def available_models() -> list[str]:
     """回傳所有已登錄的 model-id 清單。"""
     return list(_REGISTRY)
+
+
+def available_vision_models() -> list[str]:
+    """回傳所有已登錄的 vision model-id 清單。"""
+    return list(_VISION_REGISTRY)
 
 
 def build_model(model_id: str) -> Model:
@@ -50,5 +63,16 @@ def build_model(model_id: str) -> Model:
             f"Unknown model: '{model_id}'. Available: {available_models()}"
         )
     module_path, class_name, *args = _REGISTRY[model_id]
+    mod = importlib.import_module(module_path)
+    return getattr(mod, class_name)(*args)
+
+
+def build_vision_model(model_id: str) -> SegmentationModel:
+    """根據 vision model-id 建立並回傳對應的模型實例。"""
+    if model_id not in _VISION_REGISTRY:
+        raise ValueError(
+            f"Unknown vision model: '{model_id}'. Available: {available_vision_models()}"
+        )
+    module_path, class_name, *args = _VISION_REGISTRY[model_id]
     mod = importlib.import_module(module_path)
     return getattr(mod, class_name)(*args)

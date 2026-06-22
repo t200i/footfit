@@ -78,6 +78,7 @@ pip install -r requirements-rocm.txt
 | HuggingFace Repository | Model ID | Size | Type | Backend |
 |------------------------|----------|------|------|---------| 
 | [`amd/Gemma-3-4b-it-mm-onnx-ryzenai-npu`](https://huggingface.co/amd/Gemma-3-4b-it-mm-onnx-ryzenai-npu) | `gemma3-4b-npu` | 6.2 GB | Vision LM | NPU |
+| [`facebook/sam3`](https://huggingface.co/facebook/sam3) | `sam3-igpu` | - | Segmentation | iGPU |
 
 ### 經實測 適用於Vivobook S 15/16 (Ryzen AI 9 HX 370)的模型
 
@@ -86,13 +87,16 @@ pip install -r requirements-rocm.txt
 | [`amd/Gemma-3-4b-it-mm-onnx-ryzenai-npu`](https://huggingface.co/amd/Gemma-3-4b-it-mm-onnx-ryzenai-npu) | `gemma3-4b-npu` | 6.2 GB | Vision LM | NPU |
 | [`google/gemma-4-E2B-it`](https://huggingface.co/google/gemma-4-E2B-it) | `gemma4-2b-gpu` | 6.2 GB | Vision LM | iGPU |
 | [`google/gemma-4-E4B-it`](https://huggingface.co/google/gemma-4-E4B-it) | `gemma4-4b-gpu` | 6.2 GB | Vision LM | iGPU |
+| [`facebook/sam3`](https://huggingface.co/facebook/sam3) | `sam3-igpu` | - | Segmentation | iGPU |
 
 > ROCm在 iGPU 上執行某些 LLM 工作負載（例如 Llama 1B/3B）時，可能會出現效能低於預期的情況。
 
 ### 快速開始
 
 
-#### Step 1. 根據模型的 Backend 啟動對應環境（擇一）
+#### 一、文字對話 / 圖文對話（Chat / Vision LM）
+
+**Step 1. 根據模型的 Backend 啟動對應環境（擇一）**
 
 依上方表格 **Backend** 欄位選擇環境：Model ID 結尾為 `-npu` 選 `ryzen-ai-1.7.1`，結尾為 `-gpu` 選 `rocm-pytorch`。
 
@@ -103,7 +107,7 @@ conda activate rocm-pytorch      # iGPU backend（ROCm）
 conda activate ryzen-ai-1.7.1    # NPU backend（VitisAI EP）
 ```
 
-#### Step 2. 執行推論
+**Step 2. 執行推論**
 
 ```powershell
 # 單次推論（加 --stream 啟用逐 token 輸出）
@@ -114,6 +118,30 @@ python cli.py --model <model-id> --image cat.jpg --prompt "描述這張圖片" -
 
 # 互動模式
 python cli.py --model <model-id>
+```
+
+#### 二、影像分割（Segmentation）
+
+**Step 1. 安裝 Ultralytics/SAM 相依環境**
+
+```powershell
+pip install -r requirements-ultralytics.txt
+```
+
+`sam3-igpu` 需使用 `sam3-ryzen-ai/ultralytics` 中的客製 Ultralytics 版本。請勿以一般上游 `ultralytics` 套件取代此客製版本。
+
+**Step 2. 放置模型權重**
+
+請將 Ultralytics-compatible SAM3 權重置於專案根目錄：
+
+```text
+weights/sam3.pt
+```
+
+**Step 3. 執行影像分割**
+
+```powershell
+python cli.py --task segment --model sam3-igpu --image pill.jpg --prompt "a single pill"
 ```
 
 ---
@@ -128,6 +156,10 @@ python cli.py --model <model-id>
 
 conda activate <environment>
 python api.py --model <model-id>
+```
+```powershell
+# Segmentation API
+python api.py --vision-model sam3-igpu
 ```
 > 「Open AI Python SDK」與「Open WebUI」皆須通過額外獨立的Terminal預先啟動本API Server，才能認到模型以提供推論服務。
 
@@ -166,7 +198,19 @@ for chunk in client.chat.completions.create(
     print(chunk.choices[0].delta.content or "", end="", flush=True)
 ```
 
-#### 四、整合 Open WebUI
+#### 四、使用 HTTP API 進行影像分割（Segmentation）
+
+`sam3-igpu` 使用 `/v1/segment` 接收 multipart image 與 text prompt，回傳格式保留 Ultralytics `Results.summary()` 的解析習慣。
+
+```powershell
+curl -X POST http://localhost:8000/v1/segment `
+    -F "file=@pill.jpg" `
+    -F "text=a single pill" `
+    -F "conf=0.25" `
+    -F "iou=0.7"
+```
+
+#### 五、整合 Open WebUI
 
 以 Docker 啟動 [Open WebUI](https://github.com/open-webui/open-webui)，提供 ChatGPT 聊天介面、支援圖片上傳功能。
 

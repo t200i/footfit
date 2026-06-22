@@ -6,12 +6,14 @@ If any subpackage import breaks, the entire application crashes on startup.
 
 class TestPackageImports:
     def test_import_backend(self):
-        from ryzenai.backend import Backend, ONNXVitisAIBackend, ONNXDirectMLBackend, PyTorchROCmBackend
+        from ryzenai.backend import Backend, ONNXVitisAIBackend, ONNXDirectMLBackend, PyTorchROCmBackend, PyTorchDirectMLBackend
         assert Backend is not None
+        assert PyTorchDirectMLBackend is not None
 
     def test_import_model(self):
-        from ryzenai.model import Model, Text2Text, ImageText2Text
+        from ryzenai.model import Model, Text2Text, ImageText2Text, SegmentationModel
         assert Model is not None
+        assert SegmentationModel is not None
 
     def test_import_conversation(self):
         from ryzenai.conversation import Message, ConversationContext

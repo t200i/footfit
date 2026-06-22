@@ -1,5 +1,6 @@
 import argparse
 import base64
+import json
 import logging
 from typing import Generator
 
@@ -7,7 +8,8 @@ logging.basicConfig(format="[%(name)s] %(message)s")
 logging.getLogger("ryzenai").setLevel(logging.INFO)
 
 from ryzenai.model import Model
-from ryzenai.registry import build_model, available_models
+from ryzenai.registry import build_model, build_vision_model
+from ryzenai.modules.sam3_segmentator import summarize_results
 from ryzenai.session import SingleSession, InteractiveSession
 
 
@@ -57,6 +59,35 @@ def run_interactive(model: Model, stream: bool = True) -> None:
         print("\n再見。")
 
 
+def run_segment(
+    model_id: str,
+    image_path: str,
+    text: str | None = None,
+    conf: float = 0.25,
+    iou: float = 0.7,
+    normalize: bool = False,
+    save_annotated: str | None = None,
+) -> None:
+    try:
+        import cv2
+    except Exception as exc:
+        raise RuntimeError(f"Segmentation dependencies unavailable: {exc}") from exc
+
+    image = cv2.imread(image_path)
+    if image is None:
+        raise RuntimeError(f"Invalid image: {image_path}")
+
+    model = build_vision_model(model_id)
+    results = model.predict(image, text=text, conf=conf, iou=iou)
+    print(json.dumps(summarize_results(results, normalize=normalize), ensure_ascii=False))
+
+    if save_annotated:
+        if not results:
+            raise RuntimeError("No results returned; annotated image was not saved")
+        annotated = results[0].plot()
+        cv2.imwrite(save_annotated, annotated)
+
+
 # ── Composition Root ─────────────────────────────────────────────────────────
 
 
@@ -66,12 +97,31 @@ if __name__ == "__main__":
         description="Ryzen AI CLI — 本地 LLM/VLM 推論介面",
     )
     parser.add_argument("-m", "--model", required=True, help="模型識別名稱（見 registry）")
+    parser.add_argument("--task", choices=["chat", "segment"], default="chat", help="推論任務類型")
     parser.add_argument(
         "-p", "--prompt", default=None, help="單次推論 prompt；省略則進入互動模式"
     )
     parser.add_argument("--image", default=None, help="影像檔案路徑（僅 VLM 模型支援）")
     parser.add_argument("--stream", action="store_true", help="啟用逐 token 串流輸出")
+    parser.add_argument("--conf", type=float, default=0.25, help="segmentation confidence threshold")
+    parser.add_argument("--iou", type=float, default=0.7, help="segmentation IoU threshold")
+    parser.add_argument("--normalize", action="store_true", help="segmentation output 使用正規化座標")
+    parser.add_argument("--save-annotated", default=None, help="儲存 segmentation 標註影像")
     args = parser.parse_args()
+
+    if args.task == "segment":
+        if args.image is None:
+            parser.error("--task segment 需要 --image")
+        run_segment(
+            model_id=args.model,
+            image_path=args.image,
+            text=args.prompt,
+            conf=args.conf,
+            iou=args.iou,
+            normalize=args.normalize,
+            save_annotated=args.save_annotated,
+        )
+        raise SystemExit(0)
 
     model = build_model(args.model)
 
