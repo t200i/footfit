@@ -1,0 +1,40 @@
+{
+  "model_id": "sam3-igpu",
+  "image_model": "sam3",
+  "name": "SAM3 Segmentation",
+  "version": "0.1.0",
+  "owner": "team-amd-ryzenai",
+  "source": "https://huggingface.co/facebook/sam3",
+  "task_type": "segment",
+  "accelerator": "directml-privateuseone-igpu",
+  "host_runtime": "torch-directml-wsl",
+  "image": "model-cards.azurecr.io/amd/directml-privateuseone-igpu/sam3:0.1.0",
+  "input_types": ["image", "text"],
+  "output_format": "ultralytics-results",
+  "api_endpoints": ["/healthz", "/v1/models", "/v1/segment"],
+  "hardware_minimum": "AMD Ryzen AI iGPU exposed to WSL with torch-directml privateuseone support",
+  "weights": {
+    "policy": "image-or-volume",
+    "path": "weights/sam3.pt",
+    "format": "Ultralytics-compatible .pt"
+  },
+  "labels": {
+    "aihub.package.kind": "single-model-accelerator",
+    "aihub.model.id": "sam3-igpu",
+    "aihub.model.name": "SAM3 Segmentation",
+    "aihub.model.version": "0.1.0",
+    "aihub.model.owner": "team-amd-ryzenai",
+    "aihub.accelerator": "directml-privateuseone-igpu",
+    "aihub.hardware.minimum": "AMD Ryzen AI iGPU exposed to WSL with torch-directml privateuseone support",
+    "aihub.host.runtime": "torch-directml-wsl",
+    "aihub.input.types": "image,text",
+    "aihub.task.type": "segment",
+    "aihub.output.format": "ultralytics-results",
+    "aihub.entry.gateway": "http://127.0.0.1:8080",
+    "aihub.entry.api": "http://127.0.0.1:8080/v1",
+    "aihub.entry.segment": "http://127.0.0.1:8080/v1/segment",
+    "aihub.entry.cli": "aihub-cli --base-url http://127.0.0.1:8080 --task segment",
+    "aihub.license.required": "true",
+    "aihub.license.env": "AIHUB_LICENSE_KEY"
+  }
+}

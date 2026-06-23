@@ -16,10 +16,11 @@ def test_directml_backend_detects_dml(monkeypatch):
             get_device_name=lambda index: "fake-gpu",
         )
     )
-    fake_torch_directml = SimpleNamespace(device=lambda: "privateuseone:0")
+    fake_torch_directml = SimpleNamespace(device=lambda: SimpleNamespace(type="privateuseone"))
     monkeypatch.setitem(sys.modules, "torch", fake_torch)
     monkeypatch.setitem(sys.modules, "torch_directml", fake_torch_directml)
 
     backend = PyTorchDirectMLBackend(device="auto")
 
     assert backend.device == "dml"
+    assert backend.torch_device_type == "privateuseone"

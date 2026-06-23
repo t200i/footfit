@@ -128,7 +128,7 @@ python cli.py --model <model-id>
 pip install -r requirements-ultralytics.txt
 ```
 
-`sam3-igpu` 需使用 `sam3-ryzen-ai/ultralytics` 中的客製 Ultralytics 版本。請勿以一般上游 `ultralytics` 套件取代此客製版本。
+`sam3-igpu` 需使用專案根目錄 `ultralytics/` 中的客製 Ultralytics 版本。請勿以一般上游 `ultralytics` 套件或已棄用的 `sam3-ryzen-ai/` 子專案取代此客製版本。
 
 **Step 2. 放置模型權重**
 

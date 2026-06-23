@@ -2,6 +2,7 @@ import argparse
 import asyncio
 import json
 import logging
+import os
 import time
 import uuid
 from typing import Generator, Optional, Union, Annotated
@@ -122,6 +123,30 @@ def build(
     vision_model_name: str | None = None,
 ) -> FastAPI:
     app = FastAPI()
+
+    @app.get("/healthz")
+    async def healthz():
+        models = []
+        if model is not None and model_name is not None:
+            models.append({"id": model_name, "task": "chat"})
+        if vision_model is not None and vision_model_name is not None:
+            models.append(
+                {
+                    "id": vision_model_name,
+                    "task": "segment",
+                    "device": getattr(vision_model, "device", "unknown"),
+                    "torch_device_type": getattr(vision_model, "torch_device_type", None),
+                }
+            )
+        return {
+            "status": "ok",
+            "service": "ryzenai-model-container",
+            "models": models,
+            "license": {
+                "env": "AIHUB_LICENSE_KEY",
+                "configured": bool(os.getenv("AIHUB_LICENSE_KEY")),
+            },
+        }
 
     @app.get("/v1/models")
     async def list_models():

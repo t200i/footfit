@@ -1,0 +1,37 @@
+{
+  "model_id": "gemma4-4b-gpu",
+  "image_model": "gemma4-4b",
+  "name": "Gemma 4 4B Vision LM",
+  "version": "0.1.0",
+  "owner": "team-amd-ryzenai",
+  "source": "https://huggingface.co/google/gemma-4-E4B-it",
+  "task_type": "vlm",
+  "accelerator": "rocm-igpu",
+  "host_runtime": "rocm",
+  "image": "model-cards.azurecr.io/amd/rocm-igpu/gemma4-4b:0.1.0",
+  "input_types": ["text", "image"],
+  "output_format": "openai-chat-completion",
+  "api_endpoints": ["/healthz", "/v1/models", "/v1/chat/completions"],
+  "hardware_minimum": "AMD Ryzen AI iGPU/APU supported by the ROCm iGPU deployment guide",
+  "weights": {
+    "policy": "model-cache",
+    "path": "google/gemma-4-E4B-it"
+  },
+  "labels": {
+    "aihub.package.kind": "single-model-accelerator",
+    "aihub.model.id": "gemma4-4b-gpu",
+    "aihub.model.name": "Gemma 4 4B Vision LM",
+    "aihub.model.version": "0.1.0",
+    "aihub.model.owner": "team-amd-ryzenai",
+    "aihub.accelerator": "rocm-igpu",
+    "aihub.hardware.minimum": "AMD Ryzen AI iGPU/APU supported by the ROCm iGPU deployment guide",
+    "aihub.host.runtime": "rocm",
+    "aihub.input.types": "text,image",
+    "aihub.task.type": "vlm",
+    "aihub.entry.gateway": "http://127.0.0.1:8080",
+    "aihub.entry.api": "http://127.0.0.1:8080/v1",
+    "aihub.entry.cli": "aihub-cli --base-url http://127.0.0.1:8080",
+    "aihub.license.required": "true",
+    "aihub.license.env": "AIHUB_LICENSE_KEY"
+  }
+}

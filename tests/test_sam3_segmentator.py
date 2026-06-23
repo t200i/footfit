@@ -4,7 +4,7 @@ from types import SimpleNamespace
 from ryzenai.modules.sam3_segmentator import (
     SAM3SegmentatorModel,
     summarize_results,
-    use_vendored_ultralytics,
+    use_root_ultralytics,
 )
 
 
@@ -53,8 +53,8 @@ def test_sam3_segmentator_returns_results_compatible_objects(tmp_path):
     assert model._predictor.overrides["device"] == "cpu"
 
 
-def test_vendored_ultralytics_path_takes_priority():
-    package_path = use_vendored_ultralytics()
+def test_root_ultralytics_path_takes_priority():
+    package_path = use_root_ultralytics()
 
     assert package_path.name == "ultralytics"
     assert str(package_path.parent) == sys.path[0]

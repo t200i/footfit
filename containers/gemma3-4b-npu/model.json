@@ -1,0 +1,37 @@
+{
+  "model_id": "gemma3-4b-npu",
+  "image_model": "gemma3-4b",
+  "name": "Gemma 3 4B Vision LM",
+  "version": "0.1.0",
+  "owner": "team-amd-ryzenai",
+  "source": "https://huggingface.co/amd/Gemma-3-4b-it-mm-onnx-ryzenai-npu",
+  "task_type": "vlm",
+  "accelerator": "ryzen-ai-npu",
+  "host_runtime": "ryzen-ai-software",
+  "image": "model-cards.azurecr.io/amd/ryzen-ai-npu/gemma3-4b:0.1.0",
+  "input_types": ["text", "image"],
+  "output_format": "openai-chat-completion",
+  "api_endpoints": ["/healthz", "/v1/models", "/v1/chat/completions"],
+  "hardware_minimum": "AMD Ryzen AI NPU with Ryzen AI Software 1.7.1 and Vitis AI Execution Provider",
+  "weights": {
+    "policy": "image-or-cache",
+    "path": "weights/Gemma-3-4b-it-mm-onnx-ryzenai-npu"
+  },
+  "labels": {
+    "aihub.package.kind": "single-model-accelerator",
+    "aihub.model.id": "gemma3-4b-npu",
+    "aihub.model.name": "Gemma 3 4B Vision LM",
+    "aihub.model.version": "0.1.0",
+    "aihub.model.owner": "team-amd-ryzenai",
+    "aihub.accelerator": "ryzen-ai-npu",
+    "aihub.hardware.minimum": "AMD Ryzen AI NPU with Ryzen AI Software 1.7.1 and Vitis AI Execution Provider",
+    "aihub.host.runtime": "ryzen-ai-software",
+    "aihub.input.types": "text,image",
+    "aihub.task.type": "vlm",
+    "aihub.entry.gateway": "http://127.0.0.1:8080",
+    "aihub.entry.api": "http://127.0.0.1:8080/v1",
+    "aihub.entry.cli": "aihub-cli --base-url http://127.0.0.1:8080",
+    "aihub.license.required": "true",
+    "aihub.license.env": "AIHUB_LICENSE_KEY"
+  }
+}

@@ -8,30 +8,30 @@ from ryzenai.model import SegmentationModel
 
 _DEFAULT_TEXT_PROMPT = "a single pill"
 _PROJECT_ROOT = Path(__file__).resolve().parents[2]
-_VENDORED_ULTRALYTICS_ROOT = _PROJECT_ROOT / "sam3-ryzen-ai"
-_VENDORED_ULTRALYTICS_PACKAGE = _VENDORED_ULTRALYTICS_ROOT / "ultralytics"
+_ROOT_ULTRALYTICS_PACKAGE = _PROJECT_ROOT / "ultralytics"
 
 
-def use_vendored_ultralytics() -> Path:
-    if not _VENDORED_ULTRALYTICS_PACKAGE.exists():
+def use_root_ultralytics() -> Path:
+    if not _ROOT_ULTRALYTICS_PACKAGE.exists():
         raise FileNotFoundError(
-            f"Vendored Ultralytics fork not found: {_VENDORED_ULTRALYTICS_PACKAGE}"
+            f"Root Ultralytics fork not found: {_ROOT_ULTRALYTICS_PACKAGE}"
         )
 
     loaded = sys.modules.get("ultralytics")
     if loaded is not None:
         loaded_file = Path(getattr(loaded, "__file__", "")).resolve()
-        if _VENDORED_ULTRALYTICS_PACKAGE.resolve() not in loaded_file.parents:
+        if _ROOT_ULTRALYTICS_PACKAGE.resolve() not in loaded_file.parents:
             raise RuntimeError(
-                "SAM3 requires the vendored Ultralytics fork under "
-                f"{_VENDORED_ULTRALYTICS_PACKAGE}, but another ultralytics package "
+                "SAM3 requires the root Ultralytics fork under "
+                f"{_ROOT_ULTRALYTICS_PACKAGE}, but another ultralytics package "
                 f"is already loaded from {loaded_file}."
             )
 
-    vendored_root = str(_VENDORED_ULTRALYTICS_ROOT)
-    if vendored_root not in sys.path:
-        sys.path.insert(0, vendored_root)
-    return _VENDORED_ULTRALYTICS_PACKAGE
+    project_root = str(_PROJECT_ROOT)
+    if sys.path[:1] != [project_root]:
+        sys.path = [path for path in sys.path if path != project_root]
+        sys.path.insert(0, project_root)
+    return _ROOT_ULTRALYTICS_PACKAGE
 
 
 class SAM3SegmentatorModel(SegmentationModel):
@@ -56,11 +56,15 @@ class SAM3SegmentatorModel(SegmentationModel):
     def device(self) -> str:
         return getattr(self.backend, "device", "cpu")
 
+    @property
+    def torch_device_type(self) -> str:
+        return getattr(self.backend, "torch_device_type", "cpu")
+
     def _load_predictor_class(self) -> type:
         if self._predictor_cls is not None:
             return self._predictor_cls
 
-        use_vendored_ultralytics()
+        use_root_ultralytics()
         from ultralytics.models.sam import SAM3SemanticPredictor
 
         return SAM3SemanticPredictor

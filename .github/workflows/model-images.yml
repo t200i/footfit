@@ -1,0 +1,39 @@
+name: AI Hub Model Images
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  validate-model-specs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Validate AI Hub model specs
+        uses: ./.github/actions/validate-model-specs
+
+  validate-sam3-directml-dockerfile:
+    runs-on: ubuntu-latest
+    needs: validate-model-specs
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate SAM3 DirectML Dockerfile contract
+        run: |
+          dockerfile="containers/sam3-directml-igpu/Dockerfile"
+          grep -q 'FROM python:3.11-slim' "$dockerfile"
+          grep -q 'LD_LIBRARY_PATH=/usr/lib/wsl/lib' "$dockerfile"
+          grep -q 'torch==2.4.1 torchvision' "$dockerfile"
+          grep -q 'torch-directml==0.2.4.dev240913' "$dockerfile"
+          grep -q 'aihub.accelerator="directml-privateuseone-igpu"' "$dockerfile"
+          grep -q 'aihub.entry.segment="http://127.0.0.1:8080/v1/segment"' "$dockerfile"
+          ! grep -q 'aihub.accelerator="rocm-igpu"' "$dockerfile"

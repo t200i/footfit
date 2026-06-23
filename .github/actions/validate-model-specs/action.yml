@@ -1,0 +1,8 @@
+name: Validate Model Specs
+description: Validate AI Hub per-model container specs using the repository schema.
+runs:
+  using: composite
+  steps:
+    - name: Validate model specs
+      shell: bash
+      run: python scripts/validate_model_specs.py
