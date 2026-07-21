@@ -23,18 +23,19 @@ WORKDIR /app
 COPY requirements-ultralytics.txt ./
 RUN pip install -r requirements-ultralytics.txt
 
+COPY weights/sam3.pt /app/weights/sam3.pt
+
 COPY api.py cli.py ./
 COPY ryzenai/ ./ryzenai/
 COPY ultralytics/ ./ultralytics/
 COPY containers/sam3-directml-igpu/model.json ./model.json
 
-VOLUME ["/app/weights"]
 EXPOSE 80
 
 LABEL aihub.package.kind="single-model-accelerator" \
       aihub.model.id="sam3-igpu" \
       aihub.model.name="SAM3 Segmentation" \
-      aihub.model.version="0.1.0" \
+      aihub.model.version="8.4.37" \
       aihub.model.owner="team-amd-ryzenai" \
       aihub.accelerator="directml-privateuseone-igpu" \
       aihub.hardware.minimum="AMD Ryzen AI iGPU exposed to WSL with torch-directml privateuseone support" \
@@ -46,7 +47,6 @@ LABEL aihub.package.kind="single-model-accelerator" \
       aihub.entry.api="http://127.0.0.1:8080/v1" \
       aihub.entry.segment="http://127.0.0.1:8080/v1/segment" \
       aihub.entry.cli="aihub-cli --base-url http://127.0.0.1:8080 --task segment" \
-      aihub.license.required="true" \
-      aihub.license.env="AIHUB_LICENSE_KEY"
+      aihub.license.required="false"
 
 CMD ["python", "api.py", "--vision-model", "sam3-igpu", "--host", "0.0.0.0", "--port", "80"]

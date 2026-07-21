@@ -42,7 +42,6 @@ REQUIRED_LABELS = {
     "aihub.entry.api",
     "aihub.entry.cli",
     "aihub.license.required",
-    "aihub.license.env",
 }
 
 TASK_ENDPOINTS = {
@@ -109,13 +108,17 @@ def _validate_spec(path: Path, seen_model_ids: set[str], seen_images: set[str]) 
         "aihub.host.runtime": spec["host_runtime"],
         "aihub.input.types": ",".join(spec["input_types"]),
         "aihub.task.type": task_type,
-        "aihub.license.required": "true",
-        "aihub.license.env": "AIHUB_LICENSE_KEY",
     }
     for label, expected in expected_label_values.items():
         actual = labels.get(label)
         if actual != expected:
             _fail(f"{path}: label {label} expected {expected!r}, got {actual!r}")
+
+    license_required = labels.get("aihub.license.required")
+    if license_required not in {"true", "false"}:
+        _fail(f"{path}: aihub.license.required must be 'true' or 'false', got {license_required!r}")
+    if license_required == "true" and labels.get("aihub.license.env") != "AIHUB_LICENSE_KEY":
+        _fail(f"{path}: licensed specs must set aihub.license.env=AIHUB_LICENSE_KEY")
 
     if task_type == "segment":
         if labels.get("aihub.output.format") != spec["output_format"]:

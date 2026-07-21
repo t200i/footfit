@@ -1,8 +1,8 @@
 import argparse
 import asyncio
+import base64
 import json
 import logging
-import os
 import time
 import uuid
 from typing import Generator, Optional, Union, Annotated
@@ -10,7 +10,7 @@ from typing import Generator, Optional, Union, Annotated
 logging.basicConfig(format="[%(name)s] %(message)s")
 logging.getLogger("ryzenai").setLevel(logging.INFO)
 
-from fastapi import FastAPI, File, Form, HTTPException, UploadFile
+from fastapi import FastAPI, File, Form, HTTPException, Request, UploadFile
 from fastapi.responses import JSONResponse, StreamingResponse
 from pydantic import BaseModel
 
@@ -113,6 +113,26 @@ def _build_segment_response(
     }
 
 
+def _project_result(result) -> dict:
+    raw_names = getattr(result, "names", {}) or {}
+    if isinstance(raw_names, dict):
+        names = {int(k): v for k, v in raw_names.items()}
+    else:
+        names = {int(i): v for i, v in enumerate(raw_names)}
+    projection = {
+        "orig_shape": list(getattr(result, "orig_shape", []) or []),
+        "names": names,
+        "path": getattr(result, "path", None),
+    }
+    boxes = getattr(result, "boxes", None)
+    if boxes is not None:
+        projection["boxes"] = boxes.data.detach().cpu().tolist()
+    masks = getattr(result, "masks", None)
+    if masks is not None:
+        projection["masks"] = masks.data.detach().cpu().tolist()
+    return projection
+
+
 # ── FastAPI App Factory ─────────────────────────────────────────────────────
 
 
@@ -136,16 +156,13 @@ def build(
                     "task": "segment",
                     "device": getattr(vision_model, "device", "unknown"),
                     "torch_device_type": getattr(vision_model, "torch_device_type", None),
+                    "ultralytics_version": getattr(vision_model, "ultralytics_version", None),
                 }
             )
         return {
             "status": "ok",
             "service": "ryzenai-model-container",
             "models": models,
-            "license": {
-                "env": "AIHUB_LICENSE_KEY",
-                "configured": bool(os.getenv("AIHUB_LICENSE_KEY")),
-            },
         }
 
     @app.get("/v1/models")
@@ -204,6 +221,36 @@ def build(
 
     if vision_model is not None:
         segment_model_name = vision_model_name or model_name or "vision-model"
+
+        @app.post("/v1/models/{model_id}/predict")
+        async def predict_model(model_id: str, request: Request):
+            if model_id != segment_model_name:
+                raise HTTPException(status_code=404, detail=f"Unknown model: {model_id}")
+            try:
+                import numpy as np
+            except Exception as exc:
+                raise HTTPException(status_code=500, detail=f"Segmentation dependencies unavailable: {exc}") from exc
+
+            body = await request.json()
+            entries = body.get("images") or []
+            if not entries:
+                raise HTTPException(status_code=400, detail="No images provided")
+
+            images = []
+            for entry in entries:
+                raw = base64.b64decode(entry["data"])
+                images.append(np.frombuffer(raw, dtype=entry["dtype"]).reshape(entry["shape"]))
+
+            kwargs = dict(body.get("kwargs") or {})
+            for blocked in ("device", "half", "save", "show", "stream", "source"):
+                kwargs.pop(blocked, None)
+
+            try:
+                results = await asyncio.to_thread(vision_model.predict, images, **kwargs)
+            except Exception as exc:
+                raise HTTPException(status_code=500, detail=f"Segmentation inference error: {exc}") from exc
+
+            return JSONResponse({"results": [_project_result(r) for r in results]})
 
         @app.post("/v1/segment")
         async def segment(

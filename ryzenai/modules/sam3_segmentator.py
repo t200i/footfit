@@ -60,6 +60,16 @@ class SAM3SegmentatorModel(SegmentationModel):
     def torch_device_type(self) -> str:
         return getattr(self.backend, "torch_device_type", "cpu")
 
+    @property
+    def ultralytics_version(self) -> str:
+        try:
+            use_root_ultralytics()
+            import ultralytics
+
+            return getattr(ultralytics, "__version__", "unknown")
+        except Exception:
+            return "unknown"
+
     def _load_predictor_class(self) -> type:
         if self._predictor_cls is not None:
             return self._predictor_cls
@@ -110,10 +120,11 @@ class SAM3SegmentatorModel(SegmentationModel):
         conf: float = 0.25,
         iou: float = 0.7,
         half: bool = True,
+        **predict_kwargs: Any,
     ) -> list[Any]:
         predictor = self._ensure_predictor(conf=conf, iou=iou, half=half)
         prompts = self._normalize_text(text)
-        return predictor(source=image, text=prompts)
+        return predictor(source=image, text=prompts, **predict_kwargs)
 
     def _normalize_text(self, text: str | list[str] | None) -> list[str]:
         if text is None:

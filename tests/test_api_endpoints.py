@@ -23,7 +23,6 @@ class TestApiEndpoints:
         data = resp.json()
         assert data["status"] == "ok"
         assert data["models"] == [{"id": "echo-test", "task": "chat"}]
-        assert data["license"]["env"] == "AIHUB_LICENSE_KEY"
 
     def test_models_endpoint(self, client):
         """GET /v1/models must return model list with correct id."""
