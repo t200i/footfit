@@ -14,7 +14,7 @@ from fastapi import FastAPI, File, Form, HTTPException, Request, UploadFile
 from fastapi.responses import JSONResponse, StreamingResponse
 from pydantic import BaseModel
 
-from ryzenai.conversation import ConversationContext, Message
+from ryzenai.conversation import ConversationContext, Message, ToolCall
 from ryzenai.conversation._utils import _now
 from ryzenai.model import Model
 from ryzenai.model import SegmentationModel
@@ -33,19 +33,53 @@ class _ContentPart(BaseModel):
 
 class _RequestMessage(BaseModel):
     role: str
-    content: Union[str, list[_ContentPart]]
+    content: Union[str, list[_ContentPart], None] = None
+    tool_calls: Optional[list[dict]] = None
+    tool_call_id: Optional[str] = None
 
 
 class ChatCompletionRequest(BaseModel):
     model: str
     messages: list[_RequestMessage]
     stream: bool = False
+    tools: Optional[list[dict]] = None
+    tool_choice: Optional[Union[str, dict]] = None
 
 
 # ── Helpers ──────────────────────────────────────────────────────────────────
 
 
-def _build_response(content: str, model_name: str) -> dict:
+def _parse_tool_calls(raw: Optional[list[dict]]) -> Optional[tuple[ToolCall, ...]]:
+    """OpenAI tool_calls（arguments 為 JSON 字串）→ ToolCall tuple。"""
+    if not raw:
+        return None
+    calls = []
+    for tc in raw:
+        fn = tc.get("function") or {}
+        args = fn.get("arguments") or {}
+        if isinstance(args, str):
+            try:
+                args = json.loads(args) if args.strip() else {}
+            except json.JSONDecodeError:
+                args = {"value": args}
+        id_kwarg = {"id": tc["id"]} if tc.get("id") else {}
+        calls.append(ToolCall(name=fn.get("name", ""), arguments=args, **id_kwarg))
+    return tuple(calls)
+
+
+def _tool_call_json(tc: ToolCall) -> dict:
+    return {
+        "id": tc.id,
+        "type": "function",
+        "function": {"name": tc.name, "arguments": json.dumps(tc.arguments, ensure_ascii=False)},
+    }
+
+
+def _build_response(content: str, model_name: str, tool_calls: Optional[list[ToolCall]] = None) -> dict:
+    message = {"role": "assistant", "content": content}
+    if tool_calls:
+        message["content"] = content or None
+        message["tool_calls"] = [_tool_call_json(tc) for tc in tool_calls]
     return {
         "id": f"chatcmpl-{uuid.uuid4().hex[:8]}",
         "object": "chat.completion",
@@ -54,18 +88,15 @@ def _build_response(content: str, model_name: str) -> dict:
         "choices": [
             {
                 "index": 0,
-                "message": {
-                    "role": "assistant",
-                    "content": content,
-                },
-                "finish_reason": "stop",
+                "message": message,
+                "finish_reason": "tool_calls" if tool_calls else "stop",
             }
         ],
     }
 
 
 def _sse_stream(
-    tokens: Generator[str, None, None],
+    tokens: Generator[Union[str, ToolCall], None, None],
     model_name: str,
 ) -> Generator[str, None, None]:
     request_id = f"chatcmpl-{uuid.uuid4().hex[:8]}"
@@ -83,10 +114,15 @@ def _sse_stream(
 
     yield _chunk({"role": "assistant", "content": ""})
 
+    tool_index = 0
     for token in tokens:
-        yield _chunk({"content": token})
+        if isinstance(token, ToolCall):
+            yield _chunk({"tool_calls": [{"index": tool_index, **_tool_call_json(token)}]})
+            tool_index += 1
+        else:
+            yield _chunk({"content": token})
 
-    yield _chunk({}, finish_reason="stop")
+    yield _chunk({}, finish_reason="tool_calls" if tool_index else "stop")
 
     yield "data: [DONE]\n\n"
 
@@ -199,15 +235,19 @@ def build(
                     Message(
                         role=m.role,
                         content=(
-                            m.content
-                            if isinstance(m.content, str)
-                            else [p.model_dump() for p in m.content]
+                            [p.model_dump() for p in m.content]
+                            if isinstance(m.content, list)
+                            else m.content
                         ),
                         timestamp=_now(),
+                        tool_calls=_parse_tool_calls(m.tool_calls),
+                        tool_call_id=m.tool_call_id,
                     )
                     for m in request.messages
                 ]
             )
+            if request.tools and request.tool_choice != "none":
+                context.metadata["tools"] = request.tools
             tokens = model(context)
             if request.stream:
                 return StreamingResponse(
@@ -215,8 +255,13 @@ def build(
                     media_type="text/event-stream",
                 )
             else:
+                chunks = list(tokens)
                 return JSONResponse(
-                    _build_response("".join(tokens), request.model)
+                    _build_response(
+                        "".join(c for c in chunks if isinstance(c, str)),
+                        request.model,
+                        tool_calls=[c for c in chunks if isinstance(c, ToolCall)],
+                    )
                 )
 
     if vision_model is not None:

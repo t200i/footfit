@@ -233,6 +233,24 @@ docker start -a open-webui
 >
 > ![Open WebUI 模型選單顯示 gemma3-4b-npu](assets/open_webui.png)
 
+#### 六、Function Calling（Tools / Skills 按需載入）
+
+`/v1/chat/completions` 支援 OpenAI 格式的 `tools`、`tool_choice`，並回傳 `tool_calls`（含串流 delta）；後續請求可帶 `role: "tool"` 的工具結果。目前僅 `gemma4-*-gpu` 模型支援，其他模型會忽略 `tools`。
+
+```python
+r = client.chat.completions.create(
+    model="gemma4-2b-gpu",
+    messages=[{"role": "user", "content": "台北未來 3 天天氣如何？"}],
+    tools=[{"type": "function", "function": {
+        "name": "get_weather",
+        "parameters": {"type": "object", "properties": {"city": {"type": "string"}, "days": {"type": "integer"}}},
+    }}],
+)
+print(r.choices[0].message.tool_calls)  # get_weather({"city": "台北", "days": 3})
+```
+
+在 Open WebUI 中將模型的 **Function Calling** 設為 **Native** 並啟用 Builtin Tools，綁定到模型的 Skills 即會以 `view_skill` 按需載入，而非每次完整注入 system prompt。
+
 
 
 
