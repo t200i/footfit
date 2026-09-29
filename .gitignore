@@ -7,3 +7,6 @@ __pycache__/
 *.py[cod]
 .pytest_cache/
 .venv*/
+
+# Open WebUI (secret key created in cwd)
+.webui_secret_key

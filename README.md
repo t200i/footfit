@@ -229,6 +229,18 @@ docker run --name open-webui -p 3000:8080 `
 docker start -a open-webui
 ```
 
+若未安裝 Docker，可改用 pip 安裝的 Open WebUI（`~/.venvs/open-webui`），並以腳本一次啟動 API 與 Open WebUI：
+
+```powershell
+scripts\webui.bat                  # Windows cmd / PowerShell，預設 gemma4-2b-gpu
+scripts\webui.bat gemma4-4b-gpu    # 指定模型
+```
+```bash
+scripts/webui.sh                   # Linux / macOS / Git Bash
+```
+
+腳本會先啟動 API 並等待模型載入（若該埠已有 API 在執行則直接沿用），再啟動 Open WebUI 於 `http://localhost:3000`；關閉 Open WebUI 時一併關閉腳本所啟動的 API。可用環境變數 `API_PORT`、`WEBUI_PORT`、`ROCM_VENV`、`WEBUI_VENV`、`DATA_DIR` 覆寫預設值。
+
 >  Open WebUI 會從 **API** 動態拉取模型清單。若選單中看不到任何模型，代表 `api.py` 尚未啟動或連線配置有誤，請確認 `python api.py --model <model-id>` 已正常運行後再重新整理頁面。
 >
 > ![Open WebUI 模型選單顯示 gemma3-4b-npu](assets/open_webui.png)
